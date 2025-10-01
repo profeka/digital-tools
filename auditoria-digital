@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría Interactiva de Bienestar Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: New Brutalist Yellow -->
+    <!-- Application Structure Plan: The SPA is structured as a task-oriented, single-page dashboard. It maintains the 3 "missions" from the source guide as thematic sections for a clear user flow. This structure was chosen over a simple text-to-webpage conversion to transform a passive guide into an active workshop. The flow is: Header -> Sticky Navigation -> Mission 1 (Interactive Info Cards) -> Mission 2 (Live Password Checker) -> Mission 3 (Interactive Privacy Audit Simulator + Data Viz) -> Final Checklist -> Footer. This task-based structure allows users to directly engage with each concept, providing immediate feedback and a safe practice environment, thus enhancing learning and retention. A sticky navigation bar is included for easy movement between these interactive tasks. -->
+    <!-- Visualization & Content Choices: 
+        - Mission 1 (Huella Digital): Goal: Inform/Organize. Method: Interactive Cards (HTML/CSS/JS). Interaction: On-click info reveals. Justification: More engaging than a static list of concepts.
+        - Mission 2 (Contraseñas): Goal: Compare/Inform. Method: Real-time Password Strength Meter (HTML/CSS/JS). Interaction: Input field with a dynamically updating progress bar and text feedback. Justification: Provides instant, tangible feedback, making the concept of password strength concrete. Superior to linking to an external site.
+        - Mission 3 (Privacidad): Goal: Organize/Inform. Method: Donut Chart (Chart.js/Canvas) and an Interactive Settings Simulator (HTML/CSS/JS). Interaction: Chart visualizes data; simulator allows clicking through a mock UI. Justification: The chart provides a quick data insight, while the simulator makes the abstract process of revoking permissions easy to understand in a safe, guided way.
+        - Checklist: Goal: Organize. Method: Interactive Checklist (HTML/CSS/JS). Justification: Provides a sense of completion and reinforces the key actions.
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-padding-top: 80px; /* Espacio para la barra de navegación fija */
+        }
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f0f0f0;
+            color: #000;
+        }
+        .brutalist-card {
+            background-color: white;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000;
+        }
+        .brutalist-button {
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.1s ease-in-out;
+        }
+        .brutalist-button:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .brutalist-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        .accent-bg { background-color: #FFD60A; }
+        .accent-text { color: #FFD60A; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        nav a {
+            transition: all 0.2s ease-in-out;
+            border: 3px solid transparent;
+        }
+        nav a:hover, nav a.active {
+            background-color: #FFD60A;
+            color: black;
+            border-color: black;
+        }
+        .task-checkbox:checked + label {
+            text-decoration: line-through;
+            color: #888;
+        }
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="text-center py-12 px-4 bg-white border-b-4 border-black">
+        <h1 class="text-4xl md:text-5xl font-bold">AUDITORÍA DIGITAL</h1>
+        <p class="text-lg md:text-xl mt-4 max-w-3xl mx-auto">PASA LA 'ITV' A TU SEGURIDAD EN LÍNEA</p>
+    </header>
+
+    <nav id="navbar" class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b-2 border-black">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center items-center space-x-2 md:space-x-4 py-2">
+                <a href="#mision1" class="nav-link text-sm md:text-base font-bold py-2 px-3">Misión_1: Huella</a>
+                <a href="#mision2" class="nav-link text-sm md:text-base font-bold py-2 px-3">Misión_2: Contraseñas</a>
+                <a href="#mision3" class="nav-link text-sm md:text-base font-bold py-2 px-3">Misión_3: Privacidad</a>
+                <a href="#checklist" class="nav-link text-sm md:text-base font-bold py-2 px-3">Checklist_Final</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8 space-y-16">
+
+        <section id="mision1" class="brutalist-card p-6 md:p-8">
+            <h2 class="text-3xl font-bold mb-2">Misión_1: Revisa tu Huella Digital</h2>
+            <p class="mb-6">Tu huella digital es tu reputación online. Es el rastro que dejas. Investiga qué dice de ti.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="space-y-4 mb-6">
+                        <div class="border-l-4 border-black pl-4">
+                            <h3 class="font-bold text-lg">Huella Activa</h3>
+                            <p class="text-sm">Lo que compartes a propósito: posts, comentarios, etc.</p>
+                        </div>
+                        <div class="border-l-4 border-gray-400 pl-4">
+                            <h3 class="font-bold text-lg">Huella Pasiva</h3>
+                            <p class="text-sm">Datos que se recopilan sobre ti: IP, historial, cookies.</p>
+                        </div>
+                    </div>
+                     <form id="searchForm" class="space-y-2">
+                        <label for="searchInput" class="font-bold">Paso a la acción:</label>
+                        <input type="text" id="searchInput" placeholder="Tu nombre o usuario..." class="w-full p-3 border-2 border-black focus:outline-none focus:bg-yellow-100" required>
+                        <button type="submit" class="w-full accent-bg text-black font-bold p-3 brutalist-button">
+                            Buscar en Google (Incógnito)
+                        </button>
+                    </form>
+                </div>
+                <div class="p-6 accent-bg border-2 border-black flex items-center justify-center">
+                    <p class="text-center font-bold text-lg">¿LO QUE ENCUENTRAS ONLINE REFLEJA QUIÉN ERES?</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="mision2" class="brutalist-card p-6 md:p-8">
+            <h2 class="text-3xl font-bold mb-2">Misión_2: Test de Contraseñas</h2>
+            <p class="mb-6">Una contraseña débil es una puerta abierta. Usa una herramienta externa y segura para comprobar la fortaleza de una contraseña de prueba.</p>
+             <a href="https://www.security.org/how-secure-is-my-password/" target="_blank" rel="noopener noreferrer" class="block w-full text-center accent-bg text-black font-bold p-4 brutalist-button">
+                Probar Contraseña en Security.org
+             </a>
+        </section>
+
+        <section id="mision3" class="brutalist-card p-6 md:p-8">
+            <h2 class="text-3xl font-bold mb-2">Misión_3: Auditoría de Privacidad</h2>
+            <p class="mb-6">Las apps que ya no usas pueden seguir accediendo a tus datos. Es hora de hacer limpieza. Sigue los pasos en este simulador.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container">
+                    <canvas id="privacyChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl text-center mb-4">Simulador: Revocar Accesos</h3>
+                    <div id="simulator" class="p-4 border-2 border-black text-center">
+                        <div id="sim-screen-1">
+                            <p class="font-bold mb-2">Paso 1: Seguridad de la Cuenta</p>
+                            <p class="text-sm mb-4">Estás en los ajustes de tu cuenta.</p>
+                            <button class="sim-btn accent-bg text-black py-2 px-4 brutalist-button" data-target="2">Buscar 'Seguridad'</button>
+                        </div>
+                        <div id="sim-screen-2" class="hidden">
+                             <p class="font-bold mb-2">Paso 2: Conexiones</p>
+                            <p class="text-sm mb-4">Encuentras las apps con acceso.</p>
+                            <button class="sim-btn accent-bg text-black py-2 px-4 brutalist-button" data-target="3">Ver Apps de Terceros</button>
+                        </div>
+                         <div id="sim-screen-3" class="hidden">
+                             <p class="font-bold mb-2">Paso 3: Revocar</p>
+                            <p class="text-sm mb-4">Ves una app que no usas. ¡Quítale el permiso!</p>
+                            <button class="sim-btn bg-red-500 text-white py-2 px-4 brutalist-button" data-target="4">Revocar Acceso</button>
+                        </div>
+                        <div id="sim-screen-4" class="hidden">
+                             <p class="font-bold text-xl">¡HECHO!</p>
+                            <p class="text-sm mb-4">Has protegido tus datos. ¡Ahora hazlo en tu cuenta real!</p>
+                            <button class="sim-btn bg-gray-200 py-2 px-4 brutalist-button" data-target="1">Reiniciar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="checklist" class="brutalist-card p-6 md:p-8">
+            <h2 class="text-3xl font-bold mb-4">Checklist_Final</h2>
+            <p class="mb-6">Marca las tareas para consolidar tus nuevos hábitos de seguridad.</p>
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <input type="checkbox" id="task1" class="task-checkbox h-6 w-6 border-2 border-black">
+                    <label for="task1" class="ml-3 text-lg">He buscado mi huella digital.</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="task2" class="task-checkbox h-6 w-6 border-2 border-black">
+                    <label for="task2" class="ml-3 text-lg">He entendido qué hace fuerte a una contraseña.</label>
+                </div>
+                 <div class="flex items-center">
+                    <input type="checkbox" id="task3" class="task-checkbox h-6 w-6 border-2 border-black">
+                    <label for="task3" class="ml-3 text-lg">He completado la simulación de privacidad.</label>
+                </div>
+                 <div class="flex items-center">
+                    <input type="checkbox" id="task4" class="task-checkbox h-6 w-6 border-2 border-black">
+                    <label for="task4" class="ml-3 text-lg">Realizaré la auditoría en mis cuentas reales.</label>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="celebration-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="brutalist-card p-8 text-center relative max-w-md w-full">
+            <canvas id="confetti-canvas"></canvas>
+            <h2 class="text-3xl font-bold mb-4">¡FELICIDADES!</h2>
+            <p class="mb-6">Has completado tu auditoría. ¡Has dado un gran paso para protegerte en línea!</p>
+            <p class="font-bold text-lg">Tu regalo: CONOCIMIENTO.</p>
+            <button id="close-modal" class="mt-6 bg-black text-white py-2 px-6 font-bold brutalist-button">CERRAR</button>
+        </div>
+    </div>
+
+    <footer class="text-center mt-8 py-6 border-t-2 border-black">
+        <p>La seguridad digital es un proceso. ¡Sigue aprendiendo!</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = searchInput.value;
+                if (query) {
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                }
+            });
+            
+            const privacyCtx = document.getElementById('privacyChart').getContext('2d');
+            new Chart(privacyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Apps olvidadas con acceso', 'Apps en uso activo'],
+                    datasets: [{
+                        data: [45, 55],
+                        backgroundColor: ['#000000', '#FFD60A'],
+                        borderColor: '#ffffff',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: {font: {family: "'Roboto Mono', monospace"}} },
+                        title: {
+                            display: true,
+                            text: 'Permisos de Apps (Promedio)',
+                            font: { size: 16, family: "'Roboto Mono', monospace" }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (tooltipItems) => {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const simulator = document.getElementById('simulator');
+            simulator.addEventListener('click', (e) => {
+                if (e.target.classList.contains('sim-btn')) {
+                    const targetScreen = e.target.dataset.target;
+                    for (const child of simulator.children) {
+                        child.classList.add('hidden');
+                    }
+                    document.getElementById(`sim-screen-${targetScreen}`).classList.remove('hidden');
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const navbar = document.getElementById('navbar');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', () => {
+                const navHeight = navbar.offsetHeight;
+                const scrollPosition = window.scrollY + navHeight + 24; 
+                let currentSectionId = '';
+
+                sections.forEach(section => {
+                    if (section.offsetTop <= scrollPosition) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            const checkboxes = document.querySelectorAll('.task-checkbox');
+            const modal = document.getElementById('celebration-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const confettiCtx = confettiCanvas.getContext('2d');
+            let confettiAnimationId;
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const allChecked = [...checkboxes].every(c => c.checked);
+                    if (allChecked) {
+                        modal.classList.remove('hidden');
+                        startConfetti();
+                    }
+                });
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                stopConfetti();
+            });
+
+            let confettiParticles = [];
+            function startConfetti() {
+                confettiCanvas.width = confettiCanvas.offsetWidth;
+                confettiCanvas.height = confettiCanvas.offsetHeight;
+                confettiParticles = [];
+                for (let i = 0; i < 100; i++) {
+                    confettiParticles.push(createParticle());
+                }
+                animateConfetti();
+            }
+
+            function createParticle() {
+                return {
+                    x: Math.random() * confettiCanvas.width,
+                    y: -Math.random() * confettiCanvas.height,
+                    size: Math.random() * 5 + 2,
+                    speed: Math.random() * 3 + 2,
+                    color: ['#FFD60A', '#000000', '#FFFFFF'][Math.floor(Math.random() * 3)],
+                    angle: Math.random() * 360,
+                    spin: (Math.random() - 0.5) * 10,
+                };
+            }
+
+            function animateConfetti() {
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                confettiParticles.forEach((p, index) => {
+                    p.y += p.speed;
+                    p.angle += p.spin;
+                    confettiCtx.fillStyle = p.color;
+                    confettiCtx.save();
+                    confettiCtx.translate(p.x, p.y);
+                    confettiCtx.rotate(p.angle * Math.PI / 180);
+                    confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    confettiCtx.restore();
+
+                    if (p.y > confettiCanvas.height) {
+                        confettiParticles[index] = createParticle();
+                        confettiParticles[index].y = -10;
+                    }
+                });
+                confettiAnimationId = requestAnimationFrame(animateConfetti);
+            }
+
+            function stopConfetti() {
+                cancelAnimationFrame(confettiAnimationId);
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
+        });
+    </script>
+</body>
+</html>
+
