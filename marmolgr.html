@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackers Cluedo - Marimoligram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --clr-pink: #e83e8c;
+            --clr-blue: #3b82f6;
+            --clr: var(--clr-pink); /* Color por defecto */
+            --bg-main: #f3f4f6;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); }
+        .brand-font { font-family: 'Pacifico', cursive; color: var(--clr); }
+        
+        /* --- ESTILOS DE NAVEGACIÓN CORREGIDOS --- */
+        .navigation { 
+            width: 100%;
+            height: 70px; 
+            background: var(--clr);
+            position: relative; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+        .navigation ul { display: flex; width: 350px; }
+        .navigation ul li { position: relative; list-style: none; width: 70px; height: 70px; z-index: 1; }
+        .navigation ul li a { position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; height: 100%; text-align: center; font-weight: 500; cursor: pointer; }
+        
+        .navigation ul li a .icon { 
+            position: relative; 
+            display: block; 
+            line-height: 75px; 
+            font-size: 1.8rem; 
+            text-align: center; 
+            transition: 0.5s; 
+            color: #ffffff;
+        }
+        .navigation ul li.active a .icon { 
+            transform: translateY(-32px); 
+            color: var(--clr);
+        }
+        
+        .indicator { 
+            position: absolute; 
+            top: -50%; 
+            width: 70px; 
+            height: 70px; 
+            background: var(--bg-main);
+            border-radius: 50%; 
+            transition: 0.5s; 
+        }
+
+        .navigation ul li:nth-child(1).active ~ .indicator { transform: translateX(calc(70px * 0)); }
+        .navigation ul li:nth-child(2).active ~ .indicator { transform: translateX(calc(70px * 1)); }
+        .navigation ul li:nth-child(3).active ~ .indicator { transform: translateX(calc(70px * 2)); }
+        .navigation ul li:nth-child(4).active ~ .indicator { transform: translateX(calc(70px * 3)); }
+        .navigation ul li:nth-child(5).active ~ .indicator { transform: translateX(calc(70px * 4)); }
+        /* --- FIN DE ESTILOS CORREGIDOS --- */
+
+        .notification-dot { 
+            position: absolute; 
+            top: 15px; 
+            right: 18px;
+            transition: 0.5s;
+        }
+        .navigation ul li.active a .notification-dot {
+            transform: translateY(-32px);
+        }
+
+        .modal-enter { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .cookie-banner-enter { animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <main id="content-container" class="w-full max-w-sm mx-auto min-h-screen bg-gray-100 pb-24">
+        <!-- VISTA 1: HOME (Feed principal) -->
+        <div id="home-view" class="view p-2 space-y-2">
+            <header class="p-2 sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 -m-2 mb-2 border-b">
+                <h1 class="brand-font text-2xl text-center">Marimoligram</h1>
+            </header>
+        </div>
+
+        <!-- VISTA 2: PERFIL (del usuario principal) -->
+        <div id="profile-view" class="view hidden bg-white"></div>
+        
+        <!-- VISTA 3: MENSAJES (Ahora con sub-vistas) -->
+        <div id="messages-view" class="view hidden">
+            <!-- Lista de conversaciones -->
+            <div id="message-list-view" class="p-4 space-y-2">
+                 <h1 class="text-xl font-bold text-center">Mensajes Directos</h1>
+            </div>
+            <!-- Detalle de una conversación -->
+            <div id="chat-detail-view" class="hidden h-full flex flex-col"></div>
+        </div>
+
+        <!-- VISTA 4: BÚSQUEDA / EXPLORAR -->
+        <div id="search-view" class="view hidden p-1">
+             <h1 class="text-xl font-bold text-center p-4">Explorar</h1>
+             <div id="explore-grid" class="grid grid-cols-3 gap-1"></div>
+        </div>
+
+        <!-- VISTA 5: AJUSTES (INTERACTIVA) -->
+        <div id="settings-view" class="view hidden">
+            <!-- Menú Principal de Ajustes -->
+            <div id="settings-main-menu" class="p-4 space-y-3">
+                <h1 class="text-xl font-bold text-center mb-4">Ajustes</h1>
+                <div data-settings-target="privacy" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Privacidad y Seguridad</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-settings-target="activity" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Actividad de inicio de sesión</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-settings-target="passwords" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Contraseñas guardadas</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-action="show-terms" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Términos y Condiciones</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div class="bg-red-100 text-red-600 rounded-lg p-4 font-semibold cursor-pointer hover:bg-red-200">Cerrar Sesión</div>
+            </div>
+            <!-- Sub-vistas de Ajustes -->
+            <div id="settings-privacy-view" class="settings-detail-view hidden p-4 space-y-4"></div>
+            <div id="settings-activity-view" class="settings-detail-view hidden p-4 space-y-3"></div>
+            <div id="settings-passwords-view" class="settings-detail-view hidden p-4 space-y-3"></div>
+        </div>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 z-20 navigation" id="navigation-menu">
+        <ul>
+            <li class="list active" data-view="home"><a><span class="icon"><ion-icon name="home-outline"></ion-icon></span></a></li>
+            <li class="list" data-view="profile"><a><span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span></a></li>
+            <li class="list" data-view="messages"><a><span class="icon"><ion-icon name="paper-plane-outline"></ion-icon></span><div class="notification-dot"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span></div></a></li>
+            <li class="list" data-view="search"><a><span class="icon"><ion-icon name="search-outline"></ion-icon></span></a></li>
+            <li class="list" data-view="settings"><a><span class="icon"><ion-icon name="settings-outline"></ion-icon></span></a></li>
+            <div class="indicator"></div>
+        </ul>
+    </footer>
+
+    <!-- MODALS -->
+    <div id="modal-post" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-profile" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-terms" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-cookies-config" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 modal-enter"></div>
+
+    <!-- BANNER DE COOKIES (DISEÑO ENGAÑOSO) -->
+    <div id="cookie-banner" class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 z-50 cookie-banner-enter">
+        <div class="max-w-sm mx-auto">
+            <p class="text-sm mb-3">
+                Usamos cookies para mejorar tu experiencia. Puedes 
+                <a href="#" id="config-cookies-btn" class="underline text-gray-400 hover:text-white text-xs font-normal">configurar tus preferencias</a>
+                o aceptar todas para continuar.
+            </p>
+            <div class="mt-4">
+                <button id="accept-cookies-btn" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg">Aceptar Todo</button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    // --- BASE DE DATOS COMPLETA Y AMPLIADA ---
+    const usersData = { 
+        '@Alexploramundo': { avatar: 'https://placehold.co/80x80/3498db/ffffff?text=AE', name: 'Alex Viajero', bio: 'Explorando el mundo, un destino a la vez. #TravelLife', }, 
+        '@LauraAventura': { avatar: 'https://placehold.co/80x80/f39c12/ffffff?text=LA', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', }, 
+        '@OfertasDeVerano': { avatar: 'https://placehold.co/80x80/1abc9c/ffffff?text=OV', name: 'Ofertas de Verano', bio: 'Publicidad.', }, 
+        '@FoodieCarlos': { avatar: 'https://placehold.co/80x80/27ae60/ffffff?text=FC', name: 'Carlos Foodie', bio: 'Probando cada plato de la ciudad. 🍔🍕🌮', }, 
+        '@TechieModerno': { avatar: 'https://placehold.co/80x80/2980b9/ffffff?text=TM', name: 'David G.', bio: 'Unboxing the future. 💻📱🚀', }, 
+        '@ModaUrbanaCo': { avatar: 'https://placehold.co/80x80/8e44ad/ffffff?text=MU', name: 'Moda Urbana & Co', bio: 'Publicidad.', }, 
+        '@MamaExploraMundo': { avatar: 'https://placehold.co/80x80/e84393/ffffff?text=ME', name: 'Marisa', bio: 'Orgullosa madre de un viajero.', }, 
+        '@CyberMemes': { avatar: 'https://placehold.co/80x80/34495e/ffffff?text=CM', name: 'Memes de Ciberseguridad', bio: 'Aprendiendo a protegerte, un meme a la vez. 😉', }, 
+        '@kai_posting': { avatar: 'https://placehold.co/80x80/9b59b6/ffffff?text=K', name: 'Kai', bio: 'brainrot daily dose ✨ | viviendo en tu fyp rent free'},
+        '@NoticiasAlMinuto24': { avatar: 'https://placehold.co/80x80/c0392b/ffffff?text=N', name: 'NoticiasAlMinuto24', bio: 'La verdad, al instante. ⚡' },
+        '@VerdadDigital': { avatar: 'https://placehold.co/80x80/27ae60/ffffff?text=VD', name: 'Verdad Digital', bio: 'Fact-checker. Desmintiendo bulos.' },
+        '@User12345': { avatar: 'https://placehold.co/80x80/7f8c8d/ffffff?text=?', name: 'User12345', bio: '' },
+        '@FotografoUrbano': { avatar: 'https://placehold.co/80x80/d35400/ffffff?text=FU', name: 'Javier Ríos Foto', bio: 'Capturando la ciudad.' },
+        '@LauraAventúra': { avatar: 'https://placehold.co/80x80/f39c12/ffffff?text=LA', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨' },
+        '@Desconocido': { avatar: 'https://placehold.co/80x80/bdc3c7/ffffff?text=??', name: 'Desconocido', bio: '' },
+        '@ViajeroIncansable': { avatar: 'https://placehold.co/80x80/7f8c8d/ffffff?text=VI', name: 'Viajero Incansable', bio: 'Nómada digital.'}, 
+        '@SenderistaPro': { avatar: 'https://placehold.co/80x80/d35400/ffffff?text=SP', name: 'Pro Senderista', bio: 'Descubriendo rutas.'}, 
+        '@SolYMar': { avatar: 'https://placehold.co/80x80/f1c40f/ffffff?text=SM', name: 'Sol y Mar', bio: 'Viviendo en la playa.'}, 
+    };
+    
+    const postsData = [
+        { id: 'mision', type: 'mission', title: 'MISIÓN: Ciber-Detective', text: 'La cuenta de @Alexploramundo ha sido comprometida. Tu misión es investigar su perfil y el de sus amigos para descubrir todas las vulnerabilidades. Elabora un informe con tus hallazgos.' },
+        { id: 'ALX01', type: 'post', author: '@Alexploramundo', image: 'img/ALX01.webp', caption: 'Estrenando mi nuevo rincón de trabajo. ¡Creo que por fin he conseguido un setup productivo! #HomeOffice', timestamp: 'Hace 3 semanas', comments: [{ user: '@MamaExploraMundo', text: '¡Qué ordenado todo, hijo! Pero ten cuidado con lo que se ve en las fotos.' }, { user: '@TechieModerno', text: '¡Buen setup! ¿Qué monitor es?' }]},
+        { id: 'ALX02', type: 'post', author: '@Alexploramundo', caption: 'A veces me pregunto si no comparto demasiado por aquí. Es fácil olvidar cuánta gente puede ver tus publicaciones. Una reflexión nocturna nada más. 🤔', timestamp: 'Hace 2 semanas', comments: [{ user: '@MamaExploraMundo', text: 'Haces bien en pensarlo, hijo.' }]},
+        { id: 'ALX03', type: 'post', author: '@Alexploramundo', image: 'img/ALX03.webp', caption: '¡Despidiendo un verano increíble! El mejor remedio para el estrés. #Verano2025 #Playa #PuraVida', timestamp: 'Hace 1 semana', comments: [{ user: '@SolYMar', text: 'La mejor terapia que existe.' }, { user: '@kai_posting', text: 'vaya vibe, bro' }]},
+        { id: 'ALX04', type: 'post', author: '@Alexploramundo', image: 'img/ALX04.webp', caption: '¡Qué emoción! Con el pasaporte recién renovado, ya no hay excusas para el próximo gran viaje. ¡El mundo me espera! ✈️🌍 #TravelLife #NuevasAventuras', timestamp: 'Hace 2 días', comments: [{ user: '@LauraAventura', text: '¡Qué envidia! ¡A disfrutarlo mucho!' }, { user: '@ViajeroIncansable', text: '¡Esa es la actitud! ¿Próximo destino?' }] },
+        { id: 'CYB01', type: 'post', author: '@CyberMemes', image: 'img/CYB01.webp', caption: '¿A quién no le ha pasado? Ese botón es mi mejor amigo.', timestamp: 'Hace 4 semanas', comments: [{ user: '@Alexploramundo', text: 'jajaja total! Aunque a mí ya no me pasa. Tengo un truco: uso siempre mi plato favorito seguido del año de mis vacaciones de verano. ¡Infalible! 🤫' }]},
+        { id: 'CYB02', type: 'post', author: '@CyberMemes', image: 'img/CYB02.webp', caption: 'Jeje Bendito modo incógnito. #Ciberseguridad', timestamp: 'Hace 1 semana', comments: [] },
+        { id: 'FOO01', type: 'post', author: '@FoodieCarlos', image: 'img/FOO01.webp', caption: 'He encontrado el paraíso en forma de croqueta. ¡Tenéis que probar este sitio! #Croquetas #TapasMadrid #Foodie', timestamp: 'Hace 1 semana', comments: [{ user: '@Alexploramundo', text: '¡Vaya! ¡Me encantan las croquetas! ¡Son mi comida favorita sin duda!' }]},
+        { id: 'FOO02', type: 'post', author: '@FoodieCarlos', caption: 'Debate serio: ¿la tortilla de patatas con o sin cebolla? Abro melón. 🍈', timestamp: 'Hace 3 semanas', comments: [{user: '@Alexploramundo', text: '¡Con cebolla siempre! No hay debate posible.'}] },
+        { id: 'FOO03', type: 'post', author: '@FoodieCarlos', image: 'img/FOO03.webp', caption: 'Nada como una buena paella para celebrar el fin de semana. ¿Sois de marisco o de carne? #Paella #ComidaEspañola', timestamp: 'Hace 1 mes', comments: []},
+        { id: 'KAI01', type: 'post', author: '@kai_posting', caption: 'literalmente, mi cerebro a las 3 am pensando: TUNG TUNG TUNG SAHUR!!! Ballerina Capuccina', timestamp: 'Hace 4 días', comments: [{user: '@TechieModerno', text: 'No entiendo la mitad de lo que dices, pero me hace gracia.'}, {user: '@User12345', text: 'Otro post sin sentido, para no variar.'}] },
+        { id: 'KAI02', type: 'post', author: '@kai_posting', image: 'img/KAI02.webp', caption: 'new fit check ✨', timestamp: 'Hace 5 días', comments: [{ user: '@User12345', text: 'Vaya pintas, no sé cómo te atreves a subir esto' }, { user: '@kai_posting', text: '@User12345 lol, ok boomer' }]},
+        { id: 'KAI03', type: 'post', author: '@kai_posting', caption: 'soy delulu pero al menos soy feliz', timestamp: 'Hace 1 semana', comments: [{user: '@User12345', text: '???'}]},
+        { id: 'KAI04', type: 'post', author: '@kai_posting', image: 'img/KAI04.webp', caption: 'Real. #meme #pov #fyp', timestamp: 'Hace 2 semanas', comments: [{user: '@LauraAventura', text: 'jajaja me pasa'}, {user: '@User12345', text: 'Deja de subir tonterías.'}] },
+        { id: 'KAI05', type: 'post', author: '@kai_posting', caption: 'hoy me he cruzado con 3 NPCs seguidos con el mismo bug, es que ni se esfuerzan los devs', timestamp: 'Hace 3 semanas', comments: [{user: '@User12345', text: 'Habla normal.'}]},
+        { id: 'KAI06', type: 'post', author: '@kai_posting', caption: "acabo de ver a un pavo en la calle con el corte del 7 y las TN... es que es canon, no puedo ser el único que lo ve.", timestamp: 'Hace 1 mes', comments: [{user: '@Alexploramundo', text: '¿Corte del 7? Me he perdido algo en mis viajes 😂'}, {user: '@User12345', text: 'Lástima de cuenta.'}] },
+        { id: 'LAU01', type: 'post', author: '@LauraAventura', image: 'img/LAU01.webp', caption: 'Un día increíble de senderismo con mi amigo @Alexploramundo. ¡Hay que repetir pronto! #Montaña #Amigos #Naturaleza', timestamp: 'Hace 3 días', comments: [{ user: '@Alexploramundo', text: '¡Fotón! ¡Qué bien lo pasamos!' }, { user: '@SenderistaPro', text: '¡Qué buena ruta! ¿Dónde es?' }] },
+        { id: 'LAU02', type: 'post', author: '@LauraAventura', image: 'img/LAU02.webp', caption: 'No hay dos atardeceres iguales. Agradecida por estos momentos. #Atardecer #Paz', timestamp: 'Hace 1 semana', comments: []},
+        { id: 'LAU03', type: 'post', author: '@LauraAventura', image: 'img/LAU03.webp', caption: 'Mañana de bici por la sierra. ¡Aire puro y a recargar pilas!', timestamp: 'Hace 3 semanas', comments: []},
+        { id: 'MAM01', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM01.webp', caption: 'Mis rosas están preciosas esta primavera. ¡Un pequeño paraíso en casa!', timestamp: 'Hace 5 días', comments: [{ user: '@LauraAventura', text: '¡Qué bonito, Marisa!' }] },
+        { id: 'MAM02', type: 'post', author: '@MamaExploraMundo', caption: '¡Qué orgullosa de mi @Alexploramundo! Siempre persiguiendo sus sueños por todo el mundo. ¡Aunque a veces me da cada susto con su confianza!', timestamp: 'Hace 2 semanas', comments: [] },
+        { id: 'MAM03', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM03.webp', caption: 'Tarde de domingo haciendo mi famosa tarta de manzana. ¡La casa huele de maravilla!', timestamp: 'Hace 2 semanas', comments: [{user: '@FoodieCarlos', text: '¡Necesito esa receta, Marisa!'}]},
+        { id: 'MAM04', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM04.webp', caption: 'Comida familiar de domingo. ¡Qué alegría tener a @Alexploramundo en casa, aunque sea por poco tiempo!', timestamp: 'Hace 2 meses', comments: [{user: '@FoodieCarlos', text: '¡Qué pintaza tiene esa paella, Marisa!'}] },
+        { id: 'MOD01', type: 'post', author: '@ModaUrbanaCo', image: 'img/MOD01.webp', caption: 'El estilo está en las calles. Encuentra tu look con nosotros. #ModaUrbana', timestamp: 'Hace 5 días', comments: [{user: '@FotografoUrbano', text: 'Hola, esa foto es mía. Agradecería que me dieras crédito o la retiraras.'}] },
+        { id: 'MOD02', type: 'post', isAd: true, author: '@ModaUrbanaCo', image: 'img/MOD02.webp', caption: 'Edición limitada. Consigue las tuyas antes de que se agoten. #Sneakers #Hype', timestamp: 'Hace 3 semanas', comments: [] },
+        { id: 'NOT01', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT01.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 1 mes', comments: [{user: '@VerdadDigital', text: 'Esto es FALSO. No existe esa "Universidad" y el estudio es un bulo. Fuentes fiables aquí: ver-dig.html. No compartan.'}] },
+        { id: 'NOT02', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT02.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 3 semanas', comments: [{user: '@MamaExploraMundo', text: '¡Qué barbaridad! ¡Con lo que usa mi hijo el móvil! Avisaré a la familia.'}, {user: '@User12345', text: 'Lo sabía... yo notaba algo raro.'}] },
+        { id: 'NOT03', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT03.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 4 días', comments: [{user: '@kai_posting', text: 'No se rick...'}] },
+        { id: 'OFE01', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE01.webp', caption: '¿Ganas de una escapada? Vuelos a toda Europa desde 19.99€. ¡No dejes pasar la oportunidad!', timestamp: 'Hace 2 meses', comments: []},
+        { id: 'OFE02', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE02.webp', caption: '¿Aún sin tus gafas de sol para este verano? ¡Aprovecha nuestro 50% de descuento! Link en la bio. #Verano #Ofertas', timestamp: 'Hace 3 semanas', comments: [] },
+        { id: 'TEC01', type: 'post', author: '@TechieModerno', image: 'img/TEC01.webp', caption: 'Día de mantenimiento en el centro de datos. Aquí es donde vive la magia (y vuestros datos). #SysAdmin #DataCenter', timestamp: 'Hace 1 mes', comments: [] },
+        { id: 'TEC02', type: 'post', author: '@TechieModerno', caption: 'Recordatorio amistoso: una VPN no te hace 100% anónimo, pero es una capa de seguridad esencial hoy en día. ¿Cuál usáis vosotros?', timestamp: 'Hace 4 semanas', comments: [] },
+        { id: 'TEC03', type: 'post', author: '@TechieModerno', image: 'img/TEC03.webp', caption: 'Probando esta nueva bestia. ¡La potencia es increíble! Review completa muy pronto en mi canal. #Tech #Review', timestamp: 'Hace 6 días', comments: [{ user: '@Alexploramundo', text: '¡Wow! ¡Tiene una pinta increíble!' }] },
+        { id: 'post-copyright-original', type: 'post', author: '@FotografoUrbano', image: 'img/post-copyright-original.webp', caption: 'Luces de la ciudad. #FotografiaUrbana #StreetPhotography', timestamp: 'Hace 2 meses', comments: [] }
+    ];
+    
+    const conversationsData = [ 
+        { id: 'phishing', participantName: 'AeroVuela Max', participantAvatar: 'https://placehold.co/40x40/1ABC9C/FFFFFF?text=AV', lastMessage: '¡Muchas gracias!', messages: [ { sender: 'them', text: '¡Felicidades @Alexploramundo! Eres el ganador de nuestro sorteo mensual. Para reclamar tu premio, necesitamos verificar tus datos. Por favor, inicia sesión en el siguiente portal seguro: <a href="#" onclick="alert(\'Pista: ¡Esto es phishing! Un enlace sospechoso como este nunca te llevaría a una página oficial.\')" class="text-blue-600 underline">bit.ly/vuelo-gratis-real</a>' }, { sender: 'me', text: '¡Qué buena noticia! Claro, mis datos son: Alex Viajero, con DNI 12345678X. ¡Muchas gracias!' } ] }, 
+        { id: 'impersonation', participantName: '@LauraAventúra', participantAvatar: usersData['@LauraAventura'].avatar.replace('80x80','40x40'), lastMessage: '¡Ahora mismo te lo mando! ¿Estás bien?', messages: [ { sender: 'them', text: '¡Hola Álex! Soy Laura. He perdido el móvil y la cartera, estoy tirada. Necesito que me hagas un Bizum urgente de 50€ a este número para poder coger un taxi a casa. ¡Es una emergencia! Ya te lo devolveré.'}, { sender: 'me', text: '¡Claro, Laura! Qué faena. No te preocupes, ¡ahora mismo te lo mando! ¿Estás bien?' } ] },
+        { id: 'sextortion', participantName: '@Desconocido', participantAvatar: usersData['@Desconocido'].avatar, lastMessage: 'No sé de qué hablas... ¿podemos hablarlo?', messages: [ { sender: 'them', text: 'Hola, Alex. Tengo un vídeo tuyo bastante comprometedor. O me pagas 200€ en criptomonedas o me aseguraré de que todos tus seguidores lo vean. Tienes 24 horas.'}, { sender: 'me', text: '¿Qué vídeo? No sé de qué hablas... Por favor, no hagas nada. ¿Podemos hablarlo? No tengo tanto dinero.' } ] },
+        { id: 'laura', participantName: '@LauraAventura', participantAvatar: usersData['@LauraAventura'].avatar.replace('80x80','40x40'), lastMessage: '¡Tráeme muchos! 😂', messages: [ { sender: 'them', text: 'Oye, ¡qué fotaza la que subiste el otro día en la montaña!' }, { sender: 'me', text: 'Verdad? Fue un día genial. A ver cuándo repetimos.' }, { sender: 'them', text: 'Cuando quieras! Avísame cuando vuelvas de Japón y planeamos algo. ¡Y tráeme mochis! 😂' }, { sender: 'me', text: '¡Hecho! Los que quieras jajaja' } ] }, 
+        { id: 'mama', participantName: '@MamaExploraMundo', participantAvatar: usersData['@MamaExploraMundo'].avatar.replace('80x80','40x40'), lastMessage: 'Que sí mamá, de verdad, está todo controlado.', messages: [ { sender: 'them', text: 'Cariño, he visto la foto de tu nuevo despacho. ¡Qué ordenado! Pero ten cuidado con los papelitos que se ven por ahí, que nunca se sabe.' }, { sender: 'me', text: 'Gracias, mamá. No te preocupes, no es nada importante. Un beso.' }, { sender: 'them', text: 'Más vale prevenir, hijo. Que luego te llevas sustos.'}, { sender: 'me', text: 'Que sí mamá, de verdad, está todo controlado.' } ] },
+        { id: 'foodie', participantName: '@FoodieCarlos', participantAvatar: usersData['@FoodieCarlos'].avatar.replace('80x80','40x40'), lastMessage: '¡Tenemos que ir!', messages: [ { sender: 'them', text: 'Oye, viste las croquetas que subí?' }, { sender: 'me', text: 'Uf, sí. Tienen una pinta increíble. ¡Tenemos que ir!' } ] },
+        { id: 'techie', participantName: '@TechieModerno', participantAvatar: usersData['@TechieModerno'].avatar.replace('80x80','40x40'), lastMessage: 'Cuando quieras le echamos un ojo.', messages: [ { sender: 'me', text: 'Hey! Vi el unboxing del nuevo portátil. Qué pasada, no?' }, { sender: 'them', text: 'Es una bestia. Si quieres cuando vuelvas le echamos un ojo y te cuento.' } ] }
+    ];
+    
+    // --- REFERENCIAS AL DOM Y ESTADO ---
+    const contentContainer = document.getElementById('content-container');
+    const views = document.querySelectorAll('.view');
+    const listItems = document.querySelectorAll('.list');
+    const modalPostContainer = document.getElementById('modal-post');
+    const modalProfileContainer = document.getElementById('modal-profile');
+    const modalTermsContainer = document.getElementById('modal-terms');
+    const modalCookiesConfigContainer = document.getElementById('modal-cookies-config');
+    const cookieBanner = document.getElementById('cookie-banner');
+    let activeModal = null;
+
+    // --- LÓGICA DE NAVEGACIÓN Y VISTAS ---
+    function switchView(viewId) {
+        views.forEach(view => view.classList.add('hidden'));
+        const targetView = document.getElementById(viewId + '-view');
+        if (targetView) {
+            targetView.classList.remove('hidden');
+            contentContainer.scrollTop = 0;
+            if (viewId === 'settings') showSettingsMenu();
+            if (viewId === 'messages') showMessagesMenu();
+        }
+    }
+
+    listItems.forEach(item => {
+        item.addEventListener('click', function() {
+            listItems.forEach(li => li.classList.remove('active'));
+            this.classList.add('active');
+            
+            const allIcons = document.querySelectorAll('.navigation ul li a .icon ion-icon');
+            allIcons.forEach(icon => { icon.setAttribute('name', icon.getAttribute('name').replace('-outline', '') + '-outline'); });
+            const activeIcon = this.querySelector('.icon ion-icon');
+            activeIcon.setAttribute('name', activeIcon.getAttribute('name').replace('-outline', ''));
+            
+            switchView(this.dataset.view);
+        });
+    });
+    
+    // --- LÓGICA DE RENDERIZADO (FUNCIONES COMPLETAS) ---
+    function renderFeed() {
+        const feedContainer = document.querySelector('#home-view'); 
+        const header = feedContainer.querySelector('header'); 
+        feedContainer.innerHTML = ''; 
+        feedContainer.appendChild(header);
+
+        // Función para convertir timestamps a un valor comparable
+        function parseTimestamp(timestamp) {
+            if (timestamp === 'Patrocinado') return Infinity; // Poner anuncios al final o principio
+            const parts = timestamp.split(' ');
+            const value = parseInt(parts[1]);
+            const unit = parts[2];
+            if (unit.startsWith('día')) return value;
+            if (unit.startsWith('semana')) return value * 7;
+            if (unit.startsWith('mes')) return value * 30;
+            return 0;
+        }
+
+        // Ordenar postsData por antigüedad (de más reciente a más antiguo)
+        const sortedPosts = [...postsData].sort((a, b) => {
+            if (a.type === 'mission') return -1; // Misión siempre primero
+            if (b.type === 'mission') return 1;
+            return parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp);
+        });
+        
+        sortedPosts.forEach(post => { 
+            let postHTML = ''; 
+            if (post.type === 'mission') { 
+                postHTML = `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-md" role="alert"><p class="font-bold">${post.title}</p><p class="text-sm">${post.text}</p></div>`; 
+            } else if (post.type === 'post') { 
+                const authorData = usersData[post.author]; 
+                const postFooter = `
+                    <div class="p-3 pt-1 flex justify-between items-center text-gray-400">
+                        <div class="flex items-center space-x-1 cursor-pointer hover:text-pink-600" data-post-id="${post.id}">
+                            <ion-icon name="chatbubble-outline" class="text-xl"></ion-icon>
+                            <span class="text-xs font-semibold">${post.comments.length}</span>
+                        </div>
+                        <p class="text-xs">${post.timestamp}</p>
+                    </div>`;
+
+                postHTML = `
+                    <div id="${post.id}" class="bg-white rounded-lg shadow-md overflow-hidden hover:ring-2 ring-pink-200 transition-all">
+                        <div class="p-3 flex items-center justify-between">
+                            <div class="flex items-center space-x-2 cursor-pointer" data-author-id="${post.author}">
+                                <img src="${authorData.avatar.replace('80x80','32x32')}" class="w-8 h-8 rounded-full">
+                                <div>
+                                    <span class="font-semibold text-sm">${post.author}</span>
+                                    ${post.location ? `<p class="text-xs text-gray-500 flex items-center"><ion-icon name="location-sharp" class="mr-1"></ion-icon>${post.location}</p>` : ''}
+                                </div>
+                            </div>
+                            ${post.isAd ? `<span class="text-xs text-gray-400 font-medium">Patrocinado</span>` : ''}
+                        </div>
+                        ${post.image ? `<img src="${post.image}" class="w-full h-auto cursor-pointer" data-post-id="${post.id}">` : ''}
+                        <div class="p-3 pb-1">
+                            <p class="text-sm"><strong class="font-semibold cursor-pointer" data-author-id="${post.author}">${post.author}</strong> ${post.caption}</p>
+                        </div>
+                        ${postFooter}
+                    </div>`; 
+            } 
+            feedContainer.innerHTML += postHTML; 
+        }); 
+    }
+    
+    function renderProfile(authorId) { const user = usersData[authorId]; const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); const profileContainer = document.getElementById('profile-view'); const postsGridHTML = userPosts.map(p => { if (p.image) { return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; } else { return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; } }).join(''); profileContainer.innerHTML = `<div class="p-4 flex flex-col items-center border-b bg-gray-50"><img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2"><h2 class="font-bold text-lg">${authorId}</h2><p class="text-sm text-gray-600 text-center">${user.bio}</p><div class="flex space-x-8 mt-4 text-center"><div><p class="font-bold">${userPosts.length}</p><p class="text-xs text-gray-500">Posts</p></div><div><p class="font-bold">5.8K</p><p class="text-xs text-gray-500">Followers</p></div><div><p class="font-bold">210</p><p class="text-xs text-gray-500">Following</p></div></div></div><div class="grid grid-cols-3 gap-1 p-1">${postsGridHTML}</div>`; }
+    function renderExploreGrid() { 
+        const allPosts = postsData.filter(p => p.type === 'post');
+        const exploreGrid = document.getElementById('explore-grid'); 
+        exploreGrid.innerHTML = allPosts.map(p => { 
+            if (p.image) { 
+                return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; 
+            } else { 
+                return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; 
+            } 
+        }).join(''); 
+    }
+    function renderSettingsSubViews() { document.getElementById('settings-privacy-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Privacidad y Seguridad</h2></header><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Perfil Privado</span><span class="font-bold text-red-600">Desactivado</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Etiquetado de Fotos</span><span class="font-bold text-yellow-600">Aprobación Automática</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Mostrar estado de actividad</span><span class="font-bold text-red-600">Activado</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Autenticación en dos pasos</span><span class="font-bold text-red-600">Desactivada</span></div>`; document.getElementById('settings-activity-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Actividad de inicio de sesión</h2></header><div class="bg-green-100 p-3 rounded-lg"><p class="font-medium">Este dispositivo - Madrid, ES</p><p class="text-sm text-green-700">Activo ahora</p></div><div class="bg-white p-3 rounded-lg"><p class="font-medium">iPhone 14 - Kyoto, JP</p><p class="text-sm text-gray-600">Hace 1 día</p></div><div class="bg-red-100 p-3 rounded-lg"><p class="font-medium">Windows - Ubicación desconocida</p><p class="text-sm text-red-700">Hace 3 horas</p></div>`; document.getElementById('settings-passwords-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Contraseñas guardadas</h2></header><div class="bg-white p-3 rounded-lg"><p class="font-medium">WIFI-AEROPUERTO-GRATIS</p><p class="text-sm text-gray-600">WIFIAEROPUERTO</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Red Social "FaceSnap"</p><p class="text-sm text-yellow-800">Croquetas2024</p></div>`; }
+    
+    // --- LÓGICA DE MODALES ---
+    function openModal(modalContainer, contentHTML) { closeCurrentModal(); modalContainer.innerHTML = contentHTML; modalContainer.classList.remove('hidden'); activeModal = modalContainer; }
+    function closeCurrentModal() { if (activeModal) activeModal.classList.add('hidden'); activeModal = null; }
+    function showPostModal(postId) { const post = postsData.find(p => p.id === postId); if (!post) return; const authorData = usersData[post.author]; const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-3 flex items-center space-x-2 border-b"><img src="${authorData.avatar.replace('80x80','32x32')}" class="w-8 h-8 rounded-full"><span class="font-semibold text-sm">${post.author}</span></div><div class="overflow-y-auto">${post.image ? `<img src="${post.image}" class="w-full h-auto">` : ''}<div class="p-3"><p class="text-sm"><strong class="font-semibold">${post.author}</strong> ${post.caption}</p></div><div class="p-3 border-t space-y-2"><h3 class="font-bold text-sm mb-2">Comentarios</h3>${post.comments.length > 0 ? post.comments.map(c => `<div class="text-sm"><p><strong class="font-semibold cursor-pointer" data-author-id="${c.user}">${c.user}</strong> ${c.text}</p></div>`).join('') : '<p class="text-sm text-gray-500">No hay comentarios.</p>'}</div></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; openModal(modalPostContainer, modalHTML); }
+    function showProfileModal(authorId) { const user = usersData[authorId]; const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); const postsGridHTML = userPosts.map(p => { if (p.image) { return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; } else { return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; } }).join(''); const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-4 flex flex-col items-center border-b"><img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2"><h2 class="font-bold text-lg">${authorId}</h2><p class="text-sm text-gray-600 text-center">${user.bio}</p></div><div class="overflow-y-auto p-1"><div class="grid grid-cols-3 gap-1">${postsGridHTML}</div></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; openModal(modalProfileContainer, modalHTML); }
+    function showTermsModal() { const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-4 border-b"><h2 class="font-bold text-lg text-center">Términos y Condiciones</h2></div><div class="overflow-y-auto p-4 text-sm space-y-2"><p>Al usar Marimoligram, aceptas que:</p><p class="font-bold text-red-600">1. Nos cedes los derechos de propiedad intelectual de todas tus fotos y vídeos para nuestro uso comercial sin compensación.</p><p>2. Analizamos tus mensajes privados para mostrarte publicidad relevante.</p><p class="font-bold text-red-600">3. Nos reservamos el derecho de compartir tus datos de actividad con "terceros de confianza" para "mejorar el servicio".</p></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; openModal(modalTermsContainer, modalHTML); }
+    function showCookiesConfigModal() { 
+        const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]">
+            <div class="p-4 border-b"><h2 class="font-bold text-lg text-center">Configuración de Cookies</h2></div>
+            <div class="p-4 text-sm space-y-3">
+                <div class="flex justify-between items-center"><label for="c-essential">Esenciales</label><input type="checkbox" id="c-essential" checked disabled class="h-5 w-5"></div>
+                <div class="flex justify-between items-center"><label for="c-analytics" class="text-red-600 font-bold">Análisis y Rendimiento</label><input type="checkbox" id="c-analytics" checked class="h-5 w-5"></div>
+                <div class="flex justify-between items-center"><label for="c-ads" class="text-red-600 font-bold">Publicidad y Seguimiento</label><input type="checkbox" id="c-ads" checked class="h-5 w-5"></div>
+            </div>
+            <div class="p-4 border-t mt-auto text-center space-y-3">
+                <button id="close-config-and-return-btn" class="w-full bg-pink-600 text-white font-bold py-2 rounded-lg">Cerrar</button>
+                <a href="#" id="save-cookies-config-link" class="text-xs text-gray-500 underline">Guardar preferencias y continuar</a>
+            </div>
+        </div>`;
+        openModal(modalCookiesConfigContainer, modalHTML);
+    }
+
+    // --- LÓGICA DE MENSAJES Y AJUSTES ---
+    function showMessagesMenu() { document.getElementById('chat-detail-view').classList.add('hidden'); document.getElementById('message-list-view').classList.remove('hidden'); }
+    function showChatDetail(conversationId) { const conversation = conversationsData.find(c => c.id === conversationId); const chatContainer = document.getElementById('chat-detail-view'); let messagesHTML = conversation.messages.map(msg => { if (msg.sender === 'me') { return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } else { return `<div class="flex justify-start"><div class="bg-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } }).join(''); chatContainer.innerHTML = `<header class="p-4 border-b bg-gray-50 flex items-center sticky top-0 z-10"><button data-action="back-to-messages" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><img src="${conversation.participantAvatar}" class="w-8 h-8 rounded-full mr-3"><h2 class="font-bold">${conversation.participantName}</h2></header><div class="p-4 space-y-4 flex-grow overflow-y-auto">${messagesHTML}</div>`; document.getElementById('message-list-view').classList.add('hidden'); chatContainer.classList.remove('hidden'); }
+    function showSettingsDetail(viewName) { document.getElementById('settings-main-menu').classList.add('hidden'); const detailView = document.getElementById(`settings-${viewName}-view`); if(detailView) detailView.classList.remove('hidden'); }
+    function showSettingsMenu() { document.querySelectorAll('.settings-detail-view').forEach(v => v.classList.add('hidden')); document.getElementById('settings-main-menu').classList.remove('hidden'); }
+
+    // --- LÓGICA DE COOKIES Y TEMA ---
+    function applyCookieTheme() {
+        const preference = localStorage.getItem('cookiePreference');
+        const root = document.documentElement;
+        if (preference === 'all') {
+            root.style.setProperty('--clr', 'var(--clr-blue)');
+        } else {
+            root.style.setProperty('--clr', 'var(--clr-pink)');
+        }
+    }
+
+    // --- DELEGACIÓN DE EVENTOS ---
+    document.addEventListener('click', (e) => { 
+        const target = e.target; 
+        if (target.closest('[data-post-id]')) showPostModal(target.closest('[data-post-id]').dataset.postId); 
+        if (target.closest('[data-author-id]')) showProfileModal(target.closest('[data-author-id]').dataset.authorId); 
+        const settingsTarget = target.closest('[data-settings-target]'); 
+        if (settingsTarget) showSettingsDetail(settingsTarget.dataset.settingsTarget); 
+        if (target.closest('[data-action="back-to-settings"]')) showSettingsMenu(); 
+        if (target.closest('[data-action="show-terms"]')) showTermsModal(); 
+        const conversationTarget = target.closest('[data-conversation-id]'); 
+        if (conversationTarget) showChatDetail(conversationTarget.dataset.conversationId); 
+        if (target.closest('[data-action="back-to-messages"]')) showMessagesMenu();
+        if (target.closest('#close-config-and-return-btn')) {
+            closeCurrentModal();
+            cookieBanner.classList.remove('hidden');
+        }
+        if (target.closest('#save-cookies-config-link')) {
+            e.preventDefault();
+            const analyticsChecked = document.getElementById('c-analytics').checked;
+            const adsChecked = document.getElementById('c-ads').checked;
+            
+            localStorage.setItem('cookiesAccepted', 'true');
+            if (!analyticsChecked && !adsChecked) {
+                localStorage.setItem('cookiePreference', 'configured');
+            } else {
+                localStorage.setItem('cookiePreference', 'all');
+            }
+            applyCookieTheme();
+            closeCurrentModal();
+            cookieBanner.classList.add('hidden');
+        }
+    });
+
+    // --- INICIALIZACIÓN ---
+    document.addEventListener('DOMContentLoaded', () => {
+        applyCookieTheme(); // Aplicar tema al cargar
+
+        // Lógica de Cookies
+        const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+        if (!cookiesAccepted) {
+            cookieBanner.classList.remove('hidden');
+        }
+        document.getElementById('accept-cookies-btn').addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            localStorage.setItem('cookiePreference', 'all');
+            applyCookieTheme();
+            cookieBanner.classList.add('hidden');
+        });
+        document.getElementById('config-cookies-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showCookiesConfigModal();
+            cookieBanner.classList.add('hidden');
+        });
+
+        renderFeed();
+        renderProfile('@Alexploramundo');
+        renderExploreGrid();
+        renderSettingsSubViews();
+        const messageListView = document.getElementById('message-list-view').querySelector('h1').parentElement;
+        conversationsData.forEach(convo => { const isPhishing = convo.id === 'phishing' || convo.id === 'impersonation' || convo.id === 'sextortion'; messageListView.innerHTML += `<div data-conversation-id="${convo.id}" class="flex items-center space-x-3 p-2 rounded-lg cursor-pointer ${isPhishing ? 'bg-red-100 hover:bg-red-200' : 'hover:bg-gray-200'}"><img src="${convo.participantAvatar}" class="w-12 h-12 rounded-full"><div><p class="font-bold">${convo.participantName}</p><p class="text-sm text-gray-600 truncate">${convo.lastMessage}</p></div></div>`; });
+        
+        const homeIcon = document.querySelector('.list.active .icon ion-icon');
+        homeIcon.setAttribute('name', homeIcon.getAttribute('name').replace('-outline', ''));
+    });
+</script>
+
+</body>
+</html>
+
