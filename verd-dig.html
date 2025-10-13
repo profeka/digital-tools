@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdad Digital - Fact Checking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .brand-text {
+            font-weight: 900; /* Black weight */
+        }
+        .modal-enter {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <h1 class="text-4xl brand-text text-center text-blue-600">Verdad Digital</h1>
+            <p class="text-center text-gray-500 mt-1">Periodismo de datos y verificación contra la desinformación.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+
+            <!-- Artículo 1: Magnetismo -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden col-span-1 md:col-span-2 lg:col-span-2">
+                <img src="https://placehold.co/800x400/c0392b/ffffff?text=FAKE+NEWS" alt="Imagen de noticia falsa" class="w-full h-56 object-cover">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-2 text-gray-800">DESMENTIDO: No, usar el móvil no te vuelve magnético</h2>
+                    <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles puede generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
+                    <p class="text-gray-700 leading-relaxed">Los teléfonos móviles emiten radiación no ionizante de baja frecuencia, la cual no tiene la capacidad de alterar las propiedades magnéticas del cuerpo. Los vídeos que muestran objetos metálicos pegándose a la piel suelen ser trucos que utilizan sudor o sustancias pegajosas. Este tipo de desinformación busca generar miedo y desconfianza en la tecnología sin ninguna base científica.</p>
+                    <a href="#" data-article-id="magnetismo" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                </div>
+            </article>
+
+            <!-- Artículo 2: Amigo en Apuros -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+                 <img src="https://placehold.co/600x400/f39c12/ffffff?text=Estafa+Bizum" alt="Icono de alerta en un móvil" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">ALERTA: La estafa del 'amigo en apuros' que te pide dinero</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! He perdido el móvil, necesito que me hagas un Bizum urgente". Este es el gancho de una de las estafas más comunes: la suplantación de identidad. Los ciberdelincuentes se hacen pasar por un amigo o familiar en apuros para que les envíes dinero de forma inmediata.</p>
+                    <p class="text-gray-700 leading-relaxed"><span class="font-bold">Claves para detectarlo:</span> Fíjate en el nombre de usuario (a veces cambia una letra, como una tilde), desconfía de la urgencia y, ante la duda, intenta contactar con tu amigo por otra vía (una llamada) para confirmar la historia.</p>
+                    <a href="#" data-article-id="amigo-apuros" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                </div>
+            </article>
+
+            <!-- Artículo 3: AeroVuela Max -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src="https://placehold.co/600x400/1abc9c/ffffff?text=Phishing" alt="Icono de phishing" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">ANÁLISIS: El timo del falso premio de aerolínea</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">Si has recibido un mensaje diciendo que has ganado un vuelo gratis, ten cuidado. Analizamos la estafa de "AeroVuela Max": prometen un gran premio para que, a cambio, les des tus datos personales. Es un caso clásico de <span class="font-bold">phishing</span>.</p>
+                    <p class="text-gray-700 leading-relaxed"><span class="font-bold">Banderas rojas:</span> El enlace no es de la web oficial (usa acortadores como bit.ly), te piden datos sensibles como el DNI para un simple sorteo y el mensaje crea una falsa sensación de urgencia. Las empresas reales no operan así.</p>
+                    <a href="#" data-article-id="aerovuela" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                </div>
+            </article>
+
+             <!-- Artículo 4: Contraseñas -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden col-span-1 md:col-span-2 lg:col-span-2">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-2 text-gray-800">GUÍA: Cómo crear contraseñas que nadie pueda adivinar</h2>
+                    <p class="text-gray-600 mb-4">Tu contraseña es la primera barrera de defensa. Usar "123456" o el nombre de tu mascota ya no es seguro. Te damos las claves para crear contraseñas robustas.</p>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar ("MiPerroComeMuchaHierba!") que una palabra corta con símbolos ("P3rro!").</li>
+                        <li><span class="font-bold">Evita lo personal:</span> No uses fechas de nacimiento, nombres de familiares, ni tu comida favorita. Los atacantes buscan esa información en tus redes sociales.</li>
+                        <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Si uno cae, caerán todos.</li>
+                        <li><span class="font-bold">Activa la autenticación en dos pasos (2FA):</span> Es una capa de seguridad extra fundamental que deberías tener activada en todas tus cuentas.</li>
+                    </ul>
+                    <a href="#" data-article-id="contrasenas" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                </div>
+            </article>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12 py-4">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Verdad Digital. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal para Artículos -->
+    <div id="article-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 modal-enter">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div id="modal-content" class="overflow-y-auto p-8">
+                <!-- Contenido del artículo se insertará aquí -->
+            </div>
+            <div class="p-4 border-t bg-gray-50 text-right">
+                <button id="close-modal-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const articles = {
+        'magnetismo': {
+            title: "DESMENTIDO: No, usar el móvil no te vuelve magnético",
+            content: `
+                <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles puede generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
+                <p class="text-gray-700 leading-relaxed mb-4">Los teléfonos móviles emiten radiación no ionizante de baja frecuencia, la cual no tiene la capacidad de alterar las propiedades magnéticas del cuerpo. Los vídeos que muestran objetos metálicos pegándose a la piel suelen ser trucos que utilizan sudor o sustancias pegajosas. Este tipo de desinformación busca generar miedo y desconfianza en la tecnología sin ninguna base científica.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Por qué se viraliza?</h3>
+                <p class="text-gray-700 leading-relaxed">Estos bulos apelan a miedos preexistentes sobre la tecnología y la salud. Usan un lenguaje pseudocientífico y a menudo citan "universidades" o "expertos" inexistentes para darse credibilidad. La mejor defensa es el escepticismo: si algo suena demasiado increíble, probablemente no sea cierto. Siempre busca la confirmación en medios de comunicación fiables y agencias científicas oficiales.</p>
+            `
+        },
+        'amigo-apuros': {
+            title: "ALERTA: La estafa del 'amigo en apuros' que te pide dinero",
+            content: `
+                <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! He perdido el móvil, necesito que me hagas un Bizum urgente". Este es el gancho de una de las estafas más comunes: la suplantación de identidad. Los ciberdelincuentes se hacen pasar por un amigo o familiar en apuros para que les envíes dinero de forma inmediata.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Cómo funciona el engaño?</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">Primero, los estafadores consiguen acceso a la cuenta de tu amigo (a menudo por contraseñas débiles o phishing). Luego, escriben a sus contactos con una historia creíble y urgente que impide la comunicación normal (ej: "no me llames, el micrófono está roto"). Apelan a tu confianza y te presionan para que actúes rápido.</p>
+                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Claves para detectarlo:</span> Fíjate en el nombre de usuario (a veces cambia una letra, como una tilde), desconfía de la urgencia y, ante la duda, intenta contactar con tu amigo por otra vía (una llamada) para confirmar la historia. O hazle una pregunta personal que solo él o ella sabría responder.</p>
+            `
+        },
+        'aerovuela': {
+            title: "ANÁLISIS: El timo del falso premio de aerolínea",
+            content: `
+                <p class="text-gray-700 leading-relaxed mb-4">Si has recibido un mensaje diciendo que has ganado un vuelo gratis, ten cuidado. Analizamos la estafa de "AeroVuela Max": prometen un gran premio para que, a cambio, les des tus datos personales. Es un caso clásico de <span class="font-bold">phishing</span>.</p>
+                 <h3 class="font-bold text-lg mt-6 mb-2">El paso a paso de la estafa</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">1. Recibes un mensaje directo de una cuenta que imita a una marca conocida. 2. Te anuncian como ganador de un premio irresistible. 3. Te piden hacer clic en un enlace para "reclamarlo". 4. Ese enlace te lleva a una página web falsa, idéntica a la original, donde te piden tu usuario, contraseña e incluso datos bancarios. Al introducirlos, los ladrones los capturan.</p>
+                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Banderas rojas:</span> El enlace no es de la web oficial (usa acortadores como bit.ly), te piden datos sensibles como el DNI para un simple sorteo y el mensaje crea una falsa sensación de urgencia. Las empresas reales no operan así.</p>
+            `
+        },
+        'contrasenas': {
+            title: "GUÍA: Cómo crear contraseñas que nadie pueda adivinar",
+            content: `
+                <p class="text-gray-600 mb-4">Tu contraseña es la primera barrera de defensa. Usar "123456" o el nombre de tu mascota ya no es seguro. Te damos las claves para crear contraseñas robustas.</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-4">
+                    <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar ("MiPerroComeMuchaHierba!") que una palabra corta con símbolos ("P3rro!"). Los ordenadores tardan mucho más en adivinar frases largas.</li>
+                    <li><span class="font-bold">Evita lo personal:</span> No uses fechas de nacimiento, nombres de familiares, ni tu comida favorita. Los atacantes buscan esa información en tus redes sociales para intentar adivinar tus claves. El post sobre las "croquetas" de Álex es un ejemplo perfecto de lo que no hay que hacer.</li>
+                    <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Los ciberdelincuentes usan una técnica llamada "credential stuffing": si roban tu contraseña de un sitio poco seguro, la prueban en todos los demás (tu email, tus redes sociales, etc.).</li>
+                    <li><span class="font-bold">Activa la autenticación en dos pasos (2FA):</span> Es una capa de seguridad extra fundamental. Aunque alguien consiga tu contraseña, necesitará un segundo código (que normalmente llega a tu móvil) para poder entrar. ¡Actívala siempre que puedas!</li>
+                </ul>
+            `
+        }
+    };
+
+    const modal = document.getElementById('article-modal');
+    const modalContent = document.getElementById('modal-content');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    document.querySelectorAll('a[data-article-id]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const articleId = e.currentTarget.dataset.articleId;
+            const article = articles[articleId];
+
+            if (article) {
+                modalContent.innerHTML = `
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">${article.title}</h2>
+                    ${article.content}
+                `;
+                modal.classList.remove('hidden');
+            }
+        });
+    });
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modalContent.innerHTML = '';
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        // Cierra el modal si se hace clic en el fondo oscuro
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+</script>
+
+</body>
+</html>
+
