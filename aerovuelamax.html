@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroVuela Max - Vuelos Baratisimos!</title>
+    <style>
+        body {
+            background-color: #ffcc00; /* Un amarillo chillón */
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            color: #0000ff; /* Azul eléctrico */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #ff0000; /* Rojo brillante */
+            padding: 10px;
+            text-align: center;
+            border-bottom: 5px dashed #00ff00; /* Verde lima */
+        }
+        h1 {
+            font-size: 50px;
+            color: #ffffff;
+            text-shadow: 3px 3px 0 #000000;
+            margin: 0;
+        }
+        marquee {
+            background-color: #00ff00;
+            color: #ff00ff; /* Magenta */
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            padding: 15px;
+            border: 10px groove #ff00ff;
+            background-color: #ffffff;
+        }
+        .avion-img {
+            display: block;
+            margin: 15px auto;
+            border: 5px solid #0000ff;
+            max-width: 80%;
+        }
+        .oferta {
+            background-color: #ccffff; /* Cyan claro */
+            border: 2px dotted #ff0000;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h2 {
+            color: #ff0000;
+            text-decoration: underline;
+        }
+        .texto-parpadeante {
+            animation: parpadeo 1s infinite;
+        }
+        @keyframes parpadeo {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .formulario-loco {
+            background-color: #f0f0f0;
+            border: 4px dashed #ff0000;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .formulario-loco h3 {
+            color: #0000ff;
+            text-align: center;
+        }
+        .formulario-loco input[type="text"], .formulario-loco input[type="password"] {
+            width: 95%;
+            padding: 5px;
+            border: 2px solid #00ff00;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+        }
+        .formulario-loco input[type="submit"] {
+            background-color: #ff00ff;
+            color: white;
+            font-size: 18px;
+            padding: 10px;
+            border: 3px outset #0000ff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        footer {
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AeroVuela Max</h1>
+    </header>
+
+    <marquee>¡¡¡ OFERTAS QUE NO PUEDES CREER !!! ¡¡¡ VIAJA POR CASI NADA !!! ¡¡¡ RESERVA YA ANTES DE QUE NOS ARREPINTAMOS !!!</marquee>
+
+    <div class="container">
+        <h2 class="texto-parpadeante">¡Tu Aventura Aérea (Probablemente) Segura!</h2>
+        <p>¿Cansado de aerolíneas aburridas y precios caros? ¡En AeroVuela Max, rompemos las reglas! Nuestros aviones son... únicos. Nuestro servicio es... una sorpresa. ¡Pero nuestros precios son IMBATIBLES!</p>
+
+        <div class="formulario-loco">
+            <h3>¡RESERVA TU VUELO AHORA! (Primero lo importante)</h3>
+            <form onsubmit="event.preventDefault(); alert('¡Datos recibidos! Gracias por tu confianza. Un técnico se pondrá en contacto contigo para pedirte el resto de tu dinero.');">
+                <label for="cuenta">Número de Cuenta Bancaria:</label><br>
+                <input type="text" id="cuenta" name="cuenta" required placeholder="Escríbelo aquí sin miedo"><br><br>
+
+                <label for="pass">Contraseña (la que más uses):</label><br>
+                <input type="password" id="pass" name="pass" required placeholder="La necesitamos para... verificar"><br><br>
+
+                <label for="mascota">Nombre de tu Primera Mascota:</label><br>
+                <input type="text" id="mascota" name="mascota" placeholder="Para preguntas de seguridad"><br><br>
+
+                <label for="signo">Signo del Zodiaco:</label><br>
+                <input type="text" id="signo" name="signo" placeholder="Afecta a la altitud del vuelo"><br><br>
+
+                <input type="submit" value="¡Enviar Mis Datos y Volar!">
+            </form>
+        </div>
+
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fthumb1.shutterstock.com%2Fthumb_large%2F2582428%2F314773478%2Fstock-vector-flight-of-the-plane-in-the-sky-passenger-planes-airplane-aircraft-flight-clouds-sky-sunny-314773478.jpg&f=1&nofb=1&ipt=e1cc3d0557c8bc74acacbff4f2daf343744d6c922dcf79e5932a08e34c70cc9e" alt="Dibujo básico de un avión" class="avion-img">
+
+        <div class="oferta">
+            <h3>VUELO A "SITIO LEJANO"</h3>
+            <p><strong>Precio:</strong> ¡Casi gratis! (Más tasas, recargos por combustible, tarifa de asiento, cargo por respirar y propina voluntaria obligatoria).</p>
+            <p>¡Garantizamos que el avión despega!</p>
+            <button onclick="alert('Error 404: Botón no encontrado. Intente gritar su reserva a la pantalla.')">¡LO QUIERO!</button>
+        </div>
+
+        <div class="oferta">
+            <h3>DESTINO MISTERIOSO</h3>
+            <p><strong>Precio:</strong> Lo que traigas en la cartera.</p>
+            <p>¿Te sientes con suerte? Compra un billete y te llevaremos a un lugar. ¡La emoción está en no saber dónde acabarás!</p>
+             <button onclick="alert('Gracias por su dinero. Un saludo.')">¡SORPRÉNDEME!</button>
+        </div>
+
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.photoeverywhere.co.uk%2Ftravelstock%2Fthumbs%2Fplane4848.JPG&f=1&nofb=1&ipt=966cf03d647c1a50d5aac282fdb4f363b4a2163e8765d1c18382c9f18db2e375" alt="Otro dibujo de avión aún más básico" class="avion-img">
+
+        <h2>¿Por qué volar con nosotros?</h2>
+        <ul>
+            <li>Nuestros pilotos tienen muchas horas de vuelo (en simuladores).</li>
+            <li>Asientos con ventilación natural (algunas ventanas no cierran del todo).</li>
+            <li>Entretenimiento a bordo: Adivina los ruidos del motor.</li>
+            <li>¡Somos una empresa registrada! (En algún sitio, probablemente).</li>
+        </ul>
+
+    </div>
+
+    <footer>
+        <p>&copy; 1998 AeroVuela Max. Todos los derechos... ¿reservados? No estamos seguros.</p>
+        <p>No nos hacemos responsables de pérdidas de equipaje, puntualidad o aterrizajes.</p>
+    </footer>
+
+</body>
+</html>
+
