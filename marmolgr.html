@@ -128,7 +128,7 @@
     <!-- Main App Container -->
     <div id="main-app">
         <div id="desktop-wrapper" class="lg:flex lg:justify-center lg:gap-6 lg:pt-4">
-            <main id="content-container" class="w-full max-w-sm mx-auto lg:max-w-none lg:w-[600px] min-h-screen bg-gray-100 pb-24 lg:transition-all lg:duration-500">
+            <main id="content-container" class="w-full max-w-xs mx-auto lg:max-w-none lg:w-[600px] min-h-screen bg-gray-100 pb-24 lg:transition-all lg:duration-500">
                 <!-- VISTA 1: HOME (Feed principal) -->
                 <div id="home-view" class="view p-2">
                     <header class="p-2 sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 -m-2 mb-2 border-b">
@@ -138,10 +138,10 @@
                 </div>
 
                 <!-- VISTA 2: PERFIL (del usuario principal) -->
-                <div id="profile-view" class="view hidden bg-white h-full"></div>
+                <div id="profile-view" class="view hidden bg-white"></div>
                 
                 <!-- VISTA 3: MENSAJES (Ahora con sub-vistas) -->
-                <div id="messages-view" class="view hidden h-full"></div>
+                <div id="messages-view" class="view hidden"></div>
 
                 <!-- VISTA 4: BÚSQUEDA / EXPLORAR -->
                 <div id="search-view" class="view hidden p-1">
@@ -150,7 +150,7 @@
                 </div>
 
                 <!-- VISTA 5: AJUSTES (INTERACTIVA) -->
-                <div id="settings-view" class="view hidden h-full"></div>
+                <div id="settings-view" class="view hidden"></div>
             </main>
 
             <aside id="post-detail-desktop" class="h-[calc(100vh-2rem)] sticky top-4 lg:flex flex-col justify-center items-center"></aside>
@@ -210,7 +210,7 @@
         '@VerdadDigital': { avatar: 'img/VERPFP.webp', name: 'Verdad Digital', bio: 'Fact-checker. Desmintiendo bulos.', followers: 80000, following: 300 },
         '@User12345': { avatar: 'img/USRPFP.webp', name: 'User12345', bio: '', followers: 12, following: 2500 },
         '@FotografoUrbano': { avatar: 'img/FOTPFP.webp', name: 'Javier Ríos Foto', bio: 'Capturando la ciudad.', followers: 8000, following: 400 },
-        '@LauraAventúra': { avatar: 'img/LAU01.webp', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', followers: 50, following: 3500 },
+        '@LaurAventúra': { avatar: 'img/LAU01.webp', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', followers: 50, following: 3500 },
         '@Desconocido': { avatar: 'img/DESPFP.webp', name: 'Desconocido', bio: '', followers: 2, following: 1500 },
         '@ViajeroIncansable': { avatar: 'img/VIAPFP.webp', name: 'Viajero Incansable', bio: 'Nómada digital.', followers: 22000, following: 600 },
         '@SenderistaPro': { avatar: 'img/LAU02.webp', name: 'Pro Senderista', bio: 'Descubriendo rutas.', followers: 4500, following: 800 },
@@ -260,7 +260,7 @@
         { id: 'Aerovuela', participantName: 'AeroVuela Max', participantAvatar: 'img/DESPFP.webp', lastMessage: 'No hay problema, ¡gracias a ti!', messages: [ { sender: 'them', text: '¡Felicidades @Alexploramundo! Eres el ganador de nuestro sorteo mensual. Para reclamar tu premio, necesitamos verificar tus datos. Por favor, inicia sesión en el siguiente portal seguro: <a href="marmolgr.html" class="text-blue-600 underline">bit.ly/vuelo-gratis-real</a>' }, { sender: 'me', text: '¡Qué buena noticia! Claro, mis datos son: Alex Rojo Soshal, con DNI XMP200309. ¡Muchas gracias!' }, { sender: 'them', text: 'Perfecto, Alex. Hemos recibido tus datos. En 24/48 horas recibirás la confirmación de tu vuelo. ¡Disfruta del viaje!' }, { sender: 'me', text: '¡Genial! Muchísimas gracias por todo.'} ] }, 
         { id: 'Laura', participantName: '@LaurAventura', participantAvatar: usersData['@LaurAventura'].avatar.replace('80x80','40x40'), lastMessage: 'Uf, qué raro...', messages: [ { sender: 'them', text: 'Oye, ¡qué fotaza la que subiste el otro día en la montaña!' }, { sender: 'me', text: 'Verdad? Fue un día genial. A ver cuándo repetimos.' }, { sender: 'them', text: '¡Cuando quieras! Acabo de ver que has renovado el pasaporte... ¿próximo destino?' }, { sender: 'me', text: 'Jajaja, sí, ¡por fin! Pues me voy a Japón dos semanas.' }, { sender: 'them', text: '¡Qué pasada! Avísame cuando vuelvas y planeamos algo. ¡Y tráeme mochis! 😂' }, { sender: 'me', text: '¡Hecho! Los que quieras jajaja. ¿Hacemos una ruta por la Pedriza a la vuelta?'}, { sender: 'them', text: 'Uuuh, planazo. Me apunto de cabeza. ¡Perfecto! ¡Qué ganas!' }, { sender: 'me', text: 'Por cierto, ¿qué tal el otro día? ¿Te llegó mi bizum? ¿Está todo bien?'}, { sender: 'them', text: '¿Qué bizum? No, no me ha pasado nada. ¿De qué hablas?' }, { sender: 'me', text: 'Uf, qué raro... Juraría que me hablaste tú. Bueno, da igual, lo importante es que estés bien. ¡Hablamos a la vuelta!' } ] }, 
         { id: 'DESC', participantName: '@Desconocido', participantAvatar: usersData['@Desconocido'].avatar, lastMessage: 'La cuenta atrás ha comenzado.', messages: [ { sender: 'them', text: 'Hola, Alex. Tengo un vídeo tuyo bastante comprometedor. O me pagas 200€ en criptomonedas o me aseguraré de que todos tus seguidores lo vean. Tienes 24 horas.'}, { sender: 'me', text: '¿Qué vídeo? No sé de qué hablas... Por favor, no hagas nada. ¿Podemos hablarlo? No tengo tanto dinero.' }, { sender: 'them', text: 'No es una negociación. Tienes mi wallet. El tiempo corre.' }, { sender: 'me', text: 'Por favor, dame más tiempo. No sé cómo conseguir criptomonedas tan rápido.'}, { sender: 'them', text: 'La cuenta atrás ha comenzado.'} ] },
-        { id: 'LauraV', participantName: '@LauraAventúra', participantAvatar: usersData['@LauraAventúra'].avatar.replace('80x80','40x40'), lastMessage: '¡Hecho! Cuídate mucho.', messages: [ { sender: 'them', text: '¡Hola Álex! Soy Laura. He perdido el móvil y la cartera, estoy tirada. NecesITO que me hagas un Bizum urgente de 50€ a este número para poder coger un taxi a casa. ¡Es una emergencia! Ya te lo devolveré.'}, { sender: 'me', text: '¡Claro, Laura! Qué faena. No te preocupes, ¡ahora mismo te lo mando! ¿Estás bien?' }, { sender: 'them', text: 'Sí, sí, solo el susto. Muchísimas gracias, de verdad. Eres el mejor. Mañana te lo devuelvo sin falta.'}, { sender: 'me', text: 'No te preocupes por eso ahora. Lo importante es que llegues bien a casa. ¡Hecho! Cuídate mucho.'} ] },
+        { id: 'LauraV', participantName: '@LaurAventúra', participantAvatar: usersData['@LaurAventúra'].avatar.replace('80x80','40x40'), lastMessage: '¡Hecho! Cuídate mucho.', messages: [ { sender: 'them', text: '¡Hola Álex! Soy Laura. He perdido el móvil y la cartera, estoy tirada. NecesITO que me hagas un Bizum urgente de 50€ a este número para poder coger un taxi a casa. ¡Es una emergencia! Ya te lo devolveré.'}, { sender: 'me', text: '¡Claro, Laura! Qué faena. No te preocupes, ¡ahora mismo te lo mando! ¿Estás bien?' }, { sender: 'them', text: 'Sí, sí, solo el susto. Muchísimas gracias, de verdad. Eres el mejor. Mañana te lo devuelvo sin falta.'}, { sender: 'me', text: 'No te preocupes por eso ahora. Lo importante es que llegues bien a casa. ¡Hecho! Cuídate mucho.'} ] },
         { id: 'Mama', participantName: '@MamaExploraMundo', participantAvatar: usersData['@MamaExploraMundo'].avatar.replace('80x80','40x40'), lastMessage: '¡Que sí, mamá! Jajaja. Un beso enorme.', messages: [ { sender: 'them', text: 'Cariño, he visto la foto de tu nuevo despacho. ¡Qué ordenado! Pero ten cuidado con los papelitos que se ven por ahí, que nunca se sabe.' }, { sender: 'me', text: 'Gracias, mamá. No te preocupes, no es nada importante. Un beso.' }, { sender: 'them', text: 'Más vale prevenir, hijo. Que luego te llevas sustos. Por cierto, también vi la foto del pasaporte. ¡No pongas esas cosas en internet, que se ve tu nombre completo y la fecha de nacimiento!'}, { sender: 'me', text: 'Ay, es verdad... no me había dado cuenta. Ahora la borro. Gracias por el aviso.'}, { sender: 'them', text: 'Si es que vas a lo loco. Ten más cuidado, por favor.'}, { sender: 'me', text: 'Que sí mamá, de verdad, está todo controlado.' }, { sender: 'them', text: 'Bueno, tú avísame cuando llegues a Japón, ¿eh? Y no te olvides de la rebequita, que por las noches refresca.' }, { sender: 'me', text: '¡Que sí, mamá! Jajaja. Un beso enorme.' } ] },
         { id: 'Carlos', participantName: '@FoodieCarlos', participantAvatar: usersData['@FoodieCarlos'].avatar.replace('80x80','40x40'), lastMessage: 'Jajaja, palabra de foodie. ¡Disfruta de Japón!', messages: [ { sender: 'them', text: '¡Hey, Alex! He visto que te molan las croquetas tanto como a mí.' }, { sender: 'me', text: '¡Hombre, Carlos! Jajaja, sí, son mi perdición. Las de tu foto tenían una pinta brutal.' }, { sender: 'them', text: 'Pues cuando te digo que son las mejores de Madrid, no exagero. Si quieres, cuando vuelvas de tus viajes, te llevo. ¡Invita la casa!' }, { sender: 'me', text: '¡Ostras, planazo! Vuelvo en un par de semanas de Japón. ¿Guardas el secreto del sitio hasta entonces?' }, { sender: 'them', text: '¡Trato hecho! Te escribo.' }, { sender: 'me', text: '¡Genial! No me falles, ¿eh? Que me muero por probar esas croquetas.' }, { sender: 'them', text: 'Jajaja, palabra de foodie. ¡Disfruta de Japón!' } ] },
         { id: 'Tec', participantName: '@TechieModerno', participantAvatar: usersData['@TechieModerno'].avatar.replace('80x80','40x40'), lastMessage: '¡Sin problema! Que vaya genial el viaje.', messages: [ { sender: 'me', text: '¡David! ¡Qué pasada el portátil que enseñaste el otro día! Justo ando buscando algo así para los viajes, que el mío ya no da para más.' }, { sender: 'them', text: '¡Buenas, Alex! Pues es una bestia, la verdad. Para editar vídeo y fotos mientras viajas, es perfecto. La batería dura bastante para la potencia que tiene.' }, { sender: 'me', text: 'Suena genial. ¿Crees que es mejor que el nuevo Mac? Estoy en un mar de dudas.' }, { sender: 'them', text: 'Depende del uso que le des. Si quieres, cuando vuelvas por aquí, te pasas por la oficina y lo pruebas sin compromiso. Así sales de dudas.' }, { sender: 'me', text: '¡De lujo! Te tomo la palabra. En cuanto vuelva de Japón te doy un toque. ¡Mil gracias de nuevo!'}, { sender: 'them', text: '¡Sin problema! Que vaya genial el viaje.' } ] }
@@ -433,7 +433,7 @@
             <div id="message-list-view" class="p-4 space-y-2">
                 <h1 class="text-xl font-bold text-center">Mensajes Directos</h1>
             </div>
-            <div id="chat-detail-view" class="hidden h-full flex flex-col"></div>
+            <div id="chat-detail-view" class="hidden"></div>
         `;
         const messageListView = messagesContainer.querySelector('#message-list-view');
         conversationsData.forEach(convo => { 
@@ -621,9 +621,9 @@
 
         let messagesHTML = conversation.messages.map(msg => {
             if (msg.sender === 'me') {
-                return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`;
+                return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-md">${msg.text}</div></div>`;
             } else {
-                return `<div class="flex justify-start"><div class="bg-gray-200 p-3 rounded-lg max-w-xs">${msg.text}</div></div>`;
+                return `<div class="flex justify-start"><div class="bg-gray-200 p-3 rounded-lg max-w-md">${msg.text}</div></div>`;
             }
         }).join('');
 
@@ -637,8 +637,10 @@
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </header>
-            <div class="p-4 space-y-4 flex-grow overflow-y-auto bg-gray-50">
-                ${messagesHTML}
+            <div class="p-4 flex-grow overflow-y-auto bg-gray-50">
+                <div class="max-w-xl mx-auto space-y-4">
+                    ${messagesHTML}
+                </div>
             </div>
         `;
 
@@ -760,9 +762,14 @@
         const conversation = conversationsData.find(c => c.id === conversationId); 
         const chatContainer = document.getElementById('chat-detail-view'); 
         let messagesHTML = conversation.messages.map(msg => { if (msg.sender === 'me') { return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } else { return `<div class="flex justify-start"><div class="bg-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } }).join(''); 
-        chatContainer.innerHTML = `<header class="p-4 border-b bg-gray-50 flex items-center sticky top-0 z-10"><button data-action="back-to-messages" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><img src="${conversation.participantAvatar}" class="w-8 h-8 rounded-full mr-3"><h2 class="font-bold">${conversation.participantName}</h2></header><div class="p-4 pb-24 space-y-4 flex-grow overflow-y-auto">${messagesHTML}</div>`; 
+        
+        // Se envuelven los mensajes en un contenedor centrado y se añade el espaciador invisible al final
+        chatContainer.innerHTML = `<header class="p-4 border-b bg-gray-50 flex items-center sticky top-0 z-10"><button data-action="back-to-messages" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><img src="${conversation.participantAvatar}" class="w-8 h-8 rounded-full mr-3"><h2 class="font-bold">${conversation.participantName}</h2></header><div class="w-full max-w-md mx-auto p-4 space-y-4">${messagesHTML}<div class="h-28" aria-hidden="true"></div></div>`; 
+        
         document.getElementById('message-list-view').classList.add('hidden'); 
         chatContainer.classList.remove('hidden'); 
+        // Se asegura que la vista principal se desplace al principio del chat
+        contentContainer.scrollTop = 0;
     }
 
     function showSettingsDetail(viewName) { 
