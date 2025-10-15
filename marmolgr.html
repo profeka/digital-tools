@@ -208,7 +208,7 @@
         '@kai_posting': { avatar: 'img/KAIPFP.webp', name: 'Kai', bio: 'brainrot daily dose ✨ | viviendo en tu fyp rent free', followers: 1200, following: 980 },
         '@NoticiasAlMinuto24': { avatar: 'img/NOTPFP.webp', name: 'NoticiasAlMinuto24', bio: 'La verdad, al instante. ⚡', followers: 250000, following: 50 },
         '@VerdadDigital': { avatar: 'img/VERPFP.webp', name: 'Verdad Digital', bio: 'Fact-checker. Desmintiendo bulos.', followers: 80000, following: 300 },
-        '@ElPregonero': { avatar: 'img/PREPFP.webp', name: 'El Pregonero Global', bio: 'Información contrastada para un mundo complejo.', followers: 150000, following: 120 },        
+        '@ElPregonero': { avatar: 'img/PREPFP.webp', name: 'El Pregonero Global', bio: 'Información contrastada para un mundo complejo.', followers: 150000, following: 120 },         
         '@User12345': { avatar: 'img/USRPFP.webp', name: 'User12345', bio: '', followers: 12, following: 2500 },
         '@FotografoUrbano': { avatar: 'img/FOTPFP.webp', name: 'Javier Ríos Foto', bio: 'Capturando la ciudad.', followers: 8000, following: 400 },
         '@LaurAventúra': { avatar: 'img/LAU01.webp', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', followers: 50, following: 3500 },
@@ -220,6 +220,7 @@
     
     const postsData = [
         { id: 'mision', type: 'mission', title: 'MISIÓN: Ciber-Detective', text: 'La cuenta de @Alexploramundo ha sido comprometida. Tu misión es investigar su perfil y el de sus amigos para descubrir todas las vulnerabilidades. Elabora un informe con tus hallazgos.' },
+        { id: 'ALX00', type: 'post', author: '@Alexploramundo', caption: 'Pues nada, me han robado la cuenta vieja. Supongo que alguien quería mis fotos de viajes más que yo. ¡Aquí empieza la versión 2.0! #VueltaAlRuedo #MeLaHanLiado', timestamp: 'Hace 3 meses', comments: [{ user: '@MamaExploraMundo', text: '¡Hijo, qué susto! ¿Estás bien? Ten más cuidado.' }] },
         { id: 'ALX01', type: 'post', author: '@Alexploramundo', image: 'img/ALX04.webp', caption: 'Estrenando mi nuevo rincón de trabajo. ¡Creo que por fin he conseguido un setup productivo! #HomeOffice', timestamp: 'Hace 3 semanas', comments: [{ user: '@MamaExploraMundo', text: '¡Qué ordenado todo, hijo! Pero ten cuidado con lo que se ve en las fotos.' }, { user: '@TechieModerno', text: '¡Buen setup! ¿Qué monitor es?' }]},
         { id: 'ALX02', type: 'post', author: '@Alexploramundo', caption: 'A veces me pregunto si no comparto demasiado por aquí. Es fácil olvidar cuánta gente puede ver tus publicaciones. Una reflexión nocturna nada más. 🤔', timestamp: 'Hace 2 semanas', comments: [{ user: '@MamaExploraMundo', text: 'Haces bien en pensarlo, hijo.' }]},
         { id: 'ALX03', type: 'post', author: '@Alexploramundo', image: 'img/ALX03.webp', caption: '¡Despidiendo un verano increíble! El mejor remedio para el estrés. #Verano2025 #Playa #PuraVida', timestamp: 'Hace 1 semana', comments: [{ user: '@SolYMar', text: 'La mejor terapia que existe.' }, { user: '@kai_posting', text: 'vaya vibe, bro' }]},
@@ -255,7 +256,7 @@
         { id: 'NOTL01', type: 'post', author: '@NoticiasAlMinuto24', caption: "La 'Identidad Digital' suma 500.000 usuarios entre fallos y protestas. Mientras el Gobierno celebra la agilización de trámites, las asociaciones de derechos digitales denuncian la falta de transparencia y los riesgos para la privacidad. #IdentidadDigital #Polémica", timestamp: 'Hace 1 mes', comments: [{user: '@Alexploramundo', text: 'Pues si funciona para los trámites, bienvenido sea.'}] },
         { id: 'NOTL02', type: 'post', author: '@VerdadDigital', caption: "VERIFICADO: El Gobierno califica de 'éxito' el primer mes de la 'Identidad Digital', pero es ENGAÑOSO. Se han ocultado 2 brechas de seguridad que, aunque 'solucionadas', demuestran la vulnerabilidad del sistema. Tus datos, ¿realmente seguros? El debate sobre la privacidad es más necesario que nunca. #Datos #Seguridad", timestamp: 'Hace 1 mes', comments: [{user: '@CyberMemes', text: '2 brechas menores... de momento 👀'}, {user: '@TechieModerno', text: 'Importante el matiz. Gracias por la info.'}] },
         { id: 'NOTL03', type: 'post', author: '@ElPregonero', caption: "Un éxito rotundo: La 'Identidad Digital' conquista a la ciudadanía en su primer mes. La masiva adopción del sistema demuestra el apoyo popular a la modernización y la confianza en un gobierno que apuesta por la seguridad y la eficiencia. Las críticas minoritarias no pueden empañar este gran avance. #Éxito #Innovación", timestamp: 'Hace 1 mes', comments: [] },
-        { id: 'OFE01', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE01.webp', caption: '¿Ganas de una escapada? Vuelos a toda Europa desde 19.99€. ¡No dejes pasar la oportunidad!', timestamp: 'Hace 2 meses', comments: []},
+        { id: 'OFE01', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE01.webp', caption: '¿Ganas de una escapada? Vuelos a toda Europa desde 19.99€. ¡No dejes pasar la oportunidad!', timestamp: 'Hace 2 meses', comments: []},
         { id: 'OFE02', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE02.webp', caption: '¿Aún sin tus gafas de sol para este verano? ¡Aprovecha nuestro 50% de descuento! Link en la bio. #Verano #Ofertas', timestamp: 'Hace 3 semanas', comments: [] },
         { id: 'TEC01', type: 'post', author: '@TechieModerno', image: 'img/TEC01.webp', caption: 'Día de mantenimiento en el centro de datos. Aquí es donde vive la magia (y vuestros datos). #SysAdmin #DataCenter', timestamp: 'Hace 1 mes', comments: [] },
         { id: 'TEC02', type: 'post', author: '@TechieModerno', caption: 'Recordatorio amistoso: una VPN no te hace 100% anónimo, pero es una capa de seguridad esencial hoy en día. ¿Cuál usáis vosotros?', timestamp: 'Hace 4 semanas', comments: [] },
@@ -294,6 +295,19 @@
             return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
         }
         return num;
+    }
+
+    function parseTimestamp(timestamp) {
+        if (!timestamp || timestamp === 'Patrocinado') return Infinity;
+        const parts = timestamp.split(' ');
+        if (parts.length < 3) return Infinity;
+        const value = parseInt(parts[1]);
+        const unit = parts[2];
+        if (isNaN(value)) return Infinity;
+        if (unit.startsWith('día')) return value;
+        if (unit.startsWith('semana')) return value * 7;
+        if (unit.startsWith('mes')) return value * 30;
+        return Infinity;
     }
     
     function showLoginScreen() {
@@ -359,18 +373,6 @@
         const feedContainer = document.getElementById('feed-content'); 
         if (!feedContainer) return;
 
-        function parseTimestamp(timestamp) {
-            if (!timestamp || timestamp === 'Patrocinado') return Infinity; 
-            const parts = timestamp.split(' ');
-            if (parts.length < 3) return Infinity;
-            const value = parseInt(parts[1]);
-            const unit = parts[2];
-            if (unit.startsWith('día')) return value;
-            if (unit.startsWith('semana')) return value * 7;
-            if (unit.startsWith('mes')) return value * 30;
-            return 0;
-        }
-
         const sortedPosts = [...postsData].sort((a, b) => {
             if (a.type === 'mission') return -1;
             if (b.type === 'mission') return 1;
@@ -423,6 +425,7 @@
     function renderProfile(authorId) { 
         const user = usersData[authorId]; 
         const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); 
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
         const profileContainer = document.getElementById('profile-view'); 
         const postsGridHTML = userPosts.map(p => { 
             if (p.image) { 
@@ -522,7 +525,7 @@
             case 'activity':
                 return `<div class="bg-green-100 p-3 rounded-lg"><p class="font-medium">Este dispositivo - Madrid, ES</p><p class="text-sm text-green-700">Activo ahora</p></div><div class="bg-white p-3 rounded-lg"><p class="font-medium">iPhone 14 - Kyoto, JP</p><p class="text-sm text-gray-600">Hace 1 día</p></div><div class="bg-red-100 p-3 rounded-lg"><p class="font-medium">Windows - Ubicación desconocida</p><p class="text-sm text-red-700">Hace 3 horas</p></div>`;
             case 'passwords':
-                return `<div class="bg-white p-3 rounded-lg"><p class="font-medium">WIFI-AEROPUERTO-GRATIS</p><p class="text-sm text-gray-600">WIFIAEROPUERTO</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Red Social "FaceSnap"</p><p class="text-sm text-yellow-800">Croquetas2003</p></div>`;
+                return `<div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">WIFI-AEROPUERTO-GRATIS</p><p class="text-sm text-gray-600">WIFIAEROPUERTO</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Marimoligram</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Banco del Ahorro</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Correo Electrónico</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Tienda Ropa Online</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Plataforma de Series</p><p class="text-sm text-yellow-800">Croquetas2003</p></div>`;
             default:
                 return '';
         }
@@ -551,6 +554,7 @@
         // Mobile fallback
         const user = usersData[authorId]; 
         const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); 
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
         const postsGridHTML = userPosts.map(p => { if (p.image) { return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; } else { return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; } }).join(''); 
         const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-4 flex flex-col items-center border-b"><img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2"><h2 class="font-bold text-lg">${authorId}</h2><p class="text-sm text-gray-600 text-center">${user.bio}</p><div class="flex space-x-8 mt-4 text-center"><div><p class="font-bold">${userPosts.length}</p><p class="text-xs text-gray-500">Posts</p></div><div><p class="font-bold">${formatNumber(user.followers)}</p><p class="text-xs text-gray-500">Followers</p></div><div><p class="font-bold">${formatNumber(user.following)}</p><p class="text-xs text-gray-500">Following</p></div></div></div><div class="overflow-y-auto p-1"><div class="grid grid-cols-3 gap-1">${postsGridHTML}</div></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; 
         openModal(modalProfileContainer, modalHTML); 
@@ -591,7 +595,7 @@
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </div>
-            <div class="overflow-y-auto flex-grow">
+            <div class="overflow-y-auto flex-grow pb-20"> <!-- FIX APPLIED HERE -->
                 ${post.image ? `<img src="${post.image}" class="w-full h-auto">` : ''}
                 <div class="p-3">
                     <p class="text-sm"><strong class="font-semibold cursor-pointer" data-author-id="${post.author}">${post.author}</strong> ${post.caption}</p>
@@ -644,7 +648,7 @@
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </header>
-            <div class="p-4 flex-grow overflow-y-auto bg-gray-50">
+            <div class="p-4 flex-grow overflow-y-auto bg-gray-50 pb-20"> <!-- FIX APPLIED HERE -->
                 <div class="max-w-xl mx-auto space-y-4">
                     ${messagesHTML}
                 </div>
@@ -667,6 +671,7 @@
         const user = usersData[authorId];
         if (!user) return;
         const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post');
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
         const detailContainer = document.getElementById('post-detail-desktop');
         const wrapper = document.getElementById('desktop-wrapper');
 
@@ -685,7 +690,7 @@
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </header>
-            <div class="overflow-y-auto flex-grow">
+            <div class="overflow-y-auto flex-grow pb-20"> <!-- FIX APPLIED HERE -->
                 <div class="p-4 flex flex-col items-center border-b bg-gray-50">
                     <img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2">
                     <p class="text-sm text-gray-600 text-center">${user.bio}</p>
@@ -725,7 +730,7 @@
                         <ion-icon name="close-outline"></ion-icon>
                     </button>
                 </header>
-                <div class="overflow-y-auto flex-grow p-4 space-y-3">
+                <div class="overflow-y-auto flex-grow p-4 space-y-3 pb-20"> <!-- FIX APPLIED HERE -->
                     ${settingsContent}
                 </div>
             </div>
@@ -920,6 +925,4 @@
 
 </body>
 </html>
-
-
 
