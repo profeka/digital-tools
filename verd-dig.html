@@ -34,16 +34,25 @@
     </header>
 
     <main class="container mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <!-- Artículo 1: Magnetismo -->
-            <article class="bg-white rounded-lg shadow-lg overflow-hidden col-span-1 md:col-span-2 lg:col-span-2">
-                <img src="https://placehold.co/800x400/c0392b/ffffff?text=FAKE+NEWS" alt="Imagen de noticia falsa" class="w-full h-56 object-cover">
+            <!-- Artículo 1: Magnetismo (Ocupa 2 columnas en LG) -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden md:col-span-2 lg:col-span-2">
+                <img src="https://placehold.co/800x400/c0392b/ffffff?text=FAKE+NEWS" alt="Imagen de noticia falsa sobre magnetismo" class="w-full h-56 object-cover">
                 <div class="p-6">
                     <h2 class="text-2xl font-bold mb-2 text-gray-800">DESMENTIDO: No, usar el móvil no te vuelve magnético</h2>
-                    <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles puede generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
-                    <p class="text-gray-700 leading-relaxed">Los teléfonos móviles emiten radiación no ionizante de baja frecuencia, la cual no tiene la capacidad de alterar las propiedades magnéticas del cuerpo. Los vídeos que muestran objetos metálicos pegándose a la piel suelen ser trucos que utilizan sudor o sustancias pegajosas. Este tipo de desinformación busca generar miedo y desconfianza en la tecnología sin ninguna base científica.</p>
-                    <a href="#" data-article-id="magnetismo" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                    <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles o las vacunas pueden generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
+                    <a href="#" data-article-id="magnetismo" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer análisis completo...</a>
+                </div>
+            </article>
+            
+            <!-- Artículo: Vishing -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src="https://placehold.co/600x400/8e44ad/ffffff?text=Vishing" alt="Icono de estafa telefónica Vishing" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">CUIDADO: El 'vishing', la estafa en la que suplantan a tu banco</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">"Hola, le llamamos de su entidad bancaria...". Así empieza el <span class="font-bold">vishing</span>, una estafa telefónica para robar tus datos personales y bancarios.</p>
+                    <a href="#" data-article-id="vishing" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Saber más...</a>
                 </div>
             </article>
 
@@ -52,8 +61,7 @@
                  <img src="https://placehold.co/600x400/f39c12/ffffff?text=Estafa+Bizum" alt="Icono de alerta en un móvil" class="w-full h-48 object-cover">
                 <div class="p-6">
                     <h2 class="text-xl font-bold mb-2 text-gray-800">ALERTA: La estafa del 'amigo en apuros' que te pide dinero</h2>
-                    <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! He perdido el móvil, necesito que me hagas un Bizum urgente". Este es el gancho de una de las estafas más comunes: la suplantación de identidad. Los ciberdelincuentes se hacen pasar por un amigo o familiar en apuros para que les envíes dinero de forma inmediata.</p>
-                    <p class="text-gray-700 leading-relaxed"><span class="font-bold">Claves para detectarlo:</span> Fíjate en el nombre de usuario (a veces cambia una letra, como una tilde), desconfía de la urgencia y, ante la duda, intenta contactar con tu amigo por otra vía (una llamada) para confirmar la historia.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! Se me ha roto el móvil, este es mi número nuevo. Necesito que me hagas un Bizum urgente". Este es el gancho de una estafa de suplantación de identidad.</p>
                     <a href="#" data-article-id="amigo-apuros" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
                 </div>
             </article>
@@ -63,24 +71,33 @@
                 <img src="https://placehold.co/600x400/1abc9c/ffffff?text=Phishing" alt="Icono de phishing" class="w-full h-48 object-cover">
                 <div class="p-6">
                     <h2 class="text-xl font-bold mb-2 text-gray-800">ANÁLISIS: El timo del falso premio de aerolínea</h2>
-                    <p class="text-gray-700 leading-relaxed mb-4">Si has recibido un mensaje diciendo que has ganado un vuelo gratis, ten cuidado. Analizamos la estafa de "AeroVuela Max": prometen un gran premio para que, a cambio, les des tus datos personales. Es un caso clásico de <span class="font-bold">phishing</span>.</p>
-                    <p class="text-gray-700 leading-relaxed"><span class="font-bold">Banderas rojas:</span> El enlace no es de la web oficial (usa acortadores como bit.ly), te piden datos sensibles como el DNI para un simple sorteo y el mensaje crea una falsa sensación de urgencia. Las empresas reales no operan así.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Si has recibido un mensaje diciendo que has ganado un vuelo gratis, ten cuidado. Es un caso clásico de <span class="font-bold">phishing</span> para robar tus datos en una web falsa.</p>
                     <a href="#" data-article-id="aerovuela" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
                 </div>
             </article>
 
-             <!-- Artículo 4: Contraseñas -->
-            <article class="bg-white rounded-lg shadow-lg overflow-hidden col-span-1 md:col-span-2 lg:col-span-2">
+            <!-- Artículo nuevo: Identidad Digital -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src="https://placehold.co/600x400/3498db/ffffff?text=Identidad+Digital" alt="Icono de identidad digital" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">ANÁLISIS: La nueva 'Identidad Digital Unificada'</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">Es FALSO que sea un 'chip implantado', pero la centralización de datos plantea serias dudas sobre privacidad que el Gobierno no ha aclarado.</p>
+                    <a href="#" data-article-id="identidad-digital" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                </div>
+            </article>
+
+
+             <!-- Artículo 4: Contraseñas (Ocupa 3 columnas en LG) -->
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden col-span-1 md:col-span-2 lg:col-span-3">
                 <div class="p-6">
                     <h2 class="text-2xl font-bold mb-2 text-gray-800">GUÍA: Cómo crear contraseñas que nadie pueda adivinar</h2>
-                    <p class="text-gray-600 mb-4">Tu contraseña es la primera barrera de defensa. Usar "123456" o el nombre de tu mascota ya no es seguro. Te damos las claves para crear contraseñas robustas.</p>
+                    <p class="text-gray-600 mb-4">Tu contraseña es la primera barrera de defensa. Usar "123456" o el nombre de tu mascota ya no es seguro. Te damos las claves para crear contraseñas robustas y difíciles de romper.</p>
                     <ul class="list-disc list-inside text-gray-700 space-y-2">
-                        <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar ("MiPerroComeMuchaHierba!") que una palabra corta con símbolos ("P3rro!").</li>
-                        <li><span class="font-bold">Evita lo personal:</span> No uses fechas de nacimiento, nombres de familiares, ni tu comida favorita. Los atacantes buscan esa información en tus redes sociales.</li>
-                        <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Si uno cae, caerán todos.</li>
-                        <li><span class="font-bold">Activa la autenticación en dos pasos (2FA):</span> Es una capa de seguridad extra fundamental que deberías tener activada en todas tus cuentas.</li>
+                        <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar que una palabra corta con símbolos. Una longitud de 12 caracteres o más es ideal.</li>
+                        <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Si uno cae, los ciberdelincuentes probarán esa misma clave en tus otras cuentas.</li>
+                        <li><span class="font-bold">Activa la autenticación en dos pasos (2FA):</span> Es una capa de seguridad extra fundamental que deberías tener activada en todas tus cuentas importantes.</li>
                     </ul>
-                    <a href="#" data-article-id="contrasenas" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Leer más...</a>
+                    <a href="#" data-article-id="contrasenas" class="text-blue-500 hover:underline font-semibold mt-4 inline-block">Ver guía completa...</a>
                 </div>
             </article>
 
@@ -110,20 +127,27 @@
         'magnetismo': {
             title: "DESMENTIDO: No, usar el móvil no te vuelve magnético",
             content: `
-                <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles puede generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
-                <p class="text-gray-700 leading-relaxed mb-4">Los teléfonos móviles emiten radiación no ionizante de baja frecuencia, la cual no tiene la capacidad de alterar las propiedades magnéticas del cuerpo. Los vídeos que muestran objetos metálicos pegándose a la piel suelen ser trucos que utilizan sudor o sustancias pegajosas. Este tipo de desinformación busca generar miedo y desconfianza en la tecnología sin ninguna base científica.</p>
-                <h3 class="font-bold text-lg mt-6 mb-2">¿Por qué se viraliza?</h3>
-                <p class="text-gray-700 leading-relaxed">Estos bulos apelan a miedos preexistentes sobre la tecnología y la salud. Usan un lenguaje pseudocientífico y a menudo citan "universidades" o "expertos" inexistentes para darse credibilidad. La mejor defensa es el escepticismo: si algo suena demasiado increíble, probablemente no sea cierto. Siempre busca la confirmación en medios de comunicación fiables y agencias científicas oficiales.</p>
-            `
+                <p class="text-gray-600 mb-4">En los últimos días ha circulado una publicación viral que asegura que el uso prolongado de teléfonos móviles o las vacunas pueden generar propiedades magnéticas en el cuerpo humano. <span class="font-bold">Esto es científicamente imposible y se trata de un bulo.</span></p>
+                <p class="text-gray-700 leading-relaxed mb-4">Los teléfonos móviles emiten radiación no ionizante de baja frecuencia, la cual no tiene la capacidad de alterar las propiedades magnéticas del cuerpo. Del mismo modo, las vacunas autorizadas no contienen metales pesados ni componentes que puedan generar magnetismo.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Por qué parece real en los vídeos?</h3>
+                <p class="text-gray-700 leading-relaxed">El efecto que se observa en muchos vídeos virales, donde cucharas o monedas se quedan "pegadas" a la piel, no se debe al magnetismo, sino a la simple adhesión causada por la grasa natural de la piel, el sudor o restos de cremas. Es un truco sencillo sin ninguna base científica detrás. Estos bulos apelan a miedos preexistentes sobre la tecnología y la salud para generar desinformación.</p>
+            `,
+            sources: [
+                { name: 'Newtral - No, las vacunas no contienen “metales pesados” capaces de atraer a los imanes', url: 'https://www.newtral.es/bulo-vacunas-metales-pesados-imanes/20210515/' },
+                { name: 'Maldita.es - No hay evidencias de que las radiaciones del móvil repercutan en la salud', url: 'https://maldita.es/malditaciencia/20200228/dormir-movil-radiaciones-salud-almohada-mesilla/' }
+            ]
         },
         'amigo-apuros': {
             title: "ALERTA: La estafa del 'amigo en apuros' que te pide dinero",
             content: `
-                <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! He perdido el móvil, necesito que me hagas un Bizum urgente". Este es el gancho de una de las estafas más comunes: la suplantación de identidad. Los ciberdelincuentes se hacen pasar por un amigo o familiar en apuros para que les envíes dinero de forma inmediata.</p>
+                <p class="text-gray-700 leading-relaxed mb-4">"¡Hola! Se me ha roto el móvil, este es mi número nuevo. Necesito que me hagas un Bizum urgente para una grúa/multa/etc.". Este es el gancho de una de las estafas más comunes: la suplantación de identidad. Los ciberdelincuentes se hacen pasar por un amigo o familiar en apuros para que les envíes dinero de forma inmediata.</p>
                 <h3 class="font-bold text-lg mt-6 mb-2">¿Cómo funciona el engaño?</h3>
-                <p class="text-gray-700 leading-relaxed mb-4">Primero, los estafadores consiguen acceso a la cuenta de tu amigo (a menudo por contraseñas débiles o phishing). Luego, escriben a sus contactos con una historia creíble y urgente que impide la comunicación normal (ej: "no me llames, el micrófono está roto"). Apelan a tu confianza y te presionan para que actúes rápido.</p>
-                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Claves para detectarlo:</span> Fíjate en el nombre de usuario (a veces cambia una letra, como una tilde), desconfía de la urgencia y, ante la duda, intenta contactar con tu amigo por otra vía (una llamada) para confirmar la historia. O hazle una pregunta personal que solo él o ella sabría responder.</p>
-            `
+                <p class="text-gray-700 leading-relaxed mb-4">Los estafadores contactan contigo desde un número desconocido, haciéndose pasar por un ser querido que ha tenido un problema. Crean una sensación de urgencia y estrés para que no te dé tiempo a pensar. A menudo, el pretexto es que su teléfono "antiguo" se ha roto y no pueden recibir llamadas, solo WhatsApp.</p>
+                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Claves para detectarlo:</span> Desconfía de la urgencia y, ante la duda, intenta contactar con tu amigo por otra vía (una llamada a su número de siempre) para confirmar la historia. O hazle una pregunta personal que solo él o ella sabría responder.</p>
+            `,
+            sources: [
+                { name: 'INCIBE - Su hijo tiene un accidente y le pide pagar por Bizum la grúa', url: 'https://www.incibe.es/linea-de-ayuda-en-ciberseguridad/casos-reales/su-hijo-tiene-un-accidente-y-le-pide-pagar-por-bizum-la-grua' }
+            ]
         },
         'aerovuela': {
             title: "ANÁLISIS: El timo del falso premio de aerolínea",
@@ -131,20 +155,66 @@
                 <p class="text-gray-700 leading-relaxed mb-4">Si has recibido un mensaje diciendo que has ganado un vuelo gratis, ten cuidado. Analizamos la estafa de "AeroVuela Max": prometen un gran premio para que, a cambio, les des tus datos personales. Es un caso clásico de <span class="font-bold">phishing</span>.</p>
                  <h3 class="font-bold text-lg mt-6 mb-2">El paso a paso de la estafa</h3>
                 <p class="text-gray-700 leading-relaxed mb-4">1. Recibes un mensaje directo de una cuenta que imita a una marca conocida. 2. Te anuncian como ganador de un premio irresistible. 3. Te piden hacer clic en un enlace para "reclamarlo". 4. Ese enlace te lleva a una página web falsa, idéntica a la original, donde te piden tu usuario, contraseña e incluso datos bancarios. Al introducirlos, los ladrones los capturan.</p>
-                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Banderas rojas:</span> El enlace no es de la web oficial (usa acortadores como bit.ly), te piden datos sensibles como el DNI para un simple sorteo y el mensaje crea una falsa sensación de urgencia. Las empresas reales no operan así.</p>
-            `
+                <p class="text-gray-700 leading-relaxed"><span class="font-bold">Banderas rojas:</span> El enlace no es de la web oficial (fíjate bien en la URL), te piden datos bancarios para un simple sorteo y el mensaje crea una falsa sensación de urgencia. Las empresas reales no operan así.</p>
+            `,
+            sources: [
+                { name: 'INCIBE - ¿Cómo podemos protegernos de los fraudes online?', url: 'https://www.incibe.es/ciudadania/tematicas/ingenieria-social-fraudes-online' }
+            ]
         },
         'contrasenas': {
             title: "GUÍA: Cómo crear contraseñas que nadie pueda adivinar",
             content: `
                 <p class="text-gray-600 mb-4">Tu contraseña es la primera barrera de defensa. Usar "123456" o el nombre de tu mascota ya no es seguro. Te damos las claves para crear contraseñas robustas.</p>
                 <ul class="list-disc list-inside text-gray-700 space-y-4">
-                    <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar ("MiPerroComeMuchaHierba!") que una palabra corta con símbolos ("P3rro!"). Los ordenadores tardan mucho más en adivinar frases largas.</li>
+                    <li><span class="font-bold">Longitud > Complejidad:</span> Es mejor una frase larga y fácil de recordar ("MiPerroComeMuchaHierba!") que una palabra corta con símbolos ("P3rro!"). Los expertos recomiendan una longitud mínima de 12-15 caracteres.</li>
                     <li><span class="font-bold">Evita lo personal:</span> No uses fechas de nacimiento, nombres de familiares, ni tu comida favorita. Los atacantes buscan esa información en tus redes sociales para intentar adivinar tus claves.</li>
-                    <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Los ciberdelincuentes usan una técnica llamada "credential stuffing": si roban tu contraseña de un sitio poco seguro, la prueban en todos los demás (tu email, tus redes sociales, etc.).</li>
+                    <li><span class="font-bold">Única para cada sitio:</span> Nunca reutilices la misma contraseña en diferentes servicios. Los ciberdelincuentes usan una técnica llamada "credential stuffing": si roban tu contraseña de un sitio poco seguro, la prueban en todos los demás.</li>
+                    <li><span class="font-bold">Usa un gestor de contraseñas:</span> Estas herramientas crean y guardan contraseñas robustas y únicas para cada servicio, por lo que solo necesitas recordar una contraseña maestra.</li>
                     <li><span class="font-bold">Activa la autenticación en dos pasos (2FA):</span> Es una capa de seguridad extra fundamental. Aunque alguien consiga tu contraseña, necesitará un segundo código (que normalmente llega a tu móvil) para poder entrar. ¡Actívala siempre que puedas!</li>
                 </ul>
-            `
+            `,
+             sources: [
+                { name: 'INCIBE - Gestión de contraseñas seguras', url: 'https://www.incibe.es/ciudadania/tematicas/contrasenas-seguras' }
+            ]
+        },
+        'vishing': {
+            title: "CUIDADO: El 'vishing', la estafa en la que suplantan a tu banco por teléfono",
+            content: `
+                <p class="text-gray-700 leading-relaxed mb-4">"Hola, le llamamos de su entidad bancaria, hemos detectado un movimiento sospechoso". Así empieza el <span class="font-bold">vishing</span>, una estafa que utiliza una llamada de voz (de ahí la 'v') para realizar ingeniería social y robar información sensible.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Cómo te engañan?</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">Los ciberdelincuentes suplantan el número de teléfono de una entidad de confianza (tu banco, una empresa de paquetería, un organismo público...). Te comunican un problema urgente (un cargo fraudulento, un paquete retenido, etc.) para generar alarma y te solicitan datos personales, contraseñas o códigos de un solo uso (OTP) para "solucionarlo".</p>
+                <p class="text-gray-700 leading-relaxed font-bold">Recuerda: Tu banco NUNCA te pedirá por teléfono o email tus claves secretas, contraseñas o códigos de firma.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Cómo protegerse?</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li><span class="font-bold">Desconfía:</span> No te fíes de llamadas inesperadas que te soliciten información personal.</li>
+                    <li><span class="font-bold">Cuelga:</span> Ante la menor sospecha, cuelga la llamada.</li>
+                    <li><span class="font-bold">Verifica:</span> Busca el número de teléfono oficial de la empresa y llama tú para contrastar la información. No uses el número que te hayan proporcionado en la llamada sospechosa.</li>
+                    <li><span class="font-bold">No compartas:</span> Nunca compartas datos bancarios, contraseñas o códigos que recibas por SMS.</li>
+                </ul>
+            `,
+            sources: [
+                { name: 'INCIBE - ¿Qué es el vishing?', url: 'https://www.incibe.es/aprendeciberseguridad/vishing' }
+            ]
+        },
+        'identidad-digital': {
+            title: "ANÁLISIS: Los mitos y verdades de la 'Identidad Digital Unificada'",
+            content: `
+                <p class="text-gray-700 leading-relaxed mb-4">Recientemente se ha generado una gran polémica en torno a la propuesta de 'Identidad Digital Unificada'. Varios bulos afirman que se trata de un 'chip implantado' para controlar a la población. <span class="font-bold">Esto es rotundamente FALSO.</span></p>
+                <h3 class="font-bold text-lg mt-6 mb-2">¿Qué es realmente?</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">La propuesta busca unificar en una sola plataforma digital todos los datos que el Estado tiene sobre un ciudadano: datos fiscales, historial médico, censo, etc. El acceso sería a través de una aplicación móvil con fuertes medidas de seguridad, similar a los sistemas de clave digital que ya existen.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">Los riesgos reales (y no los bulos)</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">A pesar de que no hay ningún chip, expertos en ciberseguridad y privacidad sí han señalado riesgos importantes:</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li><span class="font-bold">Centralización masiva de datos:</span> Si un ciberdelincuente lograra acceder a esta base de datos, tendría toda la información de un ciudadano. Esto la convierte en un objetivo muy atractivo para ataques.</li>
+                    <li><span class="font-bold">Falta de transparencia:</span> El Gobierno no ha aclarado qué organismos tendrían acceso a qué datos, ni los mecanismos de supervisión para evitar abusos o vigilancia masiva.</li>
+                    <li><span class="font-bold">Brecha digital:</span> Podría suponer una barrera para personas mayores o sin acceso a tecnología, dificultando su acceso a servicios esenciales.</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mt-4">En resumen, el debate no debería centrarse en chips inexistentes, sino en la protección de datos, la transparencia y la ciberseguridad del sistema propuesto.</p>
+            `,
+            sources: [
+                { name: 'Boletín Oficial del Estado - Propuesta IDU-2025', url: '#' },
+                { name: 'Asociación de Internautas - Riesgos de la Identidad Digital', url: '#' }
+            ]
         }
     };
 
@@ -159,9 +229,19 @@
             const article = articles[articleId];
 
             if (article) {
+                let sourcesHTML = '';
+                if (article.sources && article.sources.length > 0) {
+                    sourcesHTML += '<h3 class="font-bold text-lg mt-8 mb-3 border-t pt-4">Fuentes:</h3><ul class="list-disc list-inside text-sm space-y-2">';
+                    article.sources.forEach(source => {
+                        sourcesHTML += `<li><a href="${source.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${source.name}</a></li>`;
+                    });
+                    sourcesHTML += '</ul>';
+                }
+
                 modalContent.innerHTML = `
                     <h2 class="text-3xl font-bold mb-6 text-gray-800">${article.title}</h2>
                     ${article.content}
+                    ${sourcesHTML}
                 `;
                 modal.classList.remove('hidden');
             }
@@ -175,7 +255,6 @@
 
     closeModalBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
-        // Cierra el modal si se hace clic en el fondo oscuro
         if (e.target === modal) {
             closeModal();
         }
