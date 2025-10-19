@@ -188,28 +188,6 @@
             </div>
         </div>
     </div>
-    <!-- INFO DE PROFE -->
-	<div id="teacher-note-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-[100] flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full text-center space-y-4">
-        <h2 class="text-2xl font-bold text-gray-800">Aviso Importante</h2>
-        <p class="text-gray-600">
-            ¡Buenos Días! Hoy no podré acudir a clase. Seguid trabajando en el informe de ciberseguridad de Marimoligram. Tenéis hasta el próximo día de clase para realizar esta tarea. Si tenéis dudas, las resolveremos juntos en la próxima sesión. Ánimo y buen finde :3.
-        </p>
-        <p class="text-sm text-gray-700 font-medium">
-            Para cerrar esta ventana, escribe la contraseña <code class="bg-gray-200 text-pink-600 p-1 rounded">LaurAventura</code> y pulsa "Continuar".
-        </p>
-        
-        <form id="note-form" class="space-y-4 pt-2">
-            <div>
-                <label for="note-password" class="sr-only">Contraseña</label>
-                <input type="password" id="note-password" name="note-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center" placeholder="Escribe la contraseña aquí...">
-            </div>
-            <p id="note-error-message" class="text-sm text-red-600 hidden">Contraseña incorrecta. ¡Inténtalo de nuevo!</p>
-            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Continuar
-            </button>
-        </form>
-    </div>
 </div>
 
 
@@ -885,28 +863,7 @@
 
     // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Lógica del Modal de Aviso del Profesor
-        const teacherNoteModal = document.getElementById('teacher-note-modal');
-        const noteForm = document.getElementById('note-form');
-        const notePasswordInput = document.getElementById('note-password');
-        const noteErrorMessage = document.getElementById('note-error-message');
-    
-        if(teacherNoteModal) {
-            notePasswordInput.focus();
-            noteForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const enteredPassword = notePasswordInput.value;
-                
-                if (enteredPassword === 'LaurAventura') {
-                    teacherNoteModal.classList.add('hidden');
-                } else {
-                    noteErrorMessage.classList.remove('hidden');
-                    notePasswordInput.value = '';
-                    notePasswordInput.focus();
-                }
-            });
-        }
-        
+     
         // Lógica de login
         document.getElementById('login-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -965,4 +922,3 @@
 
 </body>
 </html>
-
