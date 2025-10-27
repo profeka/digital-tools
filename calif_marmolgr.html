@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta de Calificación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo Neubrutalista */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0; /* Fondo ligero */
+        }
+        .neubrutalist {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 6px 6px 0 #000000;
+            border-radius: 8px; /* Ligeramente redondeado */
+        }
+        .neubrutalist-button {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0 #000000;
+        }
+        .neubrutalist-button:hover {
+            box-shadow: 2px 2px 0 #000000;
+            transform: translate(2px, 2px);
+        }
+        .neubrutalist-button:active {
+            box-shadow: 0 0 0 #000000;
+            transform: translate(4px, 4px);
+        }
+        
+        /* Botones de calificación (Estilo Neubrutalista) */
+        .rating-label {
+            border: 2px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 6px;
+        }
+        .rating-label.hover\:bg-gray-50:hover {
+            background-color: #f9fafb; /* Color hover suave */
+        }
+        
+        /* Colores de botones activos (Neubrutalismo) */
+        .rating-label.active-gray { background-color: #d1d5db; border-color: #000; color: #000; }
+        .rating-label.active-red { background-color: #fca5a5; border-color: #000; color: #000; }
+        .rating-label.active-orange { background-color: #fdba74; border-color: #000; color: #000; }
+        .rating-label.active-blue { background-color: #93c5fd; border-color: #000; color: #000; }
+        .rating-label.active-green { background-color: #86efac; border-color: #000; color: #000; }
+        
+        .rating-label.active-gray .rating-points,
+        .rating-label.active-red .rating-points,
+        .rating-label.active-orange .rating-points,
+        .rating-label.active-blue .rating-points,
+        .rating-label.active-green .rating-points {
+            color: #4b5563; /* Texto de puntos más oscuro */
+        }
+
+        /* Progreso */
+        .progress-bar-container {
+            border: 2px solid #000;
+            border-radius: 6px;
+            background-color: #e5e7eb;
+            padding: 2px;
+        }
+        .progress-bar {
+            height: 20px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 2px 0 #000 inset;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 40;
+        }
+        .modal-content {
+            z-index: 50;
+        }
+
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <h1 class="text-4xl font-bold mb-2 text-center">Herramienta de Calificación (Marimoligram)</h1>
+
+    <!-- NUEVO: Campo de Nombre de Equipo -->
+    <div class="max-w-xl mx-auto mb-6">
+        <input type="text" id="team-name-input" placeholder="Nombre del Equipo/Alumno..." class="neubrutalist w-full p-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg">
+    </div>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna Principal: Lista de Cotejo -->
+        <main id="checklist-container" class="lg:col-span-2 space-y-6">
+            <!-- Los ítems se generarán aquí por JS -->
+        </main>
+        
+        <!-- Columna Lateral: Informes y Acciones -->
+        <aside class="space-y-6">
+            <div class="sticky top-8 space-y-6">
+                
+                <!-- Puntuación Total -->
+                <section class="neubrutalist p-5">
+                    <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Puntuación Total</h2>
+                    <div class="text-center">
+                        <span id="score-current-total" class="text-6xl font-bold">0.00</span>
+                        <span class="text-2xl text-gray-600">/</span>
+                        <span id="score-max-total" class="text-2xl font-bold text-gray-600">10.00</span>
+                    </div>
+                </section>
+
+                <!-- Informe por Sección -->
+                <section class="neubrutalist p-5">
+                    <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Informe por Sección</h2>
+                    <div id="report-sections" class="space-y-4">
+                        <!-- El informe por sección se genera aquí -->
+                    </div>
+                </section>
+                
+                <!-- Acciones -->
+                <section class="neubrutalist p-5">
+                    <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Acciones</h2>
+                    <div class="space-y-4">
+                        <button id="export-button" class="neubrutalist-button w-full bg-blue-300 hover:bg-blue-400">Exportar Informe</button>
+                        <button id="save-button" class="neubrutalist-button w-full bg-green-300 hover:bg-green-400">Guardar Progreso</button>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="load-code-input" placeholder="Pegar código para cargar..." class="flex-grow p-2 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black">
+                            <button id="load-button" class="neubrutalist-button bg-yellow-300 hover:bg-yellow-400 !p-2 !shadow-none !border-2">Cargar</button>
+                        </div>
+                        
+                        <button id="reset-button" class="neubrutalist-button w-full bg-red-300 hover:bg-red-400">Reiniciar Calificación</button>
+                    </div>
+                </section>
+
+                <!-- Informe por Criterio (Movido) -->
+                <section class="neubrutalist p-5">
+                    <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Informe por Criterio (CE)</h2>
+                    <div id="report-criteria" class="space-y-4">
+                        <!-- El informe por criterio se genera aquí -->
+                    </div>
+                </section>
+
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Modal para Exportar y Guardar -->
+    <div id="modal" class="modal fixed inset-0 flex items-center justify-center p-4">
+        <div id="modal-overlay" class="modal-overlay"></div>
+        <div class="modal-content neubrutalist p-6 w-full max-w-lg relative">
+            <h3 id="modal-title" class="text-2xl font-bold border-b-2 border-black pb-2 mb-4"></h3>
+            <button id="modal-close" class="absolute top-4 right-4 text-3xl font-bold hover:text-red-500">&times;</button>
+            
+            <textarea id="modal-textarea" readonly class="w-full h-64 p-3 border-2 border-black rounded-lg bg-gray-100 font-mono text-sm"></textarea>
+            
+            <button id="modal-copy-button" class="neubrutalist-button w-full mt-4 bg-blue-300 hover:bg-blue-400">Copiar al Portapapeles</button>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 1. DATOS DE EVALUACIÓN ---
+        // Puntuaciones actualizadas según tu última petición
+        const evaluationData = [
+            { id: 'p1.1', section: 's1', title: '1.1. Fuga de Info. Personal', text: 'Valora si el alumno identifica la gravedad de exponer datos sensibles (DNI/Pasaporte) y lo conecta con el riesgo de suplantación.', points: 1.0, criteria: ['CE 3.1'] },
+            { id: 'p1.2', section: 's1', title: '1.2. Huella Digital y Seguridad Física', text: 'Valora si el alumno conecta la información aparentemente inofensiva (gustos, planes de viaje) con riesgos reales (ingeniería social, robo).', points: 1.0, criteria: ['CE 3.1'] },
+            { id: 'p1.3', section: 's1', title: '1.3. Gestión de Contraseñas', text: 'Valora si el alumno explica por qué el método es inseguro (predecible, basado en info pública), no solo si adivina la clave.', points: 0.5, criteria: ['CE 3.2'] },
+
+            { id: 'p2.1', section: 's2', title: '2.1. Mensajes Directos (Amenazas)', text: 'Valora si el alumno nombra y diferencia correctamente las amenazas (Phishing, Suplantación, Extorsión) y entiende su mecanismo.', points: 1.5, criteria: ['CE 3.3'] },
+            { id: 'p2.2', section: 's2', title: '2.2. Noticias Falsas (Fake News)', text: 'Valora si el alumno aplica un método de verificación (ej. contrastar, @VerdadDigital) y no solo "sabe" que es falsa.', points: 0.5, criteria: ['CE 4.3'] },
+            { id: 'p2.3', section: 's2', title: '2.3. Propiedad Intelectual', text: 'Valora si el alumno identifica el conflicto (uso comercial sin permiso) y entiende el concepto de "derechos de autor".', points: 0.5, criteria: ['CE 4.1'] },
+            { id: 'p2.4', section: 's2', title: '2.4. Ciberacoso y Etiqueta', text: 'Valora si el alumno identifica los roles (acosador/víctima) y define el problema (ciberacoso) usando la "etiqueta digital".', points: 0.5, criteria: ['CE 4.1'] },
+
+            { id: 'p3.1', section: 's3', title: '3.1. Actividad de Inicio de Sesión', text: 'Valora si el alumno identifica el problema técnico (sesión extraña) y propone la solución completa (Cerrar sesión Y cambiar clave).', points: 1.0, criteria: ['CE 1.3'] },
+            { id: 'p3.2', section: 's3', title: '3.2. Contraseñas Guardadas', text: 'Valora si el alumno identifica el riesgo crítico de la REUTILIZACIÓN de contraseñas (acceso al banco, email, etc.).', points: 0.5, criteria: ['CE 3.2'] },
+            { id: 'p3.3', section: 's3', title: '3.3. T&C y Patrones Oscuros', text: 'Valora si el alumno detecta la intencionalidad del diseño (Patrón Oscuro) o las cláusulas que vulneran su privacidad.', points: 0.5, criteria: ['CE 4.3'] },
+
+            { id: 'p4.1', section: 's4', title: '4.1. Resumen de Riesgos', text: 'Valora la capacidad de síntesis del alumno para enumerar los riesgos y priorizarlos por gravedad (alto/medio/bajo).', points: 0.5, criteria: ['CE 3.1', 'CE 3.3', 'CE 4.3'] },
+            { id: 'p4.2', section: 's4', title: '4.2. Medidas Correctoras', text: 'Valora si las 5+ medidas propuestas son concretas, eficaces y realistas (ej. 2FA, borrar fotos, bloquear, claves únicas).', points: 1.0, criteria: ['CE 3.1', 'CE 3.2'] },
+            { id: 'p4.3', section: 's4', title: '4.3. Reflexión Final', text: 'Valora si la reflexión es personal, coherente y conecta la actividad con la importancia de la ciudadanía digital crítica.', points: 1.0, criteria: ['CEsp 4'] }
+        ];
+
+        // --- 2. MAPA DE SECCIONES Y CRITERIOS ---
+        // Define los títulos, colores y si son Secciones o Criterios
+        const reportMap = {
+            's1': { title: '1. Análisis del Perfil', color: 'blue', isSection: true },
+            's2': { title: '2. Análisis de Interacciones', color: 'green', isSection: true },
+            's3': { title: '3. Auditoría de Configuración', color: 'yellow', isSection: true },
+            's4': { title: '4. Conclusiones y Plan de Acción', color: 'purple', isSection: true },
+
+            'CE 1.3': { title: 'CE 1.3: Resolver problemas técnicos', color: 'pink', isSection: false },
+            'CE 3.1': { title: 'CE 3.1: Proteger datos personales', color: 'red', isSection: false },
+            'CE 3.2': { title: 'CE 3.2: Gestión de seguridad', color: 'indigo', isSection: false },
+            'CE 3.3': { title: 'CE 3.3: Identificar amenazas', color: 'orange', isSection: false },
+            'CE 4.1': { title: 'CE 4.1: Uso ético, P.I.', color: 'lime', isSection: false },
+            'CE 4.3': { title: 'CE 4.3: Analizar críticamente info', color: 'cyan', isSection: false },
+            'CEsp 4': { title: 'CEsp 4: Ciudadanía digital crítica', color: 'teal', isSection: false }
+        };
+
+        // --- 3. NIVELES DE CALIFICACIÓN (GLOBAL) ---
+        const ratingLevels = [
+            { label: 'Nulo', value: 0, color: 'gray' },
+            { label: 'Bajo', value: 0.25, color: 'red' },
+            { label: 'Medio', value: 0.5, color: 'orange' },
+            { label: 'Alto', value: 0.75, color: 'blue' },
+            { label: 'Total', value: 1, color: 'green' }
+        ];
+
+        // --- 4. ALMACENAMIENTO DE PUNTUACIONES ---
+        let maxScores = {};
+        let currentScores = {};
+
+        // --- 5. ELEMENTOS DEL DOM ---
+        const checklistContainer = document.getElementById('checklist-container');
+        const reportSectionsContainer = document.getElementById('report-sections');
+        const reportCriteriaContainer = document.getElementById('report-criteria');
+        
+        // Modal elements
+        const modal = document.getElementById('modal');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTextarea = document.getElementById('modal-textarea');
+        const modalCopyButton = document.getElementById('modal-copy-button');
+
+        // Action buttons
+        const exportButton = document.getElementById('export-button');
+        const saveButton = document.getElementById('save-button');
+        const loadButton = document.getElementById('load-button');
+        const loadInput = document.getElementById('load-code-input');
+        const resetButton = document.getElementById('reset-button');
+
+
+        // --- 6. FUNCIONES DE INICIALIZACIÓN ---
+        
+        /**
+         * Inicializa los contenedores de puntuaciones (max y current)
+         */
+        function initializeScores() {
+            maxScores = { total: 0 };
+            currentScores = { total: 0 };
+
+            for (const id in reportMap) {
+                maxScores[id] = 0;
+                currentScores[id] = 0;
+            }
+
+            evaluationData.forEach(item => {
+                maxScores['total'] += item.points;
+                maxScores[item.section] += item.points;
+                item.criteria.forEach(ce => {
+                    ce = ce.trim();
+                    if (reportMap[ce]) {
+                        maxScores[ce] += item.points;
+                    }
+                });
+            });
+        }
+
+        /**
+         * Construye la lista de cotejo y los informes en la UI
+         */
+        function buildChecklistAndReports() {
+            checklistContainer.innerHTML = '';
+            reportSectionsContainer.innerHTML = '';
+            reportCriteriaContainer.innerHTML = '';
+            let currentSection = '';
+
+            evaluationData.forEach(item => {
+                // Añadir título de sección si es nueva
+                const sectionTitle = reportMap[item.section].title;
+                if (item.section !== currentSection) {
+                    // NUEVO: Añadir textarea para la sección ANTERIOR
+                    appendFeedbackArea(currentSection);
+
+                    const titleEl = document.createElement('h2');
+                    titleEl.className = 'text-3xl font-bold mt-8 first:mt-0';
+                    titleEl.innerText = sectionTitle;
+                    checklistContainer.appendChild(titleEl);
+                    currentSection = item.section;
+                }
+
+                // Crear el contenedor del ítem
+                const itemEl = document.createElement('div');
+                itemEl.className = 'neubrutalist p-4';
+                itemEl.id = `item-${item.id}`;
+
+                // Header del ítem (Título y Puntos)
+                const headerEl = document.createElement('div');
+                headerEl.className = 'flex justify-between items-start';
+                headerEl.innerHTML = `
+                    <h3 class="text-xl font-bold">${item.title}</h3>
+                    <span class="text-lg font-semibold text-gray-700">${item.points.toFixed(2)} pts</span>
+                `;
+                itemEl.appendChild(headerEl);
+
+                // Texto descriptivo
+                const textEl = document.createElement('p');
+                textEl.className = 'text-gray-600 mt-1';
+                textEl.innerText = item.text;
+                itemEl.appendChild(textEl);
+                
+                // Criterios (CE)
+                const criteriaEl = document.createElement('div');
+                criteriaEl.className = 'flex flex-wrap gap-2 mt-3';
+                item.criteria.forEach(ce => {
+                    const ceData = reportMap[ce.trim()];
+                    const tagEl = document.createElement('span');
+                    const color = ceData ? ceData.color : 'gray';
+                    tagEl.className = `inline-block text-xs font-semibold px-2 py-0.5 rounded-full border-2 border-black bg-${color}-200 text-black`;
+                    tagEl.innerText = ce.trim();
+                    criteriaEl.appendChild(tagEl);
+                });
+                itemEl.appendChild(criteriaEl);
+
+                // Botones de calificación
+                const radioContainer = document.createElement('div');
+                radioContainer.className = 'grid grid-cols-5 gap-2 mt-4';
+                
+                ratingLevels.forEach(level => {
+                    const radioId = `${item.id}-${level.value}`; 
+                    const labelEl = document.createElement('label');
+                    labelEl.htmlFor = radioId;
+                    labelEl.className = `rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50`;
+                    
+                    const radioEl = document.createElement('input');
+                    radioEl.type = 'radio';
+                    radioEl.className = 'hidden';
+                    radioEl.name = item.id;
+                    radioEl.value = level.value;
+                    radioEl.id = radioId;
+                    radioEl.dataset.points = item.points;
+                    radioEl.dataset.sectionId = item.section;
+                    radioEl.dataset.criteria = item.criteria.join(',');
+                    radioEl.onchange = handleRadioChange;
+                    
+                    const textEl = document.createElement('span');
+                    textEl.className = 'block font-semibold';
+                    textEl.innerText = level.label;
+
+                    const pointsTextEl = document.createElement('span');
+                    pointsTextEl.className = 'rating-points block text-xs text-gray-500';
+                    pointsTextEl.innerText = `(${(level.value * item.points).toFixed(2)} pts)`;
+
+                    labelEl.appendChild(textEl);
+                    labelEl.appendChild(pointsTextEl);
+                    radioContainer.appendChild(radioEl);
+                    radioContainer.appendChild(labelEl);
+                });
+
+                itemEl.appendChild(radioContainer);
+                checklistContainer.appendChild(itemEl);
+            });
+
+            // NUEVO: Añadir la ÚLTIMA textarea
+            appendFeedbackArea(currentSection);
+
+            // Construir los informes vacíos
+            for (const id in reportMap) {
+                const mapEntry = reportMap[id];
+                const reportEl = document.createElement('div');
+                reportEl.id = `report-${id}`;
+                
+                const title = mapEntry.title;
+                const color = mapEntry.color;
+                
+                reportEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-semibold text-sm">${title}</span>
+                        <span class="font-bold text-sm">
+                            <span id="score-current-${id}">0.00</span> / 
+                            <span id="score-max-${id}">${maxScores[id].toFixed(2)}</span>
+                        </span>
+                    </div>
+                    <div class="progress-bar-container w-full">
+                        <div id="progress-${id}" class="progress-bar bg-${color}-500" style="width: 0%;"></div>
+                    </div>
+                    ${!mapEntry.isSection ? '<div id="status-' + id + '" class="text-right text-xs font-semibold text-gray-500 mt-0.5">No Iniciado</div>' : ''}
+                `;
+                
+                if (mapEntry.isSection) {
+                    reportSectionsContainer.appendChild(reportEl);
+                } else {
+                    reportCriteriaContainer.appendChild(reportEl);
+                }
+            }
+        }
+
+        // --- NUEVA FUNCIÓN AUXILIAR ---
+        /**
+         * Añade un área de feedback al final de una sección
+         */
+        function appendFeedbackArea(sectionId) {
+            if (!sectionId) return;
+            const feedbackEl = document.createElement('div');
+            feedbackEl.className = 'mt-4'; // Espacio antes del área de feedback
+            feedbackEl.innerHTML = `
+                <label for="feedback-${sectionId}" class="block text-sm font-bold text-gray-700 mb-1">Feedback Adicional (${reportMap[sectionId].title}):</label>
+                <textarea id="feedback-${sectionId}" data-section-id="${sectionId}"
+                    class="neubrutalist w-full p-3 text-sm h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+                    placeholder="Añadir observaciones para esta sección..."></textarea>
+            `;
+            checklistContainer.appendChild(feedbackEl);
+        }
+
+
+        // --- 7. FUNCIONES DE EVENTOS ---
+        
+        /**
+         * Manejador de clic en un radio button
+         */
+        function handleRadioChange(event) {
+            const clickedRadio = event.target;
+            updateButtonVisuals(clickedRadio);
+            updateScores();
+        }
+
+        /**
+         * Actualiza los 5 botones de un grupo para el efecto "barra de progreso"
+         */
+        function updateButtonVisuals(clickedRadio) {
+            const groupName = clickedRadio.name;
+            const clickedValue = parseFloat(clickedRadio.value);
+            const allRadiosInGroup = document.querySelectorAll(`input[type="radio"][name="${groupName}"]`);
+
+            allRadiosInGroup.forEach(radio => {
+                const radioValue = parseFloat(radio.value);
+                const label = document.querySelector(`label[for="${radio.id}"]`);
+                const levelData = ratingLevels.find(l => l.value === radioValue);
+                const color = levelData.color;
+
+                // CORREGIDO: Lógica simplificada para incluir el botón "Nulo" (valor 0)
+                if (radioValue <= clickedValue) {
+                    // Estado ACTIVO (iluminado a la izquierda)
+                    label.className = `rating-label block w-full text-center p-2 cursor-pointer transition-all duration-200 text-sm font-medium active-${color}`;
+                } else {
+                    // Estado INACTIVO
+                    label.className = `rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50`;
+                }
+            });
+        }
+
+        /**
+         * Calcula las puntuaciones actuales basándose en los radios marcados
+         */
+        function updateScores() {
+            // Resetear puntuaciones actuales
+            currentScores = { total: 0 };
+            for (const id in reportMap) {
+                currentScores[id] = 0;
+            }
+
+            // Recorrer todos los radios marcados
+            const checkedRadios = document.querySelectorAll('#checklist-container input[type="radio"]:checked');
+            
+            checkedRadios.forEach(radio => {
+                const points = parseFloat(radio.dataset.points);
+                const value = parseFloat(radio.value);
+                const sectionId = radio.dataset.sectionId;
+                const criteria = radio.dataset.criteria.split(',');
+
+                const scoredPoints = points * value;
+
+                currentScores['total'] += scoredPoints;
+                currentScores[sectionId] += scoredPoints;
+                criteria.forEach(ce => {
+                    ce = ce.trim();
+                    if (currentScores[ce] !== undefined) {
+                        currentScores[ce] += scoredPoints;
+                    }
+                });
+            });
+
+            // Actualizar la UI
+            updateReportUI();
+        }
+
+        /**
+         * Actualiza la UI de los informes con las puntuaciones calculadas
+         */
+        function updateReportUI() {
+            for (const id in currentScores) {
+                const current = currentScores[id];
+                const max = maxScores[id];
+                const percentage = (max > 0) ? (current / max) * 100 : 0;
+
+                const currentEl = document.getElementById(`score-current-${id}`);
+                const progressEl = document.getElementById(`progress-${id}`);
+                
+                if (currentEl) {
+                    currentEl.innerText = current.toFixed(2);
+                }
+                if (progressEl) {
+                    progressEl.style.width = `${percentage}%`;
+                }
+                
+                // Actualizar estado de CEs
+                const statusEl = document.getElementById(`status-${id}`);
+                if (statusEl) {
+                    if (percentage === 0) {
+                        statusEl.innerText = 'No Iniciado';
+                        statusEl.className = 'text-right text-xs font-semibold text-gray-500 mt-0.5';
+                    } else if (percentage < 100) {
+                        statusEl.innerText = 'En Progreso';
+                        statusEl.className = 'text-right text-xs font-semibold text-blue-600 mt-0.5';
+                    } else {
+                        statusEl.innerText = 'Conseguido';
+                        statusEl.className = 'text-right text-xs font-semibold text-green-600 mt-0.5';
+                    }
+                }
+            }
+
+            // Actualizar el total grande
+            document.getElementById('score-current-total').innerText = currentScores['total'].toFixed(2);
+            document.getElementById('score-max-total').innerText = maxScores['total'].toFixed(2);
+        }
+
+        /**
+         * Resetea toda la lista de cotejo
+         */
+        function resetChecklist() {
+            const checkedRadios = document.querySelectorAll('#checklist-container input[type="radio"]:checked');
+            checkedRadios.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            const allLabels = document.querySelectorAll('#checklist-container label[for^="p"]');
+            allLabels.forEach(label => {
+                label.className = 'rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50';
+            });
+
+            // NUEVO: Limpiar textareas de feedback
+            const feedbackTextareas = document.querySelectorAll('#checklist-container textarea');
+            feedbackTextareas.forEach(textarea => {
+                textarea.value = '';
+            });
+            
+            // NUEVO: Limpiar nombre de equipo
+            document.getElementById('team-name-input').value = '';
+
+            updateScores(); // Recalcular (todo volverá a 0)
+        }
+
+        // --- 8. FUNCIONES DE ACCIONES (Exportar, Guardar, Cargar) ---
+
+        function showModal(title, content, buttonText = "Copiar al Portapapeles") {
+            modalTitle.innerText = title;
+            modalTextarea.value = content;
+            modalCopyButton.innerText = buttonText;
+            modal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        function copyModalText() {
+            modalTextarea.select();
+            document.execCommand('copy'); // Usar execCommand por compatibilidad
+            modalCopyButton.innerText = "¡Copiado!";
+            setTimeout(() => {
+                modalCopyButton.innerText = "Copiar al Portapapeles";
+            }, 1500);
+        }
+
+        function exportReport() {
+            // NUEVO: Añadir nombre de equipo
+            const teamName = document.getElementById('team-name-input').value;
+            let report = `INFORME DE CALIFICACIÓN - ${teamName || "Sin Nombre"}\n`;
+            report += "========================================\n\n";
+            report += `PUNTUACIÓN TOTAL: ${currentScores['total'].toFixed(2)} / ${maxScores['total'].toFixed(2)}\n\n`;
+            
+            report += "--- INFORME DETALLADO POR SECCIÓN ---\n";
+            for (const id in reportMap) {
+                if (reportMap[id].isSection) {
+                    report += `\n[${reportMap[id].title}: ${currentScores[id].toFixed(2)} / ${maxScores[id].toFixed(2)}]\n`;
+                    
+                    // NUEVO: Añadir desglose de puntos
+                    evaluationData.forEach(item => {
+                        if (item.section === id) {
+                            const radio = document.querySelector(`input[type="radio"][name="${item.id}"]:checked`);
+                            const itemScore = radio ? (parseFloat(radio.value) * item.points) : 0;
+                            const itemMax = item.points;
+                            report += `  - ${item.title}: ${itemScore.toFixed(2)} / ${itemMax.toFixed(2)}\n`;
+                        }
+                    });
+
+                    // NUEVO: Añadir feedback de la sección
+                    const feedbackText = document.getElementById(`feedback-${id}`).value;
+                    if (feedbackText && feedbackText.trim() !== '') {
+                        report += `\n  Observaciones (Sección): ${feedbackText.trim()}\n`;
+                    }
+                }
+            }
+            
+            // ELIMINADO: Se ha quitado el primer resumen de "INFORME POR CRITERIO DE EVALUACIÓN" (que era un duplicado del de secciones)
+            
+            // ELIMINADO: Se ha quitado el segundo resumen de "INFORME POR CRITERIO DE EVALUACIÓN" (el desglose de CE)
+            
+            showModal("Exportar Informe de Feedback", report, "Copiar al Portapapeles");
+        }
+
+        function saveProgress() {
+            // NUEVO: Objeto de guardado ampliado
+            const selections = {
+                radios: {},
+                feedbacks: {},
+                teamName: ''
+            };
+            const checkedRadios = document.querySelectorAll('#checklist-container input[type="radio"]:checked');
+            checkedRadios.forEach(radio => {
+                selections.radios[radio.name] = radio.value;
+            });
+
+            // NUEVO: Guardar feedback
+            const feedbackTextareas = document.querySelectorAll('#checklist-container textarea');
+            feedbackTextareas.forEach(textarea => {
+                selections.feedbacks[textarea.id] = textarea.value;
+            });
+            
+            // NUEVO: Guardar nombre de equipo
+            selections.teamName = document.getElementById('team-name-input').value;
+            
+            // Convertir a JSON y luego a Base64
+            const code = btoa(JSON.stringify(selections));
+            
+            showModal("Guardar Progreso", code, "Copiar Código");
+        }
+
+        function loadProgress() {
+            const code = loadInput.value;
+            if (!code) {
+                alert("Pega un código en el campo para cargar."); // Usar un modal personalizado en producción
+                return;
+            }
+            
+            try {
+                // Decodificar Base64 y luego parsear JSON
+                const selections = JSON.parse(atob(code));
+                
+                // Resetear todo primero
+                resetChecklist();
+                
+                // Aplicar las selecciones guardadas (radios)
+                if (selections.radios) {
+                    for (const id in selections.radios) {
+                        const value = selections.radios[id];
+                        const radio = document.querySelector(`input[type="radio"][name="${id}"][value="${value}"]`);
+                        
+                        if (radio) {
+                            radio.checked = true;
+                            updateButtonVisuals(radio); // Actualizar visuales de este grupo
+                        }
+                    }
+                }
+
+                // NUEVO: Cargar feedback
+                if (selections.feedbacks) {
+                    for (const id in selections.feedbacks) {
+                        const textarea = document.getElementById(id);
+                        if (textarea) {
+                            textarea.value = selections.feedbacks[id];
+                        }
+                    }
+                }
+                
+                // NUEVO: Cargar nombre de equipo
+                if (selections.teamName) {
+                    document.getElementById('team-name-input').value = selections.teamName;
+                }
+                
+                updateScores(); // Recalcular todo
+                loadInput.value = ""; // Limpiar campo
+                
+            } catch (e) {
+                console.error("Error al cargar el progreso:", e);
+                alert("El código no es válido."); // Usar un modal personalizado en producción
+            }
+        }
+
+
+        // --- 9. ASIGNACIÓN DE EVENTOS ---
+        resetButton.addEventListener('click', resetChecklist);
+        exportButton.addEventListener('click', exportReport);
+        saveButton.addEventListener('click', saveProgress);
+        loadButton.addEventListener('click', loadProgress);
+        
+        // Eventos del Modal
+        modalClose.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', hideModal);
+        modalCopyButton.addEventListener('click', copyModalText);
+
+        // --- 10. INICIO ---
+        initializeScores();
+        buildChecklistAndReports();
+        updateReportUI();
+    });
+    </script>
+
+</body>
+</html>
+
+
+

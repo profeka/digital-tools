@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor de Diagramas de Flujo</title>
+    <style>
+        /* --- ESTÉTICA NEUBRUTALISTA --- */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5d34f; /* Amarillo vibrante */
+            color: #000;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            border-bottom: 3px solid #000;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: 800;
+            color: #000;
+        }
+
+        main {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            width: 220px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-right: 3px solid #000;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        #toolbar h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .tool-button {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 3px solid #000;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            text-align: left;
+            transition: all 0.1s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .tool-button:hover {
+            box-shadow: 2px 2px 0px #000;
+            transform: translate(2px, 2px);
+        }
+
+        .tool-button:active, .tool-button.active {
+            box-shadow: 0px 0px 0px #000;
+            transform: translate(4px, 4px);
+            background-color: #cddc39;
+        }
+        
+        .tool-button:disabled {
+            opacity: 0.6;
+            background-color: #eee;
+            box-shadow: none;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: #e9ecef;
+            overflow: auto;
+        }
+        
+        #canvas-wrapper {
+            position: relative;
+            width: 3000px;
+            height: 3000px;
+            padding: 50px;
+            box-sizing: border-box;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            border: 3px solid #000;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            cursor: default;
+        }
+
+        canvas.dragging, canvas.dragging-midpoint { cursor: grabbing; }
+        canvas.connection-mode { cursor: crosshair; }
+
+        #text-editor {
+            position: absolute;
+            display: none;
+            padding: 5px;
+            border: 2px solid #000;
+            background-color: white;
+            z-index: 100;
+            font-family: inherit;
+            font-size: 14px;
+            text-align: center;
+            box-shadow: 3px 3px 0px #000;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header><h1>Constructor de Diagramas de Flujo</h1></header>
+    <main>
+        <div id="toolbar">
+            <h3>Bloques</h3>
+            <button class="tool-button" id="add-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"/></svg>
+                Inicio / Fin
+            </button>
+            <button class="tool-button" id="add-rect">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h18v18H3z"/></svg>
+                Proceso
+            </button>
+            <button class="tool-button" id="add-rhombus">
+                 <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L2 12l10 10l10-10L12 2z"/></svg>
+                Decisión
+            </button>
+            <button class="tool-button" id="add-arrow">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16.01 11H4v2h12.01v3L20 12l-3.99-4z"/></svg>
+                Añadir Flecha
+            </button>
+            
+            <h3>Acciones</h3>
+             <button class="tool-button" id="bend-arrow-button">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21 8c-2.32 0-4.32 1.2-5.48 3H4v2h11.52c1.16 1.8 3.16 3 5.48 3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4s4 1.79 4 4s-1.79 4-4 4z"/></svg>
+                Añadir/Quitar Curva
+            </button>
+            <button class="tool-button" id="delete-button">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                Eliminar
+            </button>
+            <button class="tool-button" id="undo-button">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+                Deshacer
+            </button>
+            <button class="tool-button" id="export-png">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7l7-7zM5 18v2h14v-2H5z"/></svg>
+                Exportar PNG
+            </button>
+        </div>
+        <div id="canvas-container">
+            <!-- CAMBIO: El editor de texto ahora está DENTRO del wrapper -->
+            <div id="canvas-wrapper">
+                <canvas id="flowchart-canvas"></canvas>
+                <input type="text" id="text-editor">
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('flowchart-canvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('canvas-container');
+            const wrapper = document.getElementById('canvas-wrapper');
+            const textEditor = document.getElementById('text-editor');
+            const undoButton = document.getElementById('undo-button');
+            const addArrowButton = document.getElementById('add-arrow');
+            const deleteButton = document.getElementById('delete-button');
+            const bendArrowButton = document.getElementById('bend-arrow-button');
+            const exportButton = document.getElementById('export-png');
+
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+
+            let shapes = [];
+            let connections = [];
+            let nextShapeId = 0;
+            let selectedShape = null;
+            let selectedConnection = null;
+            let lastSelectedShape = null;
+
+            let isDragging = false;
+            let isDraggingMidpoint = false;
+            let dragOffsetX, dragOffsetY;
+
+            let isConnectionMode = false;
+            let connectionStartShape = null;
+            
+            let history = [];
+            let historyIndex = -1;
+            
+            function getCanvasMousePos(evt) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                return {
+                    x: (evt.clientX - rect.left) * scaleX,
+                    y: (evt.clientY - rect.top) * scaleY
+                };
+            }
+
+            function updateActionButtons() {
+                undoButton.disabled = historyIndex <= 0;
+                const anythingSelected = selectedShape || selectedConnection;
+                deleteButton.disabled = !anythingSelected;
+                deleteButton.innerText = selectedShape ? 'Eliminar Bloque' : 'Eliminar Flecha';
+                bendArrowButton.disabled = !selectedConnection;
+            }
+
+            function saveState() {
+                history = history.slice(0, historyIndex + 1);
+                history.push({ shapes: JSON.parse(JSON.stringify(shapes)), connections: JSON.parse(JSON.stringify(connections)), nextShapeId, lastSelectedShapeId: lastSelectedShape ? lastSelectedShape.id : null });
+                historyIndex++;
+                updateActionButtons();
+            }
+
+            function undo() {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    const state = JSON.parse(JSON.stringify(history[historyIndex]));
+                    shapes = state.shapes;
+                    connections = state.connections;
+                    nextShapeId = state.nextShapeId;
+                    lastSelectedShape = shapes.find(s => s.id === state.lastSelectedShapeId) || null;
+                    selectedShape = null; selectedConnection = null; isDragging = false; isDraggingMidpoint = false;
+                    updateActionButtons();
+                    draw();
+                }
+            }
+            saveState();
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                connections.forEach(conn => {
+                    const from = shapes.find(s => s.id === conn.from);
+                    const to = shapes.find(s => s.id === conn.to);
+                    if (from && to) drawConnection(from, to, conn);
+                });
+
+                shapes.forEach(shape => {
+                    ctx.save();
+                    ctx.strokeStyle = '#000';
+                    if (shape.id === (selectedShape ? selectedShape.id : null)) { ctx.strokeStyle = '#1a73e8'; }
+                    if (shape.id === (connectionStartShape ? connectionStartShape.id : null)) { ctx.strokeStyle = '#4caf50';}
+                    ctx.lineWidth = (shape.id === (selectedShape ? selectedShape.id : null) || shape.id === (connectionStartShape ? connectionStartShape.id : null)) ? 4 : 3;
+                    
+                    ctx.fillStyle = '#000';
+                    const shadowOffset = 5;
+                    switch (shape.type) {
+                        case 'circle': ctx.beginPath(); ctx.ellipse(shape.x + shadowOffset, shape.y + shadowOffset, shape.width / 2, shape.height / 2, 0, 0, Math.PI * 2); ctx.fill(); break;
+                        case 'rect': ctx.fillRect(shape.x - shape.width / 2 + shadowOffset, shape.y - shape.height / 2 + shadowOffset, shape.width, shape.height); break;
+                        case 'rhombus': ctx.beginPath(); ctx.moveTo(shape.x + shadowOffset, shape.y - shape.height / 2 + shadowOffset); ctx.lineTo(shape.x + shape.width / 2 + shadowOffset, shape.y + shadowOffset); ctx.lineTo(shape.x + shadowOffset, shape.y + shape.height / 2 + shadowOffset); ctx.lineTo(shape.x - shape.width / 2 + shadowOffset, shape.y + shadowOffset); ctx.closePath(); ctx.fill(); break;
+                    }
+
+                    ctx.fillStyle = '#ffffff';
+                    switch (shape.type) {
+                        case 'circle': drawCircle(shape); break;
+                        case 'rect': drawRect(shape); break;
+                        case 'rhombus': drawRhombus(shape); break;
+                    }
+
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const lines = getWrappedText(shape.text, shape.width - 20);
+                    lines.forEach((line, i) => ctx.fillText(line, shape.x, shape.y - (lines.length - 1) * 7.5 + i * 15));
+                    
+                    ctx.restore();
+                });
+            }
+
+            function drawCircle(shape) { ctx.beginPath(); ctx.ellipse(shape.x, shape.y, shape.width / 2, shape.height / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+            function drawRect(shape) { ctx.beginPath(); ctx.rect(shape.x - shape.width / 2, shape.y - shape.height / 2, shape.width, shape.height); ctx.fill(); ctx.stroke(); }
+            function drawRhombus(shape) { ctx.beginPath(); ctx.moveTo(shape.x, shape.y - shape.height / 2); ctx.lineTo(shape.x + shape.width / 2, shape.y); ctx.lineTo(shape.x, shape.y + shape.height / 2); ctx.lineTo(shape.x - shape.width / 2, shape.y); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+            function getIntersectionPoint(fromPoint, toShape) { const toPoint={x:toShape.x, y:toShape.y}; if(fromPoint.x===toPoint.x&&fromPoint.y===toPoint.y)return toPoint; let ix=toPoint.x,iy=toPoint.y; switch(toShape.type){case 'rect':{const halfW=toShape.width/2; const halfH=toShape.height/2; const dx=toPoint.x-fromPoint.x; const dy=toPoint.y-fromPoint.y; const slope=dy/dx; const rectSlope=halfH/halfW; if(Math.abs(slope)<rectSlope){if(dx>0){ix=toPoint.x-halfW;iy=toPoint.y-slope*halfW}else{ix=toPoint.x+halfW;iy=toPoint.y+slope*halfW}}else{if(dy>0){ix=toPoint.x-halfH/slope;iy=toPoint.y-halfH}else{ix=toPoint.x+halfH/slope;iy=toPoint.y+halfH}}}break; case 'rhombus':{const a=toShape.width/2; const b=toShape.height/2; const vecX=fromPoint.x-toPoint.x; const vecY=fromPoint.y-toPoint.y; const t=1/(Math.abs(vecX)/a+Math.abs(vecY)/b); ix=toPoint.x+t*vecX; iy=toPoint.y+t*vecY}break; case 'circle':{const a=toShape.width/2; const b=toShape.height/2; const vecX=fromPoint.x-toPoint.x; const vecY=fromPoint.y-toPoint.y; const angle=Math.atan2(vecY,vecX); const r=(a*b)/Math.sqrt(Math.pow(b*Math.cos(angle),2)+Math.pow(a*Math.sin(angle),2)); ix=toPoint.x+r*Math.cos(angle); iy=toPoint.y+r*Math.sin(angle)}} return{x:ix,y:iy}}
+            
+            function drawConnection(from, to, conn) {
+                ctx.save();
+                const isSelected = conn === selectedConnection;
+                ctx.strokeStyle = isSelected ? '#1a73e8' : '#000';
+                ctx.lineWidth = isSelected ? 4 : 3;
+
+                let startPoint, endPoint;
+
+                if (conn.midPoint) {
+                    startPoint = getIntersectionPoint(conn.midPoint, from);
+                    endPoint = getIntersectionPoint(conn.midPoint, to);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(startPoint.x, startPoint.y);
+                    ctx.lineTo(conn.midPoint.x, conn.midPoint.y);
+                    ctx.lineTo(endPoint.x, endPoint.y);
+                    ctx.stroke();
+
+                    const handleRadius = isSelected ? 8 : 4;
+
+                    if (isSelected) {
+                        ctx.beginPath();
+                        ctx.arc(conn.midPoint.x, conn.midPoint.y, 15, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(26, 115, 232, 0.2)';
+                        ctx.fill();
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(conn.midPoint.x, conn.midPoint.y, handleRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    ctx.stroke();
+
+                } else {
+                    startPoint = getIntersectionPoint(to, from);
+                    endPoint = getIntersectionPoint(from, to);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(startPoint.x, startPoint.y);
+                    ctx.lineTo(endPoint.x, endPoint.y);
+                    ctx.stroke();
+                }
+
+                const finalAngleSource = conn.midPoint ? conn.midPoint : startPoint;
+                const angle = Math.atan2(endPoint.y - finalAngleSource.y, endPoint.x - finalAngleSource.x);
+                ctx.fillStyle = isSelected ? '#1a73e8' : '#000';
+                ctx.beginPath();
+                ctx.moveTo(endPoint.x, endPoint.y);
+                ctx.lineTo(endPoint.x - 14 * Math.cos(angle - Math.PI / 6), endPoint.y - 14 * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(endPoint.x - 14 * Math.cos(angle + Math.PI / 6), endPoint.y - 14 * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fill();
+
+                if (conn.label) {
+                    ctx.font = 'bold 13px Arial'; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+                    let midX, midY;
+                    if (conn.midPoint) {
+                        midX = conn.midPoint.x + (to.x - conn.midPoint.x) * 0.5;
+                        midY = conn.midPoint.y + (to.y - conn.midPoint.y) * 0.5;
+                    } else {
+                        midX = from.x + (to.x - from.x) * (2/3);
+                        midY = from.y + (to.y - from.y) * (2/3);
+                    }
+                    ctx.strokeText(conn.label, midX, midY - 10);
+                    ctx.fillText(conn.label, midX, midY - 10);
+                }
+                ctx.restore();
+            }
+            
+            function getWrappedText(text, maxWidth) { const words=text.split(' '); if(!words[0])return[]; let lines=[]; let currentLine=words[0]; for(let i=1;i<words.length;i++){const word=words[i]; const width=ctx.measureText(currentLine+" "+word).width; if(width<maxWidth){currentLine+=" "+word}else{lines.push(currentLine); currentLine=word}} lines.push(currentLine); return lines }
+            function createShape(type, text, x, y) { return {id:nextShapeId++,type,text,x,y, width: type==='rect'?140:type==='rhombus'?160:120, height: type==='rect'?80:type==='rhombus'?100:70}; }
+            function addSimpleShape(type, text) { saveState(); const startNode=lastSelectedShape; let x=400; let y=100; if(startNode){x=startNode.x;y=startNode.y+150} const shape=createShape(type,text,x,y); shapes.push(shape); if(startNode && startNode.type !== 'rhombus') connections.push({from:startNode.id,to:shape.id,label:'', midPoint: null}); selectShape(shape); draw() }
+            function addDecisionStructure() { saveState(); const startNode = lastSelectedShape; const startX = startNode ? startNode.x : 400; const startY = startNode ? startNode.y : 50; const rhombus = createShape('rhombus', '¿Condición?', startX, startY + 120); const yesNode = createShape('rect', 'Acción por Sí', startX - 160, startY + 270); const noNode = createShape('rect', 'Acción por No', startX + 160, startY + 270); shapes.push(rhombus, yesNode, noNode); if (startNode) connections.push({ from: startNode.id, to: rhombus.id, label: '', midPoint: null }); connections.push({ from: rhombus.id, to: yesNode.id, label: 'Sí', midPoint: null }); connections.push({ from: rhombus.id, to: noNode.id, label: 'No', midPoint: null }); selectShape(null); draw(); }
+            function getShapeAt(x, y) { for(let i = shapes.length - 1; i >= 0; i--) { const shape = shapes[i]; if (x > shape.x - shape.width / 2 && x < shape.x + shape.width / 2 && y > shape.y - shape.height / 2 && y < shape.y + shape.height / 2) { return shape; } } return null; }
+            function selectShape(shape) { selectedShape = shape; selectedConnection = null; if (shape) lastSelectedShape = shape; updateActionButtons(); draw(); }
+            function selectConnection(conn) { selectedConnection = conn; selectedShape = null; updateActionButtons(); draw(); }
+            function deleteSelection() { if (!selectedShape && !selectedConnection) return; saveState(); if (selectedShape) { const shapeIdToDelete = selectedShape.id; shapes = shapes.filter(s => s.id !== shapeIdToDelete); connections = connections.filter(c => c.from !== shapeIdToDelete && c.to !== shapeIdToDelete); } else { connections = connections.filter(c => c !== selectedConnection); } selectedShape = null; selectedConnection = null; updateActionButtons(); draw(); }
+            function toggleBendArrow() { if (!selectedConnection) return; saveState(); if (selectedConnection.midPoint) { selectedConnection.midPoint = null; } else { const from = shapes.find(s => s.id === selectedConnection.from); const to = shapes.find(s => s.id === selectedConnection.to); selectedConnection.midPoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }; } draw(); }
+            function pointToLineSegmentDistance(p, v, w) { const l2 = (v.x - w.x)**2 + (v.y - w.y)**2; if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y); let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2; t = Math.max(0, Math.min(1, t)); const projection = { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) }; return Math.hypot(p.x - projection.x, p.y - projection.y); }
+            function getConnectionAt(x, y) { const clickPoint = {x, y}; for (const conn of connections) { const from = shapes.find(s => s.id === conn.from); const to = shapes.find(s => s.id === conn.to); if (from && to) { if (conn.midPoint) { if (pointToLineSegmentDistance(clickPoint, getIntersectionPoint(conn.midPoint, from), conn.midPoint) < 10) return conn; if (pointToLineSegmentDistance(clickPoint, conn.midPoint, getIntersectionPoint(conn.midPoint, to)) < 10) return conn; } else { if (pointToLineSegmentDistance(clickPoint, getIntersectionPoint(to, from), getIntersectionPoint(from, to)) < 10) return conn; } } } return null; }
+            function getMidpointHandleAt(x, y) { for (const conn of connections) { if (conn.midPoint && Math.hypot(x - conn.midPoint.x, y - conn.midPoint.y) < 15) { return conn; } } return null; }
+
+            document.getElementById('add-circle').addEventListener('click', () => addSimpleShape('circle', 'Inicio'));
+            document.getElementById('add-rect').addEventListener('click', () => addSimpleShape('rect', 'Hacer algo'));
+            document.getElementById('add-rhombus').addEventListener('click', addDecisionStructure);
+            undoButton.addEventListener('click', undo);
+            deleteButton.addEventListener('click', deleteSelection);
+            bendArrowButton.addEventListener('click', toggleBendArrow);
+            addArrowButton.addEventListener('click', () => { isConnectionMode = !isConnectionMode; if(isConnectionMode) { addArrowButton.classList.add('active'); canvas.classList.add('connection-mode'); } else { addArrowButton.classList.remove('active'); canvas.classList.remove('connection-mode'); connectionStartShape = null; draw(); } });
+            
+            exportButton.addEventListener('click', () => {
+                if (shapes.length === 0) {
+                    return; 
+                }
+
+                const PADDING = 50;
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+                shapes.forEach(shape => {
+                    const shadowOffset = 5;
+                    minX = Math.min(minX, shape.x - shape.width / 2);
+                    minY = Math.min(minY, shape.y - shape.height / 2);
+                    maxX = Math.max(maxX, shape.x + shape.width / 2 + shadowOffset);
+                    maxY = Math.max(maxY, shape.y + shape.height / 2 + shadowOffset);
+                });
+
+                connections.forEach(conn => {
+                    if (conn.midPoint) {
+                        minX = Math.min(minX, conn.midPoint.x);
+                        minY = Math.min(minY, conn.midPoint.y);
+                        maxX = Math.max(maxX, conn.midPoint.x);
+                        maxY = Math.max(maxY, conn.midPoint.y);
+                    }
+                });
+
+                const contentWidth = (maxX - minX) + PADDING * 2;
+                const contentHeight = (maxY - minY) + PADDING * 2;
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = contentWidth;
+                tempCanvas.height = contentHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+
+                tempCtx.fillStyle = '#ffffff';
+                tempCtx.fillRect(0, 0, contentWidth, contentHeight);
+
+                tempCtx.drawImage(
+                    canvas,
+                    minX - PADDING,
+                    minY - PADDING,
+                    contentWidth,
+                    contentHeight,
+                    0,
+                    0,
+                    contentWidth,
+                    contentHeight
+                );
+
+                const link = document.createElement('a');
+                link.download = 'diagrama-de-flujo.png';
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            });
+
+            canvas.addEventListener('mousedown', (e) => {
+                const pos = getCanvasMousePos(e);
+                
+                if (isConnectionMode) {
+                    const shape = getShapeAt(pos.x, pos.y);
+                    if (shape) {
+                        if (!connectionStartShape) { connectionStartShape = shape; draw(); }
+                        else if (connectionStartShape.id !== shape.id) {
+                            saveState();
+                            connections.push({ from: connectionStartShape.id, to: shape.id, label: '', midPoint: null });
+                            isConnectionMode = false; connectionStartShape = null;
+                            addArrowButton.classList.remove('active'); canvas.classList.remove('connection-mode');
+                            draw();
+                        }
+                    } else { isConnectionMode = false; connectionStartShape = null; addArrowButton.classList.remove('active'); canvas.classList.remove('connection-mode'); draw(); }
+                    return;
+                }
+
+                const midpointConn = getMidpointHandleAt(pos.x, pos.y);
+                if (midpointConn) {
+                    isDraggingMidpoint = true;
+                    selectConnection(midpointConn);
+                    canvas.classList.add('dragging-midpoint');
+                    return;
+                }
+
+                const shape = getShapeAt(pos.x, pos.y);
+                if (shape) {
+                    selectShape(shape);
+                    isDragging = true;
+                    canvas.classList.add('dragging');
+                    dragOffsetX = pos.x - shape.x;
+                    dragOffsetY = pos.y - shape.y;
+                } else {
+                    const conn = getConnectionAt(pos.x, pos.y);
+                    selectConnection(conn);
+                }
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                const pos = getCanvasMousePos(e);
+                if (isDragging && selectedShape) { 
+                    selectedShape.x = pos.x - dragOffsetX; 
+                    selectedShape.y = pos.y - dragOffsetY; 
+                    draw(); 
+                }
+                if (isDraggingMidpoint && selectedConnection) { 
+                    selectedConnection.midPoint.x = pos.x; 
+                    selectedConnection.midPoint.y = pos.y; 
+                    draw(); 
+                }
+            });
+            canvas.addEventListener('mouseup', () => { if (isDragging || isDraggingMidpoint) { saveState(); } isDragging = false; isDraggingMidpoint = false; canvas.classList.remove('dragging', 'dragging-midpoint'); });
+            canvas.addEventListener('mouseout', () => { if (isDragging || isDraggingMidpoint) { saveState(); } isDragging = false; isDraggingMidpoint = false; canvas.classList.remove('dragging', 'dragging-midpoint'); });
+            
+            canvas.addEventListener('dblclick', (e) => { 
+                const pos = getCanvasMousePos(e);
+                const shape = getShapeAt(pos.x, pos.y); 
+                if(shape) showTextEditor(shape);
+            });
+            
+            // CAMBIO: La función ahora usa una lógica más simple y robusta
+            function showTextEditor(shape) {
+                const PADDING = 50; // El padding del wrapper
+                textEditor.style.display='block';
+                // La posición es relativa al wrapper, que se desplaza con el scroll.
+                // No necesitamos restar container.scrollLeft/Top.
+                textEditor.style.left=`${PADDING + shape.x - shape.width / 2}px`;
+                textEditor.style.top=`${PADDING + shape.y - shape.height / 2}px`;
+                textEditor.style.width=`${shape.width - 10}px`;
+                textEditor.style.height=`${shape.height - 10}px`;
+                textEditor.value=shape.text;
+                textEditor.focus();
+                
+                const onFinishEditing=()=>{if(shape.text!==textEditor.value){shape.text=textEditor.value;saveState()} textEditor.style.display='none'; textEditor.removeEventListener('blur',onFinishEditing); textEditor.removeEventListener('keydown',onKeyDown); draw()};
+                const onKeyDown=(event)=>{if(event.key==='Enter')onFinishEditing()};
+                textEditor.addEventListener('blur',onFinishEditing); textEditor.addEventListener('keydown',onKeyDown);
+            }
+        });
+    </script>
+</body>
+</html>
+
