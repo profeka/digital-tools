@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio de Herramientas | Estilo Neubrutalista</title>
+    <!-- Incluyendo Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Usaremos la fuente Inter, que es muy versátil -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para complementar Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Sombra dura personalizada que es clave en el neubrutalismo */
+        .hard-shadow {
+            box-shadow: 8px 8px 0px #000;
+        }
+        .hard-shadow-small {
+            box-shadow: 4px 4px 0px #000;
+        }
+        /* Efecto de transición al pulsar botones y tarjetas */
+        .btn-effect:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px #000 !important;
+        }
+        .card-effect:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px #000;
+        }
+        /* Animaciones para la aparición del modal */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.95); opacity: 0.5; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-scale-up {
+            animation: scaleUp 0.2s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-[#FDF3E3] text-black">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Cabecera de la página -->
+        <header class="text-center my-12">
+            <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter">Herramientas de Clase</h1>
+            <p class="text-lg mt-4 max-w-2xl mx-auto">Una colección de proyectos y recursos para potenciar el aprendizaje.</p>
+        </header>
+
+        <!-- Filtros por etiquetas/cursos -->
+        <div id="filters" class="flex flex-col items-center gap-8 mb-16">
+            <!-- Filtros por Etapa -->
+            <div class="filter-group">
+                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">Etapa Educativa</h2>
+                <div id="stage-filters" class="flex justify-center items-center gap-3 flex-wrap">
+                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
+                    <button data-filter="1eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">1ºESO</button>
+                    <button data-filter="2eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">2ºESO</button>
+                    <button data-filter="3eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">3ºESO</button>
+                    <button data-filter="4eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">4ºESO</button>
+                    <button data-filter="1bach" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">1ºBach</button>
+                    <button data-filter="2bach" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">2ºBach</button>
+                </div>
+            </div>
+            <!-- Filtros por Asignatura -->
+            <div class="filter-group">
+                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">Asignatura</h2>
+                <div id="subject-filters" class="flex justify-center items-center gap-3 flex-wrap">
+                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
+                    <button data-filter="ciencias-computacion" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">C. Computación</button>
+                    <button data-filter="tecnologia" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Tecnología</button>
+                    <button data-filter="digitalizacion" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Digitalización</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid con las tarjetas de proyectos -->
+        <main id="projects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+            <!-- Escape Panda -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="1eso" data-subject="ciencias-computacion" data-title="Escape Panda" data-img-src="https://placehold.co/600x400/34D399/000?text=Escape+Panda" data-long-desc="Un divertido juego de escape diseñado para que los alumnos de 1º de la ESO practiquen y desarrollen los fundamentos del pensamiento computacional mientras ayudan a un panda a resolver puzzles.">
+                <img src="https://placehold.co/600x400/34D399/000?text=Escape+Panda" alt="Imagen del proyecto Escape Panda" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Escape Panda</h2>
+                    <p class="mt-2 text-gray-700">Juego para trabajar el pensamiento computacional.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#A855F7] text-white text-xs font-bold px-3 py-1 border-2 border-black">#1ºESO</span>
+                    <span class="bg-[#10B981] text-white text-xs font-bold px-3 py-1 border-2 border-black">#C.Computación</span>
+                </div>
+            </div>
+
+            <!-- Arquitecto Dimensional -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="2eso" data-subject="tecnologia" data-title="Arquitecto Dimensional" data-img-src="https://placehold.co/600x400/A78BFA/000?text=Arquitecto+Dimensional" data-long-desc="Una herramienta lúdica para 2º de la ESO que desafía a los estudiantes a resolver problemas geométricos en un entorno 3D, mejorando su visión espacial y su capacidad de abstracción.">
+                <img src="https://placehold.co/600x400/A78BFA/000?text=Arquitecto+Dimensional" alt="Imagen del proyecto Arquitecto Dimensional" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Arquitecto Dimensional</h2>
+                    <p class="mt-2 text-gray-700">Juego para desarrollar la visión espacial.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#F43F5E] text-white text-xs font-bold px-3 py-1 border-2 border-black">#2ºESO</span>
+                    <span class="bg-[#3B82F6] text-white text-xs font-bold px-3 py-1 border-2 border-black">#Tecnología</span>
+                </div>
+            </div>
+
+            <!-- Marimoligram -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="4eso" data-subject="digitalizacion" data-title="Marimoligram" data-img-src="https://placehold.co/600x400/F472B6/000?text=Marimoligram" data-long-desc="Una simulación interactiva de una red social. Permite a los alumnos de 4º de la ESO enfrentarse a situaciones realistas para aprender a identificar amenazas, gestionar su privacidad y proteger su identidad digital.">
+                <img src="https://placehold.co/600x400/F472B6/000?text=Marimoligram" alt="Imagen del proyecto Marimoligram" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Marimoligram</h2>
+                    <p class="mt-2 text-gray-700">Simulación de red social para aprender sobre privacidad y amenazas.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#A855F7] text-white text-xs font-bold px-3 py-1 border-2 border-black">#4ºESO</span>
+                    <span class="bg-[#F43F5E] text-white text-xs font-bold px-3 py-1 border-2 border-black">#Digitalización</span>
+                </div>
+            </div>
+
+            <!-- Diagramas de Flujo -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="1eso" data-subject="ciencias-computacion" data-title="Creador de Diagramas de Flujo" data-img-src="https://placehold.co/600x400/FBBF24/000?text=Diagramas" data-long-desc="Una herramienta sencilla e intuitiva para que los alumnos de 1º de la ESO puedan crear sus primeros diagramas de flujo. Ideal para visualizar algoritmos y procesos de forma clara y ordenada.">
+                <img src="https://placehold.co/600x400/FBBF24/000?text=Diagramas" alt="Imagen del proyecto Creador de Diagramas de Flujo" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Creador de Diagramas de Flujo</h2>
+                    <p class="mt-2 text-gray-700">Herramienta sencilla para crear diagramas de flujo.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#A855F7] text-white text-xs font-bold px-3 py-1 border-2 border-black">#1ºESO</span>
+                    <span class="bg-[#10B981] text-white text-xs font-bold px-3 py-1 border-2 border-black">#C.Computación</span>
+                </div>
+            </div>
+
+            <!-- Auditoría Digital -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="4eso" data-subject="digitalizacion" data-title="Auditoría Digital de Ciberseguridad" data-img-src="https://placehold.co/600x400/60A5FA/000?text=Auditoría+Digital" data-long-desc="Un conjunto de misiones y retos para 4º de la ESO donde los alumnos realizan una auditoría de su propia huella digital. Aprenden a configurar la privacidad de sus cuentas y a mejorar su seguridad en línea de forma práctica.">
+                <img src="https://placehold.co/600x400/60A5FA/000?text=Auditoría+Digital" alt="Imagen del proyecto Auditoría Digital de Ciberseguridad" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Auditoría Digital</h2>
+                    <p class="mt-2 text-gray-700">Misiones para mejorar la privacidad y seguridad online.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#A855F7] text-white text-xs font-bold px-3 py-1 border-2 border-black">#4ºESO</span>
+                    <span class="bg-[#F43F5E] text-white text-xs font-bold px-3 py-1 border-2 border-black">#Digitalización</span>
+                </div>
+            </div>
+
+            <!-- Temario Algoritmos -->
+            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" data-stage="1eso" data-subject="ciencias-computacion" data-title="Tema 1: Algoritmos" data-img-src="https://placehold.co/600x400/F43F5E/000?text=Algoritmos" data-long-desc="Material de estudio para el primer tema de Ciencias de la Computación en 1º de la ESO. Introduce el concepto de algoritmo, sus características y cómo se representan, sentando las bases del pensamiento computacional.">
+                <img src="https://placehold.co/600x400/F43F5E/000?text=Algoritmos" alt="Imagen del Temario Algoritmos" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
+                <div class="flex-grow pointer-events-none">
+                    <h2 class="text-2xl font-black">Tema 1: Algoritmos</h2>
+                    <p class="mt-2 text-gray-700">Temario del primer tema de Ciencias de la Computación.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
+                    <span class="bg-[#A855F7] text-white text-xs font-bold px-3 py-1 border-2 border-black">#1ºESO</span>
+                    <span class="bg-[#10B981] text-white text-xs font-bold px-3 py-1 border-2 border-black">#C.Computación</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal para mostrar detalles del proyecto -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex justify-center items-center p-4 z-50">
+        <div id="modal-content" class="bg-[#FDF3E3] border-4 border-black p-6 md:p-8 max-w-2xl w-full relative hard-shadow">
+            <!-- Botón de cerrar -->
+            <button id="close-modal-btn" class="absolute -top-4 -right-4 bg-red-500 text-white font-black text-2xl w-12 h-12 border-4 border-black hard-shadow-small btn-effect flex items-center justify-center transition-transform duration-100">&times;</button>
+            
+            <img id="modal-img" src="" alt="Imagen del proyecto" class="w-full h-64 object-cover border-2 border-black mb-6">
+            <h2 id="modal-title" class="text-4xl font-black mb-4"></h2>
+            <p id="modal-description" class="text-gray-700 text-lg"></p>
+        </div>
+    </div>
+
+
+    <script>
+        // --- LÓGICA PARA FILTRAR PROYECTOS ---
+        const stageFilterButtons = document.querySelectorAll('#stage-filters .filter-btn');
+        const subjectFilterButtons = document.querySelectorAll('#subject-filters .filter-btn');
+        const projectCards = document.querySelectorAll('#projects-grid .project-card');
+
+        let activeStageFilter = 'all';
+        let activeSubjectFilter = 'all';
+
+        function applyFilters() {
+            projectCards.forEach(card => {
+                const stages = card.dataset.stage;
+                const subjects = card.dataset.subject;
+
+                const stageMatch = activeStageFilter === 'all' || stages.includes(activeStageFilter);
+                const subjectMatch = activeSubjectFilter === 'all' || subjects.includes(activeSubjectFilter);
+
+                if (stageMatch && subjectMatch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        stageFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                stageFilterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-yellow-400');
+                    btn.classList.add('bg-white');
+                });
+                button.classList.add('active', 'bg-yellow-400');
+                button.classList.remove('bg-white');
+
+                activeStageFilter = button.dataset.filter;
+                applyFilters();
+            });
+        });
+        
+        subjectFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                subjectFilterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-yellow-400');
+                    btn.classList.add('bg-white');
+                });
+                button.classList.add('active', 'bg-yellow-400');
+                button.classList.remove('bg-white');
+
+                activeSubjectFilter = button.dataset.filter;
+                applyFilters();
+            });
+        });
+
+        // --- LÓGICA PARA EL MODAL ---
+        const modal = document.getElementById('project-modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+
+        const openModal = (card) => {
+            modalImg.src = card.dataset.imgSrc;
+            modalTitle.textContent = card.dataset.title;
+            modalDescription.textContent = card.dataset.longDesc;
+            modal.classList.remove('hidden');
+            modal.classList.add('modal-fade-in');
+            modalContent.classList.add('modal-scale-up');
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('modal-fade-in');
+            modalContent.classList.remove('modal-scale-up');
+        };
+
+        projectCards.forEach(card => {
+            card.addEventListener('click', () => {
+                openModal(card);
+            });
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+    </script>
+
+</body>
+</html>
+
+
