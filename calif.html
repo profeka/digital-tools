@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta de Calificación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo Neubrutalista */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0;
+        }
+        .neubrutalist {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 6px 6px 0 #000000;
+            border-radius: 8px; /* Ligeramente redondeado */
+        }
+        .neubrutalist-button {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0 #000000;
+        }
+        .neubrutalist-button:hover {
+            box-shadow: 2px 2px 0 #000000;
+            transform: translate(2px, 2px);
+        }
+        .neubrutalist-button:active {
+            box-shadow: 0 0 0 #000000;
+            transform: translate(4px, 4px);
+        }
+        
+        /* Botones de calificación (Estilo Neubrutalista) */
+        .rating-label {
+            border: 2px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            border-radius: 6px;
+        }
+        .rating-label.hover\:bg-gray-50:hover {
+            background-color: #f9fafb; /* Color hover suave */
+        }
+        
+        /* Colores de botones activos (Neubrutalismo) */
+        .rating-label.active-gray { background-color: #d1d5db; border-color: #000; color: #000; }
+        .rating-label.active-red { background-color: #fca5a5; border-color: #000; color: #000; }
+        .rating-label.active-orange { background-color: #fdba74; border-color: #000; color: #000; }
+        .rating-label.active-blue { background-color: #93c5fd; border-color: #000; color: #000; }
+        .rating-label.active-green { background-color: #86efac; border-color: #000; color: #000; }
+        
+        .rating-label.active-gray .rating-points,
+        .rating-label.active-red .rating-points,
+        .rating-label.active-orange .rating-points,
+        .rating-label.active-blue .rating-points,
+        .rating-label.active-green .rating-points {
+            color: #4b5563; /* Texto de puntos más oscuro */
+        }
+
+        /* Progreso */
+        .progress-bar-container {
+            border: 2px solid #000;
+            border-radius: 6px;
+            background-color: #e5e7eb;
+            padding: 2px;
+        }
+        .progress-bar {
+            height: 20px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 2px 0 #000 inset;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+        /* Estilos para la cabecera fija */
+        .header-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        /* Estilos para los extras */
+        .extra-checkbox {
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border: 2px solid #000;
+            border-radius: 50%;
+            background-color: #fff;
+            box-shadow: 3px 3px 0 #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .extra-checkbox:hover {
+            box-shadow: 1px 1px 0 #000;
+            transform: translate(2px, 2px);
+        }
+        .extra-checkbox:checked {
+            background-color: #fde047; /* yellow-300 */
+            box-shadow: 1px 1px 0 #000;
+            transform: translate(2px, 2px);
+        }
+        .extra-checkbox:checked::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<!-- CORRECCIÓN: Eliminado pt-24 del body -->
+<body class="p-4 md:p-8">
+
+    <!-- ===== INICIO DE LA CORRECCIÓN ===== -->
+    <!-- NUEVO: Cabecera Fija (Reestructurada) -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b-2 border-black p-3 z-50 header-shadow">
+        <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
+            
+            <!-- Lado Izquierdo: Acciones Iniciales/Contexto -->
+            <!-- CORRECCIÓN: Ajuste de ancho para centrar mejor -->
+            <div class="w-auto sm:w-64"> <!-- Ancho fijo para ayudar a centrar -->
+                <!-- Acciones (Estado Inicial) -->
+                <div id="header-initial-actions" class="flex gap-2">
+                    <a href="rub_repo.html" id="repo-link-btn" class="neubrutalist-button bg-blue-300 hover:bg-blue-400 !py-2 !px-3 text-sm sm:text-base">
+                        Repositorio
+                    </a>
+                    <a href="dashboard.html" id="dashboard-link-btn" class="neubrutalist-button bg-green-300 hover:bg-green-400 !py-2 !px-3 text-sm sm:text-base">
+                        Dashboard
+                    </a>
+                </div>
+                
+                <!-- Contexto (Estado de Calificación) -->
+                <div id="header-context-input" class="hidden">
+                     <input type="text" id="team-name-input" placeholder="Nombre del Equipo/Alumno..." class="neubrutalist !py-2 !px-3 !text-sm !shadow-md w-full" title="Nombre del Equipo/Alumno">
+                </div>
+            </div>
+
+            <!-- Centro: Título -->
+            <div class="flex-1 min-w-0 text-center px-4">
+                <!-- Título (Estado Inicial) -->
+                <h1 id="header-main-title" class="text-xl font-bold truncate">Herramienta de Calificación</h1>
+                
+                <!-- Contexto (Estado de Calificación) -->
+                <div id="header-context-title" class="hidden">
+                    <span id="header-rubric-title" class="text-lg sm:text-xl font-bold text-blue-700 truncate" title="Rúbrica Actual">
+                        Corrigiendo:
+                    </span>
+                </div>
+            </div>
+
+            <!-- Lado Derecho: Acciones de Calificación -->
+            <!-- CORRECCIÓN: Ajuste de ancho para centrar mejor -->
+            <div class="w-auto sm:w-64 flex justify-end"> <!-- Ancho fijo para ayudar a centrar -->
+                <!-- Acciones (Estado de Calificación) -->
+                <div id="header-grading-actions" class="hidden flex-wrap gap-2 justify-end">
+                    <button id="change-rubric-btn" class="neubrutalist-button bg-gray-300 hover:bg-gray-400 !py-2 !px-3 text-sm">Cambiar</button>
+                    <button id="export-button" class="neubrutalist-button bg-blue-300 hover:bg-blue-400 !py-2 !px-3 text-sm">Exportar</button>
+                    <button id="save-button" class="neubrutalist-button bg-green-300 hover:bg-green-400 !py-2 !px-3 text-sm">Guardar</button>
+                    <button id="reset-button" class="neubrutalist-button bg-red-300 hover:bg-red-400 !py-2 !px-3 text-sm">Reiniciar</button>
+                </div>
+            </div>
+
+        </div>
+    </header>
+    <!-- ===== FIN DE LA CORRECCIÓN ===== -->
+
+
+    <!-- Pantalla de Selección/Carga de Rúbrica -->
+    <!-- CORRECCIÓN: Añadido mt-24 (margin-top: 6rem) para dejar espacio al menú -->
+    <div id="rubric-loader" class="max-w-4xl mx-auto space-y-8 mt-24">
+        <!-- Carga Manual -->
+        <section class="neubrutalist p-5">
+            <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Cargar Rúbrica</h2>
+            <div class="space-y-3">
+                <p class="text-sm text-gray-600">Pega el código JSON de la rúbrica (desde el Repositorio).</p>
+                <div id="rubric-text-error" class="hidden p-3 bg-red-100 border-2 border-red-500 rounded-lg text-red-700 font-semibold shadow-md">
+                    <p id="rubric-text-error-msg">Error: El texto pegado no es un JSON válido.</p>
+                </div>
+                <textarea id="rubric-text-input" class="neubrutalist w-full p-3 text-sm h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" placeholder="{ ... }"></textarea>
+                <button id="load-rubric-text" class="neubrutalist-button w-full bg-blue-300 hover:bg-blue-400 mt-2 text-lg">Cargar Rúbrica desde Texto</button>
+            </div>
+        </section>
+
+        <!-- Cargar Progreso -->
+        <section class="neubrutalist p-5">
+            <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Cargar Progreso</h2>
+            <div class="space-y-3">
+                <p class="text-sm text-gray-600">Pega un código de "Guardar Progreso" (el código largo Base64) para continuar.</p>
+                <div class="flex gap-2">
+                    <input type="text" id="load-code-input" placeholder="Pegar código para cargar..." class="neubrutalist flex-grow p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black rounded-lg">
+                    <button id="load-button" class="neubrutalist-button bg-yellow-300 hover:bg-yellow-400 !p-3 !shadow-none !border-2">Cargar</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Pantalla de Calificación (Oculta al inicio) -->
+    <!-- CORRECCIÓN: Añadido mt-24 (margin-top: 6rem) para dejar espacio al menú -->
+    <div id="grading-interface" class="max-w-7xl mx-auto mt-24" style="display: none;">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Columna Principal: Lista de Cotejo -->
+            <main id="checklist-container" class="lg:col-span-2 space-y-6">
+                <!-- Los ítems se generarán aquí por JS -->
+            </main>
+            
+            <!-- Columna Lateral: Informes y Acciones -->
+            <aside class="space-y-6">
+                <!-- Mover el sticky más abajo para que no choque con el header -->
+                <!-- Ajustado top-32 (8rem), que es más alto que mt-24 (6rem) + altura del header -->
+                <div class="sticky top-32 space-y-6">
+                    
+                    <!-- Puntuación Total -->
+                    <section class="neubrutalist p-5">
+                        <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Puntuación Total</h2>
+                        <div class="text-center">
+                            <span id="score-current-total" class="text-6xl font-bold">0.00</span>
+                            <span class="text-2xl text-gray-600">/</span>
+                            <span id="score-max-total" class="text-2xl font-bold text-gray-600">10.00</span>
+                        </div>
+                    </section>
+
+                    <!-- Informe por Sección -->
+                    <section class="neubrutalist p-5">
+                        <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Informe por Sección</h2>
+                        <div id="report-sections" class="space-y-4">
+                            <!-- El informe por sección se genera aquí -->
+                        </div>
+                    </section>
+
+                    <!-- Informe por Criterio -->
+                    <section class="neubrutalist p-5">
+                        <h2 class="text-2xl font-bold border-b-2 border-black pb-2 mb-4">Informe por Criterio (CE)</h2>
+                        <div id="report-criteria" class="space-y-4">
+                            <!-- El informe por criterio se genera aquí -->
+                        </div>
+                    </section>
+
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modal para Exportar y Guardar -->
+    <div id="modal" class="modal" style="display: none;">
+        <div id="modal-overlay" class="fixed inset-0 bg-black opacity-60" style="z-index: -1;"></div>
+        <div class="modal-content neubrutalist p-6 w-full max-w-lg relative bg-white">
+            <h3 id="modal-title" class="text-2xl font-bold border-b-2 border-black pb-2 mb-4"></h3>
+            <button id="modal-close" class="absolute top-4 right-4 text-3xl font-bold hover:text-red-500">&times;</button>
+            
+            <!-- Advertencia de nombre vacío -->
+            <div id="modal-name-warning" class="hidden p-3 mb-4 bg-red-100 border-2 border-red-500 rounded-lg text-red-700 font-semibold shadow-md">
+                Advertencia: No se ha añadido un nombre de equipo/alumno.
+            </div>
+
+            <textarea id="modal-textarea" readonly class="w-full h-64 p-3 border-2 border-black rounded-lg bg-gray-100 font-mono text-sm"></textarea>
+            
+            <button id="modal-copy-button" class="neubrutalist-button w-full mt-4 bg-blue-300 hover:bg-blue-400">Copiar al Portapapeles</button>
+        </div>
+    </div>
+
+    <!-- Modal simple para Alertas -->
+    <div id="simple-modal" class="modal" style="display: none;">
+        <div id="simple-modal-overlay-alert" class="fixed inset-0 bg-black opacity-60" style="z-index: -1;"></div>
+        <div class="neubrutalist p-6 w-full max-w-sm relative bg-white">
+            <p id="simple-modal-message" class="text-gray-700 text-center text-lg">Mensaje de alerta.</p>
+            <button id="simple-modal-close" class="neubrutalist-button w-full mt-6 bg-blue-300 hover:bg-blue-400">OK</button>
+        </div>
+    </div>
+
+    <!-- Biblioteca de Rúbricas (para retrocompatibilidad de Carga de Progreso) -->
+    <script>
+        const RUBRIC_LIBRARY = {
+            "rubr_1_0": {
+              "title": "1.0 Decálogo",
+              "reportMap": {
+                "s1": {
+                  "title": "1. Evaluación del Decálogo",
+                  "color": "blue",
+                  "isSection": true
+                },
+                "CE 4.1": {
+                  "title": "CE 4.1: Uso ético y etiqueta digital",
+                  "color": "purple",
+                  "isSection": false
+                }
+              },
+              "evaluationData": [
+                {
+                  "id": "d1.1",
+                  "section": "s1",
+                  "title": "1.1 Contenido y Relevancia 🎯",
+                  "text": "Valora la pertinencia de las normas (3️⃣: 10 normas claras y pertinentes. 2️⃣: 7-9 normas o poco relevantes. 1️⃣: <7 normas o la mayoría inútiles).",
+                  "points": 4.0,
+                  "criteria": [
+                    "CE 4.1"
+                  ]
+                },
+                {
+                  "id": "d1.2",
+                  "section": "s1",
+                  "title": "1.2 Claridad y Redacción ✍️",
+                  "text": "Valora la calidad de la redacción (3️⃣: Impecable, directa y concisa. 2️⃣: Confusa o con varios errores. 1️⃣: Numerosos errores, incomprensible).",
+                  "points": 3.0,
+                  "criteria": [
+                    "CE 4.1"
+                  ]
+                },
+                {
+                  "id": "d1.3",
+                  "section": "s1",
+                  "title": "1.3 Organización y Estructura 🧠",
+                  "text": "Valora la estructura y presentación (3️⃣: Perfecta, numerada y lógica. 2️⃣: Adecuada, orden lógico. 1️⃣: Caótica, sin orden).",
+                  "points": 3.0,
+                  "criteria": [
+                    "CE 4.1"
+                  ]
+                }
+              ]
+            },
+            "rubr_1_1": {
+              "title": "1.1 Evaluación Padlet: Amenazas en la Red",
+              "reportMap": {
+                "s1": {
+                  "title": "1. Evaluación de la Publicación",
+                  "color": "blue",
+                  "isSection": true
+                },
+                "CE3.3": {
+                  "title": "CE 3.3: Identificar y reaccionar ante amenazas en la red",
+                  "color": "purple",
+                  "isSection": false
+                },
+                "CE2.2": {
+                  "title": "CE 2.2: Buscar y seleccionar información con sentido crítico",
+                  "color": "green",
+                  "isSection": false
+                }
+              },
+              "evaluationData": [
+                {
+                  "id": "a1.1",
+                  "section": "s1",
+                  "title": "1.1 Identificación y Precisión 🎯",
+                  "text": "Valora la identificación y definición de la amenaza. (3️⃣: Define con total precisión qué es y cómo actúa. 2️⃣: Definición correcta pero básica o algo confusa. 1️⃣: Definición incorrecta o no identifica la amenaza).",
+                  "points": 3,
+                  "criteria": [
+                    "CE3.3"
+                  ]
+                },
+                {
+                  "id": "a1.2",
+                  "section": "s1",
+                  "title": "1.2 Medidas de Protección 🛡️",
+                  "text": "Valora la descripción de las medidas de protección. (3️⃣: Describe varias medidas específicas (preventivas/correctivas) y explica por qué son eficaces. 2️⃣: Describe medidas correctas pero genéricas. 1️⃣: No incluye medidas o no son adecuadas).",
+                  "points": 3,
+                  "criteria": [
+                    "CE3.3"
+                  ]
+                },
+                {
+                  "id": "a1.3",
+                  "section": "s1",
+                  "title": "1.3 Calidad de las Fuentes 📚",
+                  "text": "Valora la búsqueda y cita de fuentes. (3️⃣: Cita 2 o más fuentes fiables (medios, empresas de seguridad) y las enlaza correctamente. 2️⃣: Cita 1 fuente fiable o de fiabilidad media. 1️⃣: No cita fuentes o usa fuentes de nula fiabilidad).",
+                  "points": 2,
+                  "criteria": [
+                    "CE2.2"
+                  ]
+                },
+                {
+                  "id": "a1.4",
+                  "section": "s1",
+                  "title": "1.4 Claridad y Formato (Padlet) ✍️",
+                  "text": "Valora la calidad y estructura de la publicación. (3️⃣: Publicación muy clara, bien redactada y visualmente atractiva. 2️⃣: Publicación comprensible pero escueta o desorganizada. 1️⃣: Publicación incomprensible, desordenada o con graves errores).",
+                  "points": 2,
+                  "criteria": [
+                    "CE2.2"
+                  ]
+                }
+              ]
+            },
+            "rubr_1_2": {
+              "title": "1.2 Infografía Digital (4º ESO)",
+              "reportMap": {
+                "s1": {
+                  "title": "1. Evaluación de la Infografía",
+                  "color": "blue",
+                  "isSection": true
+                },
+                "CE2.1": {
+                  "title": "CE 2.1: Investigación y Selección",
+                  "color": "green",
+                  "isSection": false
+                },
+                "CE4.3": {
+                  "title": "CE 4.3: Síntesis y Claridad",
+                  "color": "cyan",
+                  "isSection": false
+                },
+                "CE2.2": {
+                  "title": "CE 2.2: Diseño y Creación",
+                  "color": "orange",
+                  "isSection": false
+                },
+                "CE4.1": {
+                  "title": "CE 4.1: Uso Ético y Fuentes",
+                  "color": "purple",
+                  "isSection": false
+                }
+              },
+              "evaluationData": [
+                {
+                  "id": "i1.1",
+                  "section": "s1",
+                  "title": "1.1 Investigación y Selección",
+                  "text": "Valora la relevancia y fiabilidad de las fuentes (4pts = Sobresaliente)",
+                  "points": 4,
+                  "criteria": [
+                    "CE2.1"
+                  ]
+                },
+                {
+                  "id": "i1.2",
+                  "section": "s1",
+                  "title": "1.2 Síntesis y Claridad",
+                  "text": "Valora la capacidad de síntesis y la estructura lógica (4pts = Sobresaliente)",
+                  "points": 4,
+                  "criteria": [
+                    "CE4.3"
+                  ]
+                },
+                {
+                  "id": "i1.3",
+                  "section": "s1",
+                  "title": "1.3 Diseño y Creación",
+                  "text": "Valora el diseño, equilibrio y uso de elementos (4pts = Sobresaliente)",
+                  "points": 4,
+                  "criteria": [
+                    "CE2.2"
+                  ]
+                },
+                {
+                  "id": "i1.4",
+                  "section": "s1",
+                  "title": "1.4 Uso Ético y Fuentes",
+                  "text": "Valora la correcta citación de fuentes y respeto a P.I. (4pts = Sobresaliente)",
+                  "points": 4,
+                  "criteria": [
+                    "CE4.1"
+                  ]
+                }
+              ]
+            },
+            "rubr_1_3": {
+              "title": "1.3 Test de la Academia de Ciberseguridad",
+              "reportMap": {
+                "s1": {"title": "Caso 1: Email Amazon", "color": "blue", "isSection": true},
+                "s2": {"title": "Caso 2: WhatsApp Fiesta", "color": "green", "isSection": true},
+                "s3": {"title": "Caso 3: Sorteo Instagram", "color": "yellow", "isSection": true},
+                "s4": {"title": "Caso 4: Dilema Copyright", "color": "purple", "isSection": true},
+                "s5": {"title": "Caso 5: Netiqueta/Ciberacoso", "color": "teal", "isSection": true},
+                "s6": {"title": "Caso 6: Email del Banco", "color": "orange", "isSection": true},
+                "CE 3.3": {"title": "CE 3.3: Identificar amenazas", "color": "red", "isSection": false},
+                "CE 4.1": {"title": "CE 4.1: Uso ético, P.I.", "color": "lime", "isSection": false},
+                "CE 4.3": {"title": "CE 4.3: Analizar críticamente", "color": "cyan", "isSection": false}
+              },
+              "evaluationData": [
+                {"id": "c1.1", "section": "s1", "title": "1.1. Identifica Phishing (Amazon)", "text": "Identifica el correo como Phishing o amenaza.", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c1.2", "section": "s1", "title": "1.2. Banderas Rojas (Amazon)", "text": "Menciona al menos una bandera roja (Ej: URL http://..., dominio .co, saludo genérico, urgencia).", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c2.1", "section": "s2", "title": "2.1. Identifica Scam (WhatsApp)", "text": "Identifica el mensaje como Scam/Fraude/Phishing.", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c2.2", "section": "s2", "title": "2.2. Banderas Rojas (WhatsApp)", "text": "Menciona al menos una bandera roja (Ej: URL .tk, pide datos personales, desconocido).", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c3.1", "section": "s3", "title": "3.1. Identifica Scam (Instagram)", "text": "Identifica la cuenta como Scam/Fraude/Robo de datos.", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c3.2", "section": "s3", "title": "3.2. Banderas Rojas (Instagram)", "text": "Menciona al menos una bandera roja (Ej: cuenta nueva, pocos seguidores, link externo).", "points": 0.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c4.1", "section": "s4", "title": "4.1. Uso de Contenido (No)", "text": "Responde \"No\" a si se puede usar sin más.", "points": 0.5, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c4.2", "section": "s4", "title": "4.2. Citar Fuente (Mínimo)", "text": "Identifica que lo MÍNIMO es citar al autor o la fuente.", "points": 0.5, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c4.3", "section": "s4", "title": "4.3. Licencia (Correcto)", "text": "Explica que lo CORRECTO es buscar la licencia (Ej: Creative Commons) o pedir permiso.", "points": 1.0, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c5.1", "section": "s5", "title": "5.1. Identifica Netiqueta", "text": "Responde \"No\" a si es aceptable (o explica que viola la netiqueta).", "points": 0.5, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c5.2", "section": "s5", "title": "5.2. Propone Acciones", "text": "Propone dos acciones coherentes (Ej: 1. Hablar en privado, 2. Apoyar al compañero, 3. Reportar).", "points": 1.0, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c5.3", "section": "s5", "title": "5.3. Justifica Elección", "text": "Justifica brevemente su elección de la \"más correcta\".", "points": 0.5, "criteria": ["CE 4.1", "CE 4.3"]},
+                {"id": "c6.1", "section": "s6", "title": "6.1. TRES Banderas Rojas (Banco)", "text": "Nombra TRES banderas rojas evidentes (Ej: Dominio .biz, saludo genérico, pide DNI + clave, urgencia).", "points": 1.5, "criteria": ["CE 3.3", "CE 4.3"]},
+                {"id": "c6.2", "section": "s6", "title": "6.2. Acción Correcta (Banco)", "text": "Indica que la única acción correcta es Borrarlo / Marcarlo como Spam (y no hacer clic).", "points": 1.5, "criteria": ["CE 3.3", "CE 4.3"]}
+              ]
+            },
+            "rubr_1_4": {
+              "title": "1.4 Informe de Ciberdetective (Marimoligram)",
+              "reportMap": {
+                "s1": {"title": "1. Análisis del Perfil", "color": "blue", "isSection": true},
+                "s2": {"title": "2. Análisis de Interacciones", "color": "green", "isSection": true},
+                "s3": {"title": "3. Auditoría de Configuración", "color": "yellow", "isSection": true},
+                "s4": {"title": "4. Conclusiones y Plan de Acción", "color": "purple", "isSection": true},
+                "CE 1.3": {"title": "CE 1.3: Resolver problemas técnicos", "color": "pink", "isSection": false},
+                "CE 3.1": {"title": "CE 3.1: Proteger datos personales", "color": "red", "isSection": false},
+                "CE 3.2": {"title": "CE 3.2: Gestión de seguridad", "color": "indigo", "isSection": false},
+                "CE 3.3": {"title": "CE 3.3: Identificar amenazas", "color": "orange", "isSection": false},
+                "CE 4.1": {"title": "CE 4.1: Uso ético, P.I.", "color": "lime", "isSection": false},
+                "CE 4.3": {"title": "CE 4.3: Analizar críticamente info", "color": "cyan", "isSection": false},
+                "CEsp 4": {"title": "CEsp 4: Ciudadanía digital crítica", "color": "teal", "isSection": false}
+              },
+              "evaluationData": [
+                {"id": "p1.1", "section": "s1", "title": "1.1. Fuga de Info. Personal", "text": "Valora si el alumno identifica la gravedad de exponer datos sensibles (DNI/Pasaporte) y lo conecta con el riesgo de suplantación.", "points": 1.0, "criteria": ["CE 3.1"]},
+                {"id": "p1.2", "section": "s1", "title": "1.2. Huella Digital y Seguridad Física", "text": "Valora si el alumno conecta la información aparentemente inofensiva (gustos, planes de viaje) con riesgos reales (ingeniería social, robo).", "points": 1.0, "criteria": ["CE 3.1"]},
+                {"id": "p1.3", "section": "s1", "title": "1.3. Gestión de Contraseñas", "text": "Valora si el alumno explica por qué el método es inseguro (predecible, basado en info pública), no solo si adivina la clave.", "points": 0.5, "criteria": ["CE 3.2"]},
+                {"id": "p2.1", "section": "s2", "title": "2.1. Mensajes Directos (Amenazas)", "text": "Valora si el alumno nombra y diferencia correctamente las amenazas (Phishing, Suplantación, Extorsión) y entiende su mecanismo.", "points": 1.5, "criteria": ["CE 3.3"]},
+                {"id": "p2.2", "section": "s2", "title": "2.2. Noticias Falsas (Fake News)", "text": "Valora si el alumno aplica un método de verificación (ej. contrastar, @VerdadDigital) y no solo \"sabe\" que es falsa.", "points": 0.5, "criteria": ["CE 4.3"]},
+                {"id": "p2.3", "section": "s2", "title": "2.3. Propiedad Intelectual", "text": "Valora si el alumno identifica el conflicto (uso comercial sin permiso) y entiende el concepto de \"derechos de autor\".", "points": 0.5, "criteria": ["CE 4.1"]},
+                {"id": "p2.4", "section": "s2", "title": "2.4. Ciberacoso y Etiqueta", "text": "Valora si el alumno identifica los roles (acosador/víctima) y define el problema (ciberacoso) usando la \"etiqueta digital\".", "points": 0.5, "criteria": ["CE 4.1"]},
+                {"id": "p3.1", "section": "s3", "title": "3.1. Actividad de Inicio de Sesión", "text": "Valora si el alumno identifica el problema técnico (sesión extraña) y propone la solución completa (Cerrar sesión Y cambiar clave).", "points": 1.0, "criteria": ["CE 1.3"]},
+                {"id": "p3.2", "section": "s3", "title": "3.2. Contraseñas Guardadas", "text": "Valora si el alumno identifica el riesgo crítico de la REUTILIZACIÓN de contraseñas (acceso al banco, email, etc.).", "points": 0.5, "criteria": ["CE 3.2"]},
+                {"id": "p3.3", "section": "s3", "title": "3.3. T&C y Patrones Oscuros", "text": "Valora si el alumno detecta la intencionalidad del diseño (Patrón Oscuro) o las cláusulas que vulneran su privacidad.", "points": 0.5, "criteria": ["CE 4.3"]},
+                {"id": "p4.1", "section": "s4", "title": "4.1. Resumen de Riesgos", "text": "Valora la capacidad de síntesis del alumno para enumerar los riesgos y priorizarlos por gravedad (alto/medio/bajo).", "points": 0.5, "criteria": ["CE 3.1", "CE 3.3", "CE 4.3"]},
+                {"id": "p4.2", "section": "s4", "title": "4.2. Medidas Correctoras", "text": "Valora si las 5+ medidas propuestas son concretas, eficaces y realistas (ej. 2FA, borrar fotos, bloquear, claves únicas).", "points": 1.0, "criteria": ["CE 3.1", "CE 3.2"]},
+                {"id": "p4.3", "section": "s4", "title": "4.3. Reflexión Final", "text": "Valora si la reflexión es personal, coherente y conecta la actividad con la importancia de la ciudadanía digital crítica.", "points": 1.0, "criteria": ["CEsp 4"]}
+              ]
+            }
+        };
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 1. DATOS DE EVALUACIÓN ---
+        let currentRubric = null; // Almacenará la rúbrica activa
+
+        // --- 2. MAPA DE SECCIONES Y CRITERIOS ---
+        // Se define dinámicamente desde currentRubric.reportMap
+
+        // --- 3. NIVELES DE CALIFICACIÓN (GLOBAL) ---
+        const ratingLevels = [
+            { label: 'Nulo', value: 0, color: 'gray' },
+            { label: 'Bajo', value: 0.25, color: 'red' },
+            { label: 'Medio', value: 0.5, color: 'orange' },
+            { label: 'Alto', value: 0.75, color: 'blue' },
+            { label: 'Total', value: 1, color: 'green' }
+        ];
+
+        // --- 4. ALMACENAMIENTO DE PUNTUACIONES ---
+        let maxScores = {};
+        let currentScores = {};
+        let currentExtras = {}; // NUEVO: Para los extras
+
+        // --- 5. ELEMENTOS DEL DOM ---
+        const checklistContainer = document.getElementById('checklist-container');
+        const reportSectionsContainer = document.getElementById('report-sections');
+        const reportCriteriaContainer = document.getElementById('report-criteria');
+        
+        // Elementos del Header
+        const headerMainTitle = document.getElementById('header-main-title');
+        const headerContextInput = document.getElementById('header-context-input');
+        const headerContextTitle = document.getElementById('header-context-title');
+        const headerRubricTitle = document.getElementById('header-rubric-title');
+        const teamNameInput = document.getElementById('team-name-input');
+        const headerInitialActions = document.getElementById('header-initial-actions');
+        const headerGradingActions = document.getElementById('header-grading-actions');
+        
+        // Elementos de Carga
+        const rubricLoader = document.getElementById('rubric-loader');
+        const gradingInterface = document.getElementById('grading-interface');
+        const loadRubricTextBtn = document.getElementById('load-rubric-text');
+        const rubricTextInput = document.getElementById('rubric-text-input');
+        const rubricTextError = document.getElementById('rubric-text-error');
+        const rubricTextErrorMsg = document.getElementById('rubric-text-error-msg');
+        
+        // Modal elements
+        const modal = document.getElementById('modal');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTextarea = document.getElementById('modal-textarea');
+        const modalCopyButton = document.getElementById('modal-copy-button');
+        const modalNameWarning = document.getElementById('modal-name-warning');
+
+        // Modal simple
+        const simpleModal = document.getElementById('simple-modal');
+        const simpleModalMessage = document.getElementById('simple-modal-message');
+
+        // Action buttons
+        const exportButton = document.getElementById('export-button');
+        const saveButton = document.getElementById('save-button');
+        const loadButton = document.getElementById('load-button');
+        const loadInput = document.getElementById('load-code-input');
+        const resetButton = document.getElementById('reset-button');
+        const changeRubricButton = document.getElementById('change-rubric-btn');
+
+
+        // --- 6. FUNCIONES DE MODALES ---
+        
+        function showSimpleMessage(message) {
+            simpleModalMessage.innerText = message;
+            simpleModal.style.display = 'flex';
+        }
+        function hideSimpleMessage() {
+            simpleModal.style.display = 'none';
+        }
+        document.getElementById('simple-modal-close').addEventListener('click', hideSimpleMessage);
+        document.getElementById('simple-modal-overlay-alert').addEventListener('click', hideSimpleMessage);
+
+        function showModal(title, content, buttonText = "Copiar al Portapapeles") {
+            // Advertencia de nombre
+            if (teamNameInput.value.trim() === "") {
+                modalNameWarning.style.display = 'block';
+            } else {
+                modalNameWarning.style.display = 'none';
+            }
+            
+            modalTitle.innerText = title;
+            modalTextarea.value = content;
+            modalCopyButton.innerText = buttonText;
+            modal.style.display = 'flex';
+        }
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+        modalClose.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', hideModal);
+        modalCopyButton.addEventListener('click', () => {
+             modalTextarea.select();
+            document.execCommand('copy'); // Usar execCommand por compatibilidad
+            modalCopyButton.innerText = "¡Copiado!";
+            setTimeout(() => {
+                modalCopyButton.innerText = "Copiar al Portapapeles";
+            }, 1500);
+        });
+
+
+        // --- 7. FUNCIONES DE INICIALIZACIÓN Y ESTADO ---
+        
+        /**
+         * Inicia el estado de calificación con una rúbrica
+         */
+        function startGrading(rubricData) {
+            currentRubric = rubricData;
+            
+            // Ocultar loader, mostrar interfaz
+            rubricLoader.style.display = 'none';
+            gradingInterface.style.display = 'block';
+
+            // NUEVO: Ocultar/Mostrar botones y contexto del Header
+            headerInitialActions.style.display = 'none';
+            headerGradingActions.style.display = 'flex';
+            headerMainTitle.style.display = 'none';
+            headerContextTitle.style.display = 'block';
+            headerContextInput.style.display = 'block';
+            headerRubricTitle.innerText = `Corrigiendo: ${currentRubric.title}`;
+            headerRubricTitle.title = currentRubric.title;
+
+            // Inicializar y construir la UI de calificación
+            initializeScores();
+            buildChecklistAndReports();
+            updateReportUI();
+        }
+        
+        /**
+         * Vuelve a la pantalla de carga de rúbrica
+         */
+        function resetToLoader() {
+            currentRubric = null;
+            
+            // Ocultar interfaz, mostrar loader
+            // CORRECCIÓN: debe ser 'block'
+            rubricLoader.style.display = 'block'; 
+            gradingInterface.style.display = 'none';
+            
+            // Ocultar/Mostrar botones y contexto del Header
+            headerInitialActions.style.display = 'flex';
+            headerGradingActions.style.display = 'none';
+            headerMainTitle.style.display = 'block';
+            headerContextTitle.style.display = 'none';
+            headerContextInput.style.display = 'none';
+            
+            // Limpiar campos
+            teamNameInput.value = '';
+            rubricTextInput.value = '';
+            loadInput.value = '';
+            rubricTextError.style.display = 'none';
+        }
+        changeRubricButton.addEventListener('click', resetToLoader);
+
+
+        /**
+         * Inicializa los contenedores de puntuaciones (max y current)
+         */
+        function initializeScores() {
+            maxScores = { total: 0 };
+            currentScores = { total: 0 };
+            currentExtras = {}; // Resetear extras
+
+            // Añadir entradas para el reportMap
+            for (const id in currentRubric.reportMap) {
+                maxScores[id] = 0;
+                currentScores[id] = 0;
+            }
+
+            // Calcular puntuaciones máximas
+            currentRubric.evaluationData.forEach(item => {
+                maxScores['total'] += item.points;
+                maxScores[item.section] += item.points;
+                item.criteria.forEach(ce => {
+                    ce = ce.trim();
+                    if (currentRubric.reportMap[ce]) {
+                        maxScores[ce] += item.points;
+                    }
+                });
+                
+                // Inicializar extras para este ítem
+                currentExtras[item.id] = 0;
+            });
+        }
+
+        /**
+         * Construye la lista de cotejo y los informes en la UI
+         */
+        function buildChecklistAndReports() {
+            checklistContainer.innerHTML = '';
+            reportSectionsContainer.innerHTML = '';
+            reportCriteriaContainer.innerHTML = '';
+            let currentSection = '';
+
+            currentRubric.evaluationData.forEach(item => {
+                // Añadir título de sección si es nueva
+                const sectionTitle = currentRubric.reportMap[item.section].title;
+                if (item.section !== currentSection) {
+                    appendFeedbackArea(currentSection);
+                    const titleEl = document.createElement('h2');
+                    titleEl.className = 'text-3xl font-bold mt-8 first:mt-0';
+                    titleEl.innerText = sectionTitle;
+                    checklistContainer.appendChild(titleEl);
+                    currentSection = item.section;
+                }
+
+                // Crear el contenedor del ítem
+                const itemEl = document.createElement('div');
+                itemEl.className = 'neubrutalist p-4';
+                itemEl.id = `item-${item.id}`;
+
+                // Header del ítem (Título y Puntos)
+                const headerEl = document.createElement('div');
+                headerEl.className = 'flex justify-between items-start';
+                headerEl.innerHTML = `
+                    <h3 class="text-xl font-bold">${item.title}</h3>
+                    <div class="text-right">
+                        <span class="text-lg font-semibold text-gray-700">${item.points.toFixed(2)} pts</span>
+                        <span id="extra-points-${item.id}" class="text-sm font-bold text-yellow-500 block" style="display: none;">+0.00</span>
+                    </div>
+                `;
+                itemEl.appendChild(headerEl);
+
+                // Texto descriptivo
+                const textEl = document.createElement('p');
+                textEl.className = 'text-gray-600 mt-1';
+                textEl.innerText = item.text;
+                itemEl.appendChild(textEl);
+                
+                // Criterios (CE)
+                const criteriaEl = document.createElement('div');
+                criteriaEl.className = 'flex flex-wrap gap-2 mt-3';
+                item.criteria.forEach(ce => {
+                    const ceData = currentRubric.reportMap[ce.trim()];
+                    const tagEl = document.createElement('span');
+                    const color = ceData ? ceData.color : 'gray';
+                    tagEl.className = `inline-block text-xs font-semibold px-2 py-0.5 rounded-full border-2 border-black bg-${color}-200 text-black`;
+                    tagEl.innerText = ce.trim();
+                    criteriaEl.appendChild(tagEl);
+                });
+                itemEl.appendChild(criteriaEl);
+
+                // Botones de calificación
+                const radioContainer = document.createElement('div');
+                radioContainer.className = 'grid grid-cols-5 gap-2 mt-4';
+                
+                ratingLevels.forEach(level => {
+                    const radioId = `${item.id}-${level.value}`; 
+                    const labelEl = document.createElement('label');
+                    labelEl.htmlFor = radioId;
+                    labelEl.className = `rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50`;
+                    
+                    const radioEl = document.createElement('input');
+                    radioEl.type = 'radio';
+                    radioEl.className = 'hidden rating-radio';
+                    radioEl.name = item.id;
+                    radioEl.value = level.value;
+                    radioEl.id = radioId;
+                    radioEl.dataset.points = item.points;
+                    radioEl.dataset.sectionId = item.section;
+                    radioEl.dataset.criteria = item.criteria.join(',');
+                    radioEl.onchange = handleRadioChange;
+                    
+                    const textEl = document.createElement('span');
+                    textEl.className = 'block font-semibold';
+                    textEl.innerText = level.label;
+
+                    const pointsTextEl = document.createElement('span');
+                    pointsTextEl.className = 'rating-points block text-xs text-gray-500';
+                    pointsTextEl.innerText = `(${(level.value * item.points).toFixed(2)} pts)`;
+
+                    labelEl.appendChild(textEl);
+                    labelEl.appendChild(pointsTextEl);
+                    radioContainer.appendChild(radioEl);
+                    radioContainer.appendChild(labelEl);
+                });
+
+                itemEl.appendChild(radioContainer);
+
+                // --- NUEVO: Checkboxes de Extras ---
+                const extraContainer = document.createElement('div');
+                extraContainer.className = 'flex items-center gap-4 mt-4 pt-3 border-t border-gray-200';
+                extraContainer.innerHTML = `<span class="text-sm font-semibold text-gray-700">Puntos Extra (+10% c/u):</span>`;
+                
+                const extraCheck1 = document.createElement('input');
+                extraCheck1.type = 'checkbox';
+                extraCheck1.id = `extra-${item.id}-1`;
+                extraCheck1.dataset.itemId = item.id;
+                extraCheck1.className = 'extra-checkbox';
+                extraCheck1.onchange = handleExtraChange;
+                
+                const extraCheck2 = document.createElement('input');
+                extraCheck2.type = 'checkbox';
+                extraCheck2.id = `extra-${item.id}-2`;
+                extraCheck2.dataset.itemId = item.id;
+                extraCheck2.className = 'extra-checkbox';
+                extraCheck2.onchange = handleExtraChange;
+
+                extraContainer.appendChild(extraCheck1);
+                extraContainer.appendChild(extraCheck2);
+                itemEl.appendChild(extraContainer);
+                // --- FIN: Checkboxes de Extras ---
+
+                checklistContainer.appendChild(itemEl);
+            });
+
+            // Añadir la ÚLTIMA textarea
+            appendFeedbackArea(currentSection);
+
+            // Construir los informes vacíos
+            for (const id in currentRubric.reportMap) {
+                const mapEntry = currentRubric.reportMap[id];
+                if (!maxScores[id] && maxScores[id] !== 0) continue; // Omitir si no se usa
+                
+                const reportEl = document.createElement('div');
+                reportEl.id = `report-${id}`;
+                
+                const title = mapEntry.title;
+                const color = mapEntry.color;
+                
+                reportEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-semibold text-sm">${title}</span>
+                        <span class="font-bold text-sm">
+                            <span id="score-current-${id}">0.00</span> / 
+                            <span id="score-max-${id}">${maxScores[id].toFixed(2)}</span>
+                        </span>
+                    </div>
+                    <div class="progress-bar-container w-full">
+                        <div id="progress-${id}" class="progress-bar bg-${color}-500" style="width: 0%;"></div>
+                    </div>
+                    ${!mapEntry.isSection ? '<div id="status-' + id + '" class="text-right text-xs font-semibold text-gray-500 mt-0.5">No Iniciado</div>' : ''}
+                `;
+                
+                if (mapEntry.isSection) {
+                    reportSectionsContainer.appendChild(reportEl);
+                } else {
+                    reportCriteriaContainer.appendChild(reportEl);
+                }
+            }
+        }
+
+        /**
+         * Añade un área de feedback al final de una sección
+         */
+        function appendFeedbackArea(sectionId) {
+            if (!sectionId || !currentRubric.reportMap[sectionId]) return;
+            const feedbackEl = document.createElement('div');
+            feedbackEl.className = 'mt-4';
+            feedbackEl.innerHTML = `
+                <label for="feedback-${sectionId}" class="block text-sm font-bold text-gray-700 mb-1">Feedback Adicional (${currentRubric.reportMap[sectionId].title}):</label>
+                <textarea id="feedback-${sectionId}" data-section-id="${sectionId}"
+                    class="neubrutalist w-full p-3 text-sm h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+                    placeholder="Añadir observaciones para esta sección..."></textarea>
+            `;
+            checklistContainer.appendChild(feedbackEl);
+        }
+
+
+        // --- 8. FUNCIONES DE EVENTOS ---
+        
+        /**
+         * Manejador de clic en un radio button
+         */
+        function handleRadioChange(event) {
+            const clickedRadio = event.target;
+            updateButtonVisuals(clickedRadio);
+            updateScores();
+        }
+        
+        /**
+         * NUEVO: Manejador de clic en un checkbox extra
+         */
+        function handleExtraChange(event) {
+            const clickedCheckbox = event.target;
+            const itemId = clickedCheckbox.dataset.itemId;
+            
+            // Contar cuántos extras están marcados para este ítem
+            const extrasCount = document.querySelectorAll(`input[data-item-id="${itemId}"]:checked`).length;
+            currentExtras[itemId] = extrasCount;
+            
+            // Actualizar UI del ítem
+            const itemPointsEl = document.querySelector(`input[name="${itemId}"]`);
+            if (!itemPointsEl) return; // Salir si el radio no existe
+            
+            const itemPoints = parseFloat(itemPointsEl.dataset.points);
+            const extraPoints = (extrasCount * 0.10) * itemPoints;
+            const extraPointsEl = document.getElementById(`extra-points-${itemId}`);
+            
+            if (extraPoints > 0) {
+                extraPointsEl.innerText = `+${extraPoints.toFixed(2)}`;
+                extraPointsEl.style.display = 'block';
+            } else {
+                extraPointsEl.style.display = 'none';
+            }
+            
+            // Recalcular puntuaciones
+            updateScores();
+        }
+
+        /**
+         * Actualiza los 5 botones de un grupo para el efecto "barra de progreso"
+         */
+        function updateButtonVisuals(clickedRadio) {
+            const groupName = clickedRadio.name;
+            const clickedValue = parseFloat(clickedRadio.value);
+            const allRadiosInGroup = document.querySelectorAll(`input[type="radio"][name="${groupName}"]`);
+
+            allRadiosInGroup.forEach(radio => {
+                const radioValue = parseFloat(radio.value);
+                const label = document.querySelector(`label[for="${radio.id}"]`);
+                const levelData = ratingLevels.find(l => l.value === radioValue);
+                const color = levelData.color;
+
+                if (radioValue <= clickedValue) {
+                    label.className = `rating-label block w-full text-center p-2 cursor-pointer transition-all duration-200 text-sm font-medium active-${color}`;
+                } else {
+                    label.className = `rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50`;
+                }
+            });
+        }
+
+        /**
+         * Calcula las puntuaciones actuales basándose en los radios y extras
+         */
+        function updateScores() {
+            // Resetear puntuaciones actuales
+            currentScores = { total: 0 };
+            for (const id in currentRubric.reportMap) {
+                currentScores[id] = 0;
+            }
+
+            // --- MODIFICADO: Recorrer *todos* los ítems, no solo los marcados ---
+            currentRubric.evaluationData.forEach(item => {
+                const itemId = item.id;
+                const radio = document.querySelector(`#checklist-container input[type="radio"][name="${itemId}"]:checked`);
+                const points = item.points;
+                const criteria = item.criteria;
+                const sectionId = item.section;
+                
+                let value = 0;
+                if (radio) {
+                    value = parseFloat(radio.value);
+                }
+
+                // Incluir extras
+                const extrasCount = currentExtras[itemId] || 0;
+                const extraValue = extrasCount * 0.10; // 10% por extra
+                const scoredPoints = (points * value) + (points * extraValue);
+
+                // Solo sumar si hay puntuación
+                if (scoredPoints > 0) {
+                    currentScores['total'] += scoredPoints;
+                    if (currentScores[sectionId] !== undefined) {
+                        currentScores[sectionId] += scoredPoints;
+                    }
+                    criteria.forEach(ce => {
+                        ce = ce.trim();
+                        if (currentScores[ce] !== undefined) {
+                            currentScores[ce] += scoredPoints;
+                        }
+                    });
+                }
+            });
+
+            // Actualizar la UI
+            updateReportUI();
+        }
+
+        /**
+         * Actualiza la UI de los informes con las puntuaciones calculadas
+         */
+        function updateReportUI() {
+            for (const id in currentScores) {
+                const current = currentScores[id];
+                const max = maxScores[id];
+                
+                // Permitir que la puntuación actual supere el máximo (por los extras)
+                const percentage = (max > 0) ? (current / max) * 100 : 0;
+
+                const currentEl = document.getElementById(`score-current-${id}`);
+                const progressEl = document.getElementById(`progress-${id}`);
+                
+                if (currentEl) {
+                    currentEl.innerText = current.toFixed(2);
+                }
+                if (progressEl) {
+                    // Limitar la barra de progreso visual al 100%
+                    progressEl.style.width = `${Math.min(percentage, 100)}%`;
+                }
+                
+                const statusEl = document.getElementById(`status-${id}`);
+                if (statusEl) {
+                    if (percentage === 0) {
+                        statusEl.innerText = 'No Iniciado';
+                        statusEl.className = 'text-right text-xs font-semibold text-gray-500 mt-0.5';
+                    } else if (percentage < 100) {
+                        statusEl.innerText = 'En Progreso';
+                        statusEl.className = 'text-right text-xs font-semibold text-blue-600 mt-0.5';
+                    } else {
+                        statusEl.innerText = 'Conseguido';
+                        statusEl.className = 'text-right text-xs font-semibold text-green-600 mt-0.5';
+                    }
+                }
+            }
+
+            // Actualizar el total grande
+            document.getElementById('score-current-total').innerText = currentScores['total'].toFixed(2);
+            document.getElementById('score-max-total').innerText = maxScores['total'].toFixed(2);
+        }
+
+        /**
+         * Resetea toda la lista de cotejo
+         */
+        function resetChecklist() {
+            // Limpiar radios
+            const checkedRadios = document.querySelectorAll('#checklist-container input[type="radio"]:checked');
+            checkedRadios.forEach(radio => radio.checked = false);
+            
+            // Limpiar visuales de radios
+            const allLabels = document.querySelectorAll('#checklist-container .rating-label');
+            allLabels.forEach(label => {
+                label.className = 'rating-label block w-full text-center p-2 border-gray-300 bg-white cursor-pointer transition-all duration-200 text-sm font-medium text-gray-700 hover:bg-gray-50';
+            });
+            
+            // Limpiar extras
+            const checkedExtras = document.querySelectorAll('.extra-checkbox:checked');
+            checkedExtras.forEach(extra => extra.checked = false);
+            document.querySelectorAll('span[id^="extra-points-"]').forEach(span => span.style.display = 'none');
+            
+            // Limpiar textareas
+            const feedbackTextareas = document.querySelectorAll('#checklist-container textarea');
+            feedbackTextareas.forEach(textarea => textarea.value = '');
+            
+            // Limpiar nombre de equipo
+            teamNameInput.value = '';
+
+            initializeScores(); // Resetea currentScores y currentExtras
+            updateReportUI();   // Recalcular (todo volverá a 0)
+        }
+        resetButton.addEventListener('click', resetChecklist);
+
+
+        // --- 9. FUNCIONES DE ACCIONES (Cargar, Guardar, Exportar) ---
+
+        /**
+         * Carga una rúbrica desde el campo de texto JSON
+         */
+        function loadRubricFromText() {
+            const jsonString = rubricTextInput.value;
+            rubricTextError.style.display = 'none'; // Ocultar error
+            
+            if (!jsonString) {
+                showSimpleMessage("Pega el JSON de la rúbrica en el área de texto.");
+                return;
+            }
+
+            try {
+                // --- NUEVA VALIDACIÓN ---
+                // 1. Intentar parsear como JSON
+                let data = JSON.parse(jsonString);
+
+                // 2. Comprobar si es un CÓDIGO DE GUARDADO (error común)
+                if (data.rubricData || data.radios || data.teamName) {
+                    rubricTextErrorMsg.innerText = "Error: Has pegado un 'Código de Guardar Progreso'. Pega el 'Código JSON' de la rúbrica (del Repositorio).";
+                    rubricTextError.style.display = 'block';
+                    return;
+                }
+
+                // 3. Comprobar si es una RÚBRICA válida
+                if (!data.title || !data.reportMap || !data.evaluationData) {
+                    throw new Error("El JSON no tiene la estructura de una rúbrica válida (faltan title, reportMap o evaluationData).");
+                }
+                
+                // ¡Éxito! Iniciar calificación
+                startGrading(data);
+                
+            } catch (e) {
+                console.error("Error al parsear JSON:", e);
+                rubricTextErrorMsg.innerText = `Error: El texto no es un JSON válido. (${e.message})`;
+                rubricTextError.style.display = 'block';
+            }
+        }
+        loadRubricTextBtn.addEventListener('click', loadRubricFromText);
+
+
+        /**
+         * Exporta el informe de feedback
+         */
+        function exportReport() {
+            let report = `INFORME DE CALIFICACIÓN - ${teamNameInput.value || "Sin Nombre"}\n`;
+            report += "========================================\n\n";
+            report += `PUNTUACIÓN TOTAL: ${currentScores['total'].toFixed(2)} / ${maxScores['total'].toFixed(2)}\n\n`;
+            
+            report += "--- INFORME DETALLADO POR SECCIÓN ---\n";
+            for (const id in currentRubric.reportMap) {
+                if (currentRubric.reportMap[id].isSection) {
+                    report += `\n[${currentRubric.reportMap[id].title}: ${currentScores[id].toFixed(2)} / ${maxScores[id].toFixed(2)}]\n`;
+                    
+                    currentRubric.evaluationData.forEach(item => {
+                        if (item.section === id) {
+                            const radio = document.querySelector(`input[type="radio"][name="${item.id}"]:checked`);
+                            const itemBaseScore = radio ? (parseFloat(radio.value) * item.points) : 0;
+                            const itemMax = item.points;
+                            
+                            // Añadir extras al informe
+                            const extrasCount = currentExtras[item.id] || 0;
+                            const itemExtraScore = (extrasCount * 0.10) * item.points;
+                            const itemTotalScore = itemBaseScore + itemExtraScore;
+                            
+                            let extraText = "";
+                            if (itemExtraScore > 0) {
+                                extraText = ` (Base: ${itemBaseScore.toFixed(2)} + Extra: ${itemExtraScore.toFixed(2)})`;
+                            }
+                            
+                            report += `  - ${item.title}: ${itemTotalScore.toFixed(2)} / ${itemMax.toFixed(2)}${extraText}\n`;
+                        }
+                    });
+
+                    const feedbackText = document.getElementById(`feedback-${id}`)?.value;
+                    if (feedbackText && feedbackText.trim() !== '') {
+                        report += `\n  Observaciones (Sección): ${feedbackText.trim()}\n`;
+                    }
+                }
+            }
+            
+            report += "\n\n--- INFORME POR CRITERIO DE EVALUACIÓN (CE) ---\n";
+            for (const id in currentRubric.reportMap) {
+                if (!currentRubric.reportMap[id].isSection) {
+                    // Solo mostrar si el criterio tiene puntuación máxima
+                    if (maxScores[id] && maxScores[id] > 0) {
+                        report += `\n[${currentRubric.reportMap[id].title}: ${currentScores[id].toFixed(2)} / ${maxScores[id].toFixed(2)}]\n`;
+                    }
+                }
+            }
+            
+            showModal("Exportar Informe de Feedback", report, "Copiar al Portapapeles");
+        }
+        exportButton.addEventListener('click', exportReport);
+
+
+        /**
+         * Guarda el progreso en un código Base64
+         */
+        function saveProgress() {
+            const selections = {
+                rubricData: currentRubric, // Guardar la rúbrica entera
+                teamName: teamNameInput.value,
+                radios: {},
+                extras: currentExtras, // Guardar los extras
+                feedbacks: {}
+            };
+            
+            const checkedRadios = document.querySelectorAll('#checklist-container input[type="radio"]:checked');
+            checkedRadios.forEach(radio => {
+                selections.radios[radio.name] = radio.value;
+            });
+
+            const feedbackTextareas = document.querySelectorAll('#checklist-container textarea');
+            feedbackTextareas.forEach(textarea => {
+                selections.feedbacks[textarea.id] = textarea.value;
+            });
+            
+            // --- INICIO DE LA CORRECCIÓN ---
+            try {
+                const jsonString = JSON.stringify(selections);
+                // Corregir para UTF-8 (emojis, tildes) antes de btoa
+                const code = btoa(unescape(encodeURIComponent(jsonString)));
+                showModal("Guardar Progreso", code, "Copiar Código");
+            } catch (e) {
+                console.error("Error al guardar:", e);
+                // El error InvalidCharacterError ocurre aquí si falla la codificación
+                showSimpleMessage(`Error al guardar: ${e.message}. Esto puede ocurrir si hay caracteres no válidos en los feedbacks.`);
+            }
+            // --- FIN DE LA CORRECCIÓN ---
+        }
+        saveButton.addEventListener('click', saveProgress);
+
+        /**
+         * Carga el progreso desde un código Base64
+         */
+        function loadProgress() {
+            const code = loadInput.value;
+            if (!code) {
+                showSimpleMessage("Pega un código en el campo para cargar.");
+                return;
+            }
+            
+            try {
+                // --- INICIO DE LA CORRECCIÓN ---
+                // Corregir para UTF-8 (emojis, tildes) después de atob
+                const jsonString = decodeURIComponent(escape(atob(code)));
+                const selections = JSON.parse(jsonString);
+                // --- FIN DE LA CORRECCIÓN ---
+                
+                // --- VALIDACIÓN DE RETROCOMPATIBILIDAD ---
+                let rubricToLoad = selections.rubricData;
+                
+                // Opción 1: El código es nuevo y tiene rubricData (perfecto)
+                if (rubricToLoad) {
+                    // Ya tenemos la rúbrica
+                } 
+                // Opción 2: El código es antiguo y tiene rubricKey o rubricFile
+                else if (selections.rubricKey || selections.rubricFile) {
+                    const key = selections.rubricKey || selections.rubricFile;
+                    rubricToLoad = RUBRIC_LIBRARY[key];
+                    if (!rubricToLoad) {
+                        throw new Error(`El código usa una rúbrica antigua ('${key}') que no se encuentra en la biblioteca interna.`);
+                    }
+                } 
+                // Opción 3: El código está corrupto
+                else {
+                    throw new Error("El código de guardado está corrupto (falta 'rubricData' o 'rubricKey').");
+                }
+
+                if (!selections.radios) {
+                     throw new Error("El código de guardado está corrupto (falta 'radios').");
+                }
+                // --- FIN VALIDACIÓN ---
+
+                // 1. Iniciar la interfaz con la rúbrica correcta
+                startGrading(rubricToLoad);
+                
+                // 2. Resetear (parcialmente)
+                // resetChecklist(); // No llamar a resetChecklist() completo porque resetea teamNameInput
+                teamNameInput.value = selections.teamName || ''; // Poner nombre
+                
+                // 3. Aplicar radios
+                for (const id in selections.radios) {
+                    const value = selections.radios[id];
+                    const radio = document.querySelector(`input[type="radio"][name="${id}"][value="${value}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        updateButtonVisuals(radio);
+                    }
+                }
+                
+                // 4. Aplicar extras (si existen)
+                // CORRECCIÓN: Usar (selections.extras || {}) para retrocompatibilidad
+                currentExtras = selections.extras || {};
+                for (const itemId in currentExtras) {
+                    const count = currentExtras[itemId];
+                    if (count >= 1) {
+                        const extra1 = document.getElementById(`extra-${itemId}-1`);
+                        if (extra1) extra1.checked = true;
+                    }
+                    if (count >= 2) {
+                            const extra2 = document.getElementById(`extra-${itemId}-2`);
+                            if (extra2) extra2.checked = true;
+                    }
+                    // Disparar un evento 'change' para actualizar la UI del extra
+                    const firstExtra = document.getElementById(`extra-${itemId}-1`);
+                    if(firstExtra) firstExtra.dispatchEvent(new Event('change'));
+                }
+                
+
+                // 5. Aplicar feedback
+                if (selections.feedbacks) {
+                    for (const id in selections.feedbacks) {
+                        const textarea = document.getElementById(id);
+                        if (textarea) {
+                            textarea.value = selections.feedbacks[id];
+                        }
+                    }
+                }
+                
+                // 6. Recalcular puntuaciones
+                updateScores();
+                loadInput.value = ""; // Limpiar campo
+                
+            } catch (e) {
+                console.error("Error al cargar el progreso:", e);
+                showSimpleMessage(`Error al cargar el progreso: ${e.message}`);
+            }
+        }
+        loadButton.addEventListener('click', loadProgress);
+
+    });
+    </script>
+
+</body>
+</html>
