@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificador Anual de Saberes</title>
+    <!-- Cargamos la fuente Neubrutalista -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family:Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS GENERALES (Neubrutalismo) --- */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            background-color: #f1f1f1;
+            color: #000000;
+            margin: 0;
+            padding: 20px;
+            /* Evitar scroll vertical por defecto */
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1, h2, h3, h4 {
+            color: #000000;
+            font-weight: 800;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 3px solid #000000;
+            padding-bottom: 10px;
+            font-size: 2.5em;
+            margin-top: 0;
+            flex-shrink: 0; /* No se encoge */
+        }
+        
+        /* --- BANCO DE SABERES (Superior) --- */
+        #saberes-bank-container {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 0;
+            padding: 15px;
+            box-shadow: 8px 8px 0px #000000;
+            margin-bottom: 20px;
+            flex-shrink: 0; /* No se encoge */
+            height: 25vh; /* 25% de la altura de la pantalla */
+            overflow-y: auto; /* Scroll vertical si hay muchos saberes */
+        }
+        /* FIX: Anular el 'display: grid' de .drop-zone para el banco */
+        #saberes-bank-container.drop-zone {
+            display: block; 
+        }
+
+        #saberes-bank-container h2 {
+            margin-top: 0;
+            border-bottom: 3px solid #000;
+            padding-bottom: 8px;
+            position: sticky;
+            top: -15px;
+            background-color: #ffffff;
+            z-index: 10;
+        }
+        #saberes-bank {
+            display: flex;
+            flex-wrap: wrap; /* Los saberes fluyen a la siguiente línea */
+            gap: 10px;
+        }
+
+        /* --- ESTILO DE CADA SABER (Arrastrable) --- */
+        .saber-item {
+            border: 2px solid #000;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: grab;
+            font-size: 1em;
+            font-weight: 700;
+            box-shadow: 2px 2px 0px #000;
+            transition: all 0.2s ease-in-out;
+            opacity: 1;
+            /* FIX: Asegurar que los items en grid no se estiren */
+            width: fit-content; 
+        }
+        .saber-item:active {
+            cursor: grabbing;
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+        /* Colores por Bloque */
+        .saber-a { background-color: #fffba5; } /* Amarillo pastel */
+        .saber-b { background-color: #ffb3c1; } /* Rosa pastel */
+        .saber-c { background-color: #c1fba4; } /* Menta pastel */
+        .saber-d { background-color: #ffdcb8; } /* Melocotón pastel */
+        .saber-e { background-color: #e0cffc; } /* Lila pastel */
+
+        /* --- Estilo de Saber "Cubierto" en el Banco --- */
+        #saberes-bank .saber-item.covered {
+            opacity: 0.5;
+            background-color: #eee;
+            box-shadow: none;
+            border-color: #aaa;
+        }
+        #saberes-bank .saber-item.uncovered {
+            opacity: 1;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+        /* Restaurar colores en estado "uncovered" */
+        #saberes-bank .saber-item.uncovered.saber-a { background-color: #fffba5; }
+        #saberes-bank .saber-item.uncovered.saber-b { background-color: #ffb3c1; }
+        #saberes-bank .saber-item.uncovered.saber-c { background-color: #c1fba4; }
+        #saberes-bank .saber-item.uncovered.saber-d { background-color: #ffdcb8; }
+        #saberes-bank .saber-item.uncovered.saber-e { background-color: #e0cffc; }
+
+
+        /* --- CONTROLES (Botón de Añadir) --- */
+        .neo-button {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 0;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.1s ease-in-out;
+            background-color: #007bff;
+            width: 100%; /* El botón ocupa todo el ancho del grupo */
+        }
+        .neo-button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        /* --- Contenedor para botones Import/Export --- */
+        #json-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        #json-controls .neo-button {
+            width: auto; /* Ancho automático para estos botones */
+            flex-grow: 1; /* Ocupan espacio por igual */
+        }
+        #export-btn { background-color: #28a745; } /* Verde */
+        #import-btn { background-color: #dc3545; } /* Rojo */
+
+
+        /* --- TABLERO DE COLUMNAS (Principal) --- */
+        #board-container {
+            display: flex;
+            gap: 20px;
+            /* Permite scroll horizontal */
+            overflow-x: auto;
+            /* Ocupa el resto del espacio vertical */
+            flex-grow: 1;
+            padding-bottom: 20px; /* Espacio para la barra de scroll */
+        }
+
+        /* --- Grupo de Trimestre --- */
+        .trimestre-group {
+            flex-shrink: 0; /* No se encoge */
+            background-color: #f9f9f9;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            /* FIX: Aumentado el ancho para dar espacio al título/botón */
+            min-width: 370px; 
+            height: 100%;
+        }
+        .trimestre-group > h3 {
+            margin: 0;
+            padding: 10px 15px;
+            border: 3px solid #000;
+            background-color: #fff;
+            box-shadow: 6px 6px 0px #000;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        /* Colores de Título de Trimestre */
+        #trim-1-group > h3 { background-color: #ffd6a5; } /* Naranja */
+        #trim-2-group > h3 { background-color: #caffbf; } /* Verde */
+        #trim-3-group > h3 { background-color: #a0c4ff; } /* Azul */
+        
+        /* --- Contenedor de Columnas de Tema (dentro del trimestre) --- */
+        .tema-columns-container {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1;
+            min-height: 200px; /* Altura mínima para ver la zona */
+            overflow-x: auto; 
+            overflow-y: hidden;
+            padding-bottom: 5px;
+        }
+
+        /* --- Estilo de Columna de Tema (Ahora vive dentro de un grupo) --- */
+        .column {
+            flex: 0 0 320px; /* No crecen, no se encogen, base de 320px */
+            /* SOLUCIÓN AL BUG DE ANCHURA (Flexbox): */
+            min-width: 0;
+            height: 100%; /* Ocupan toda la altura disponible */
+            display: flex;
+            flex-direction: column;
+        }
+        .column h3 {
+            margin-top: 0;
+            padding: 10px 15px;
+            border: 3px solid #000;
+            background-color: #fff;
+            box-shadow: 6px 6px 0px #000;
+            position: sticky; /* Título de columna se pega arriba */
+            top: 0;
+            z-index: 5;
+            background-color: #e0e0e0;
+            
+            /* para el botón de borrar */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px; /* Espacio entre título y botón */
+        }
+        
+        /* Estilos para el título editable y el botón de borrar */
+        .column h3 > span[contenteditable] {
+            flex-grow: 1; /* El texto ocupa el espacio */
+            outline: none; /* Quitar borde al editar */
+            min-width: 0; /* Evitar que el span crezca la cabecera */
+        }
+        .delete-tema-btn {
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px;
+            border-radius: 4px;
+            line-height: 1;
+            flex-shrink: 0; /* No se encoge */
+        }
+        .delete-tema-btn:hover {
+            background-color: #ffb3c1; /* Rosa pastel */
+        }
+
+        
+        /* --- Zona de Drop (dentro de la columna) --- */
+        .drop-zone {
+            border: 3px dashed #888;
+            padding: 10px;
+            background-color: #f9f9f9;
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 200px;
+            transition: all 0.2s;
+            
+            /* SOLUCIÓN AL BUG DE ANCHURA: Cambiado a CSS Grid */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+            gap: 10px;
+            align-content: flex-start; /* Alinea los items al inicio */
+            min-width: 0; /* Sigue siendo importante */
+        }
+
+        /* --- Feedback visual al arrastrar --- */
+        .drag-over {
+            background-color: #ffff00; /* Amarillo brillante */
+            border-color: #000;
+        }
+
+        /* --- Estilo del Tooltip --- */
+        #tooltip {
+            position: absolute;
+            display: none;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            border-radius: 0;
+            font-size: 0.9em;
+            max-width: 400px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* --- ESTILOS DEL MODAL DE CONFIRMACIÓN --- */
+        #modal-backdrop {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        #modal-box {
+            background-color: #fff;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            padding: 25px;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #modal-box p {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+        }
+        #modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        #modal-buttons .neo-button {
+            width: 100%; /* Ocupan el 50% cada uno */
+            font-size: 1em;
+        }
+        #modal-btn-confirm {
+            background-color: #dc3545; /* Rojo */
+        }
+        #modal-btn-cancel {
+            background-color: #6c757d; /* Gris */
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Planificador Anual de Saberes Básicos</h1>
+
+    <!-- ============================================= -->
+    <!-- ====== BANCO DE SABERES (Superior) ====== -->
+    <!-- ============================================= -->
+    <div id="saberes-bank-container" class="drop-zone"> <!-- Es zona de drop para borrar -->
+        <h2>Banco de Saberes Básicos (Arrastra aquí para borrar)</h2>
+        <div id="saberes-bank">
+            <!-- Bloque A -->
+            <div class="saber-item saber-a" draggable="true" id="s-a-1" data-full-text="A.1. Introducción a las estrategias, técnicas y marcos de resolución de problemas en diferentes contextos y sus fases." data-bloque="a">A.1</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-2" data-full-text="A.2. Introducción a la búsqueda crítica de información durante la investigación y definición de problemas planteados." data-bloque="a">A.2</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-3" data-full-text="A.3. Estructuras para la construcción de modelos: Resistencia, estabilidad y rigidez de estructuras. Esfuerzos estructurales: compresión, tracción, flexión, torsión y cortante." data-bloque="a">A.3</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-4" data-full-text="A.4. Materiales técnicos en estructuras industriales y arquitectónicas. Diseño de elementos de soporte y estructuras de apoyo. Estructuras de barras, triangulación." data-bloque="a">A.4</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-5" data-full-text="A.5. Sistemas mecánicos básicos: Montajes físicos o uso de simuladores. Palancas de primer, segundo y tercer grado. Ley de la palanca. Análisis cualitativo de sistemas poleas y engranajes." data-bloque="a">A.5</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-6" data-full-text="A.6. Electricidad básica para el montaje de esquemas y circuitos físicos o simulados: Elementos de un circuito eléctrico básico. Magnitudes fundamentales eléctricas: concepto y unidades de medida. Simbología normalizada de circuitos. Interpretación." data-bloque="a">A.6</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-7" data-full-text="A.7. Materiales tecnológicos y su impacto ambiental." data-bloque="a">A.7</div>
+            <div class="saber-item saber-a" draggable="true" id="s-a-8" data-full-text="A.8. Herramientas y técnicas de manipulación y mecanizado básicas de materiales en la construcción de objetos y prototipos. Respeto de las normas de seguridad e higiene." data-bloque="a">A.8</div>
+            <!-- Bloque B -->
+            <div class="saber-item saber-b" draggable="true" id="s-b-1" data-full-text="B.1. Habilidades básicas de comunicación interpersonal. Pautas de conducta propias del entorno virtual (etiqueta digital)." data-bloque="b">B.1</div>
+            <div class="saber-item saber-b" draggable="true" id="s-b-2" data-full-text="B.2. Técnicas de representación gráfica: Boceto y croquis. Proyección cilíndrica ortogonal para la representación de objetos: vistas normalizadas de una pieza. Acotación normalizada de piezas sencillas." data-bloque="b">B.2</div>
+            <div class="saber-item saber-b" draggable="true" id="s-b-3" data-full-text="B.3. Introducción al software de diseño gráfico en dos dimensiones." data-bloque="b">B.3</div>
+            <div class="saber-item saber-b" draggable="true" id="s-b-4" data-full-text="B.4. Herramientas digitales para la elaboración y presentación de documentación técnica e información multimedia relativa a proyectos." data-bloque="b">B.4</div>
+            <!-- Bloque C -->
+            <div class="saber-item saber-c" draggable="true" id="s-c-1" data-full-text="C.1. Algorítmia y diagramas de flujo." data-bloque="c">C.1</div>
+            <div class="saber-item saber-c" draggable="true" id="s-c-2" data-full-text="C.2. Aplicaciones informáticas sencillas para ordenador y dispositivos móviles." data-bloque="c">C.2</div>
+            <div class="saber-item saber-c" draggable="true" id="s-c-3" data-full-text="C.3. Uso de herramientas de programación por bloques." data-bloque="c">C.3</div>
+            <div class="saber-item saber-c" draggable="true" id="s-c-4" data-full-text="C.4. Autoconfianza e iniciativa: el error, la reevaluación y la depuración de errores como parte del proceso de aprendizaje." data-bloque="c">C.4</div>
+            <!-- Bloque D -->
+            <div class="saber-item saber-d" draggable="true" id="s-d-1" data-full-text="D.1. DispositIVOS digitales: Elementos del hardware y del software. Identificación y resolución de problemas técnicos sencillos." data-bloque="d">D.1</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-2" data-full-text="D.2. Sistemas de comunicación digital de uso común." data-bloque="d">D.2</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-3" data-full-text="D.3. Uso seguro y responsable de internet: búsqueda de información, correo electrónico, mensajería instantánea, redes sociales." data-bloque="d">D.3</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-4" data-full-text="D.4. Herramientas y plataformas de aprendizaje: configuración, mantenimiento y uso crítico." data-bloque="d">D.4</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-5" data-full-text="D.5. Técnicas de tratamiento, organización y almacenamiento seguro de la información. Formatos de ficheros. Copias de seguridad." data-bloque="d">D.5</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-6" data-full-text="D.6. Seguridad en la red: Riesgos, amenazas y ataques. Medidas de protección de datos y de información: antivirus, cortafuegos, servidores proxy, entre otros." data-bloque="d">D.6</div>
+            <div class="saber-item saber-d" draggable="true" id="s-d-7" data-full-text="D.7. Buen uso digital: prácticas seguras y riesgos (ciberacoso, sextorsión, vulneración de la propia imagen y de la intimidad, acceso a contenidos inadecuados, adicciones, etc.)." data-bloque="d">D.7</div>
+            <!-- Bloque E -->
+            <div class="saber-item saber-e" draggable="true" id="s-e-1" data-full-text="E.1. Desarrollo tecnológico: creatividad, innovación, investigación, obsolescencia e impacto." data-bloque="e">E.1</div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- ====== CONTROLES JSON (Import/Export) ====== -->
+    <!-- ============================================= -->
+    <div id="json-controls">
+        <button id="export-btn" class="neo-button">Exportar JSON</button>
+        <button id="import-btn" class="neo-button">Importar JSON</button>
+        <input type="file" id="import-file" accept="application/json" style="display: none;">
+    </div>
+
+
+    <!-- ============================================= -->
+    <!-- ====== TABLERO DE COLUMNAS (Trimestres y Temas) ====== -->
+    <!-- ============================================= -->
+    <div id="board-container">
+        
+        <!-- Grupo Trimestre 1 -->
+        <div class="trimestre-group" id="trim-1-group">
+            <h3>Trimestre 1</h3>
+            <!-- Contenedor para las columnas de TEMA de este trimestre -->
+            <div class="tema-columns-container">
+                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
+            </div>
+            <!-- Botón para AÑADIR TEMA a ESTE trimestre -->
+            <button class="neo-button add-tema-btn">+ Añadir Tema a T1</button>
+        </div>
+
+        <!-- Grupo Trimestre 2 -->
+        <div class="trimestre-group" id="trim-2-group">
+            <h3>Trimestre 2</h3>
+            <div class="tema-columns-container">
+                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
+            </div>
+            <button class="neo-button add-tema-btn">+ Añadir Tema a T2</button>
+        </div>
+
+        <!-- Grupo Trimestre 3 -->
+        <div class="trimestre-group" id="trim-3-group">
+            <h3>Trimestre 3</h3>
+            <div class="tema-columns-container">
+                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
+            </div>
+            <button class="neo-button add-tema-btn">+ Añadir Tema a T3</button>
+        </div>
+
+    </div>
+
+    <!-- Elemento Tooltip (un solo elemento para toda la página) -->
+    <div id="tooltip"></div>
+
+    <!-- ============================================= -->
+    <!-- ====== NUEVO: MODAL DE CONFIRMACIÓN ====== -->
+    <!-- ============================================= -->
+    <div id="modal-backdrop">
+        <div id="modal-box">
+            <p id="modal-message">¿Seguro que quieres eliminar este tema?</p>
+            <div id="modal-buttons">
+                <button id="modal-btn-cancel" class="neo-button">Cancelar</button>
+                <button id="modal-btn-confirm" class="neo-button">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let draggedElement = null;
+            const saberesBankContainer = document.getElementById('saberes-bank-container');
+            const boardContainer = document.getElementById('board-container');
+            const tooltip = document.getElementById('tooltip');
+            
+            // NUEVO: Variables para el modal
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalBtnConfirm = document.getElementById('modal-btn-confirm');
+            const modalBtnCancel = document.getElementById('modal-btn-cancel');
+            let columnToDelete = null; // Guardará la columna a eliminar
+            
+            let temaCounter = 0;
+
+            // --- 1. Lógica de Arrastrar (Drag) ---
+            /**
+             * Añade los eventos de 'drag' y 'tooltip' a un elemento
+             * @param {HTMLElement} el - El elemento que se hará arrastrable
+             */
+            function addDragEvents(el) {
+                // Evento Drag Start
+                el.addEventListener('dragstart', (e) => {
+                    draggedElement = e.target;
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                    e.dataTransfer.setData('bloque', e.target.dataset.bloque || '');
+                    e.stopPropagation();
+                    setTimeout(() => { 
+                        if (draggedElement) draggedElement.style.opacity = '0.5'; 
+                    }, 0);
+                });
+
+                // Evento Drag End
+                el.addEventListener('dragend', (e) => {
+                    if (draggedElement) {
+                        draggedElement.style.opacity = '1';
+                    }
+                    draggedElement = null;
+                });
+
+                // Eventos de Tooltip
+                el.addEventListener('mouseover', (e) => {
+                    const fullText = e.currentTarget.dataset.fullText;
+                    if (fullText) {
+                        tooltip.textContent = fullText;
+                        tooltip.style.display = 'block';
+                    }
+                });
+                el.addEventListener('mouseout', (e) => {
+                    tooltip.style.display = 'none';
+                });
+                el.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+            }
+
+            // Añadir eventos a los saberes iniciales del banco
+            document.querySelectorAll('#saberes-bank .saber-item').forEach(addDragEvents);
+
+            // --- 2. Lógica de Zonas de Soltar (Drop) ---
+            /**
+             * Configura una zona para que acepte elementos arrastrables
+             * @param {HTMLElement} zone - La zona que aceptará los 'drop'
+             */
+            function setupDropZone(zone) {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('drag-over');
+
+                    const id = e.dataTransfer.getData('text/plain');
+                    if (!id) return;
+                    const sourceElement = document.getElementById(id);
+                    if (!sourceElement) return;
+
+                    const isFromBank = sourceElement.closest('#saberes-bank') !== null;
+
+                    // CASO 1: Soltar en el Banco de Saberes (BORRAR)
+                    if (zone.id === 'saberes-bank-container' || zone.id === 'saberes-bank') {
+                        if (!isFromBank) { // Si viene de una columna
+                            sourceElement.remove(); // Borra el clon
+                        }
+                    } 
+                    // CASO 2: Soltar en una columna (Trimestre o Tema)
+                    else if (zone.classList.contains('drop-zone')) {
+                        if (isFromBank) { // Viene del banco: CLONAR
+                            const originalId = sourceElement.id;
+                            const clone = sourceElement.cloneNode(true);
+                            clone.id = `${originalId}-clone-${Date.now()}`; // ID único para el clon
+                            clone.dataset.originalId = originalId; // Guardar referencia
+                            clone.style.opacity = '1';
+                            addDragEvents(clone); // Hacer que el clon también sea arrastrable
+                            zone.appendChild(clone);
+                        } else { // Viene de otra columna: MOVER
+                            sourceElement.style.opacity = '1';
+                            zone.appendChild(sourceElement);
+                        }
+                    }
+                    
+                    // NUEVO: Ordenar la columna después de soltar
+                    if (zone.classList.contains('drop-zone') && !zone.closest('#saberes-bank-container')) {
+                        sortZoneItems(zone);
+                    }
+
+                    // Actualizar estado de cobertura
+                    updateSaberCoverage();
+                });
+            }
+
+            // Configurar el banco como zona de "drop" (para borrar)
+            setupDropZone(saberesBankContainer);
+
+
+            // --- 3. NUEVO: Lógica de Ordenar Saberes ---
+            /**
+             * Ordena los saberes dentro de una drop-zone por su texto (A.1, A.2, B.1...)
+             * @param {HTMLElement} zone 
+             */
+            function sortZoneItems(zone) {
+                const items = Array.from(zone.children);
+                
+                items.sort((a, b) => {
+                    const textA = a.textContent.trim();
+                    const textB = b.textContent.trim();
+                    return textA.localeCompare(textB, undefined, { numeric: true, sensitivity: 'base' });
+                });
+                items.forEach(item => zone.appendChild(item));
+            }
+
+
+            // --- 4. Lógica de Cobertura de Saberes ---
+            function updateSaberCoverage() {
+                const allOriginalIds = new Set();
+                document.querySelectorAll('#saberes-bank .saber-item').forEach(s => allOriginalIds.add(s.id));
+
+                const usedOriginalIds = new Set();
+                document.querySelectorAll('#board-container .saber-item').forEach(s => {
+                    if (s.dataset.originalId) {
+                        usedOriginalIds.add(s.dataset.originalId);
+                    }
+                });
+
+                allOriginalIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (usedOriginalIds.has(id)) {
+                        el.classList.add('covered');
+                        el.classList.remove('uncovered');
+                    } else {
+                        el.classList.add('uncovered');
+                        el.classList.remove('covered');
+                    }
+                });
+            }
+
+            // --- 5. Lógica de Añadir Columna de Tema (Modificada) ---
+
+            /**
+             * Crea un elemento de columna de Tema completo
+             * @param {string} temaName - El nombre para el título del tema
+             * @returns {HTMLElement} - El elemento .column completo
+             */
+            function createTemaColumn(temaName) {
+                temaCounter++;
+                
+                const column = document.createElement('div');
+                column.classList.add('column', 'tema-column');
+                
+                const title = document.createElement('h3');
+                
+                const titleText = document.createElement('span');
+                titleText.textContent = temaName;
+                titleText.setAttribute('contenteditable', 'true');
+                titleText.addEventListener('blur', (e) => {
+                    if (e.target.textContent.trim() === "") {
+                        e.target.textContent = "Tema (Editar)";
+                    }
+                });
+                
+                const deleteBtn = document.createElement('span');
+                deleteBtn.textContent = '❌';
+                deleteBtn.className = 'delete-tema-btn';
+                deleteBtn.title = 'Eliminar este tema';
+
+                // MODIFICADO: Ahora abre el modal
+                deleteBtn.addEventListener('click', () => {
+                    columnToDelete = deleteBtn.closest('.column'); // Guarda la columna
+                    modalBackdrop.style.display = 'flex'; // Muestra el modal
+                });
+
+                title.appendChild(titleText);
+                title.appendChild(deleteBtn);
+                
+                column.appendChild(title);
+                
+                const dropZone = document.createElement('div');
+                dropZone.classList.add('drop-zone');
+                dropZone.id = `tema-zone-${temaCounter}`;
+                setupDropZone(dropZone); // ¡Importante!
+                column.appendChild(dropZone);
+                
+                return column;
+            }
+
+            // Asignar evento a TODOS los botones de "+ Añadir Tema"
+            document.querySelectorAll('.add-tema-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const temaName = `Tema ${temaCounter + 1}`;
+                    const newColumn = createTemaColumn(temaName.trim());
+                    const trimestreGroup = e.target.closest('.trimestre-group');
+                    const temaContainer = trimestreGroup.querySelector('.tema-columns-container');
+                    temaContainer.appendChild(newColumn);
+                });
+            });
+
+            // --- 6. Lógica de Importar / Exportar JSON ---
+            
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+            const importFileInput = document.getElementById('import-file');
+
+            // -- EXPORTAR --
+            exportBtn.addEventListener('click', () => {
+                const data = {
+                    T1: [],
+                    T2: [],
+                    T3: []
+                };
+
+                // Recorrer Trimestre 1
+                document.querySelectorAll('#trim-1-group .column').forEach(col => {
+                    // FIX: .trim() al nombre del tema
+                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
+                    // FIX: Filtrar IDs nulos, indefinidos o vacíos
+                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
+                                      .map(s => s.dataset.originalId)
+                                      .filter(id => id && id.trim() !== "");
+                    data.T1.push({ tema: temaName, saberes: saberes });
+                });
+
+                // Recorrer Trimestre 2
+                document.querySelectorAll('#trim-2-group .column').forEach(col => {
+                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
+                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
+                                      .map(s => s.dataset.originalId)
+                                      .filter(id => id && id.trim() !== "");
+                    data.T2.push({ tema: temaName, saberes: saberes });
+                });
+
+                // Recorrer Trimestre 3
+                document.querySelectorAll('#trim-3-group .column').forEach(col => {
+                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
+                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
+                                      .map(s => s.dataset.originalId)
+                                      .filter(id => id && id.trim() !== "");
+                    data.T3.push({ tema: temaName, saberes: saberes });
+                });
+
+                downloadJSON(JSON.stringify(data, null, 2), 'planificacion_saberes.json');
+            });
+
+            function downloadJSON(content, fileName) {
+                const a = document.createElement('a');
+                const file = new Blob([content], { type: 'application/json' });
+                a.href = URL.createObjectURL(file);
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+
+            // -- IMPORTAR --
+            importBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+
+            importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        loadDataFromJSON(data);
+                    } catch (err) {
+                        console.error("Error al parsear el JSON:", err);
+                    }
+                    importFileInput.value = null;
+                };
+                reader.readText(file);
+            });
+
+            function loadDataFromJSON(data) {
+                // DEBUG: Añadido console.log
+                console.log("Iniciando carga desde JSON...", data);
+                const containers = document.querySelectorAll('.tema-columns-container');
+                containers.forEach(container => container.innerHTML = '');
+
+                loadTrimestre('#trim-1-group', data.T1);
+                loadTrimestre('#trim-2-group', data.T2);
+                loadTrimestre('#trim-3-group', data.T3);
+
+                updateSaberCoverage();
+            }
+
+            function loadTrimestre(trimestreGroupId, temaData) {
+                // DEBUG: Añadido console.log
+                if (!temaData) {
+                    console.log(`No hay datos para ${trimestreGroupId}`);
+                    return;
+                }
+                console.log(`Cargando Trimestre: ${trimestreGroupId} con ${temaData.length} temas`);
+                
+                const container = document.querySelector(`${trimestreGroupId} .tema-columns-container`);
+
+                temaData.forEach(tema => {
+                    const newColumn = createTemaColumn(tema.tema);
+                    container.appendChild(newColumn);
+                    const dropZone = newColumn.querySelector('.drop-zone');
+
+                    if (tema.saberes) {
+                        // FIX: Filtrar IDs nulos, indefinidos o vacíos del JSON
+                        tema.saberes.filter(id => id && id.trim() !== "").forEach(saberId => {
+                            const originalSaber = document.getElementById(saberId);
+                            // DEBUG: Añadido else para advertencia
+                            if (originalSaber) {
+                                const clone = originalSaber.cloneNode(true);
+                                clone.id = `${saberId}-clone-${Date.now()}`;
+                                clone.dataset.originalId = saberId;
+                                clone.style.opacity = '1';
+                                addDragEvents(clone);
+                                dropZone.appendChild(clone);
+                            } else {
+                                console.warn("ADVERTENCIA: No se encontró el saber original con ID:", saberId);
+                            }
+                        });
+                    }
+                    sortZoneItems(dropZone);
+                });
+            }
+
+
+            // --- 7. NUEVO: Lógica del Modal de Confirmación ---
+            
+            function hideModal() {
+                modalBackdrop.style.display = 'none';
+                columnToDelete = null; // Limpiar la variable
+            }
+
+            modalBtnCancel.addEventListener('click', hideModal);
+
+            modalBtnConfirm.addEventListener('click', () => {
+                if (columnToDelete) {
+                    columnToDelete.remove();
+                    updateSaberCoverage(); // ¡Importante!
+                }
+                hideModal();
+            });
+
+
+            // --- 8. Estado Inicial ---
+            updateSaberCoverage(); // Llamar al inicio
+        });
+    </script>
+
+</body>
+</html>

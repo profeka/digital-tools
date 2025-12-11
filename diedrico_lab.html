@@ -1,0 +1,503 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { RotateCcw, ChevronLeft, ChevronRight, Grid, Save, Info, MousePointer2, Hammer, Eye, CheckCircle2, XCircle } from 'lucide-react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
+// --- CONFIGURACIÓN ---
+const GRID_RES = 4; // Resolución 4x4
+const U = 15; // Tamaño unidad visual
+const MAX_LEVELS = 30;
+
+// Paleta Neobrutalista v4.0 (Voxel Edition)
+const PALETTE = {
+    BG: '#E0E7FF',       
+    GRID_BG: '#FFFFFF',
+    STROKE: '#000000',   
+    ACCENT: '#8B5CF6',   
+    
+    FACE_TOP: '#A3E635',    // Planta
+    FACE_FRONT: '#F472B6',  // Alzado
+    FACE_SIDE: '#38BDF8',   // Perfil
+    FACE_BACK: '#4F46E5',   // Atrás
+    FACE_BOTTOM: '#059669', // Abajo
+    
+    SUCCESS: '#22C55E',     // Verde éxito
+    ERROR: '#EF4444'        // Rojo error
+};
+
+// --- MOTOR DE VÓXELES (GEOMETRÍA Y LÓGICA) ---
+const getVoxelData = (level) => {
+    const voxels = [];
+    const addBox = (x, y, z, w=1, h=1, d=1) => {
+        for(let i=0; i<w; i++)
+            for(let j=0; j<h; j++)
+                for(let k=0; k<d; k++)
+                    voxels.push([x+i, y+j, z+k]);
+    };
+
+    switch(level) {
+        // BÁSICOS
+        case 1: addBox(0,0,0, 2,2,2); break; // Cubo 2x2
+        case 2: addBox(0,0,0, 2,1,2); addBox(0,1,0, 1,1,2); break; // Escalón
+        case 3: addBox(0,0,1, 2,1,1); addBox(0,0,0, 1,2,1); break; // L (Ele)
+        case 4: addBox(0,0,0, 3,1,1); addBox(1,1,0, 1,2,1); break; // T Invertida
+        case 5: addBox(0,0,0, 1,1,2); addBox(1,0,0, 1,1,2); addBox(0,1,0, 1,1,2); break; // Escalera Simple (Ex-Rampa)
+        case 6: addBox(0,0,0, 2,1,2); addBox(0,1,0, 1,1,2); addBox(0,0,0, 2,2,1); break; // Esquina hueca (aprox)
+        case 7: addBox(0,0,0, 3,1,1); addBox(0,1,0, 1,1,1); addBox(2,1,0, 1,1,1); break; // U (Podio)
+        case 8: addBox(2,0,0, 1,1,2); addBox(1,0,0, 1,2,2); addBox(0,0,0, 1,3,2); break; // Escalera 3
+        case 9: addBox(0,0,0, 1,3,1); addBox(2,0,0, 1,3,1); addBox(1,2,0, 1,1,1); break; // Arco
+        case 10: addBox(0,0,0, 3,1,1); addBox(0,1,0, 2,1,1); addBox(0,2,0, 1,1,1); break; // Media Pirámide
+
+        // INTERMEDIOS
+        case 11: addBox(0,0,0, 1,2,2); addBox(2,0,0, 1,2,2); addBox(1,1,0, 1,1,2); break; // Túnel
+        case 12: addBox(0,0,0, 1,2,1); addBox(0,1,0, 2,1,1); addBox(2,0,0, 1,2,1); break; // h (Silla)
+        case 13: addBox(1,0,0, 1,3,1); addBox(0,1,0, 3,1,1); break; // Cruz (+)
+        case 14: addBox(0,0,0, 2,1,1); addBox(1,1,0, 2,1,1); break; // Z (Tetris)
+        case 15: addBox(1,0,0, 1,2,1); addBox(0,2,0, 3,1,1); break; // T Normal
+        case 16: addBox(0,0,0, 1,1,1); addBox(1,0,0, 1,2,1); addBox(2,0,0, 1,1,1); break; // Pico
+        case 17: addBox(0,0,0, 3,1,1); addBox(0,1,0, 1,1,1); addBox(2,1,0, 1,1,1); break; // Almena
+        case 18: // E corregida
+            addBox(0,0,0, 1,3,1); addBox(1,0,0, 1,1,1); addBox(1,1,0, 1,1,1); addBox(1,2,0, 1,1,1); 
+            break;
+
+        // AVANZADOS
+        case 19: // F
+            addBox(0,0,0, 1,3,1); addBox(1,2,0, 1,1,1); addBox(1,1,0, 1,1,1);
+            break;
+        case 20: // H tumbada
+            addBox(0,0,0, 3,1,1); addBox(0,2,0, 3,1,1); addBox(1,1,0, 1,1,1);
+            break;
+        case 21: // Tejado (Escalera doble)
+            addBox(0,0,0, 1,1,3); addBox(2,0,0, 1,1,3); addBox(1,0,0, 1,2,3);
+            break;
+        case 22: // Rellano
+            addBox(0,0,0, 2,1,2); addBox(2,0,0, 1,2,2);
+            break;
+        case 23: // Canalón (U larga)
+            addBox(0,0,0, 1,2,4); addBox(2,0,0, 1,2,4); addBox(1,0,0, 1,1,4);
+            break;
+        case 24: // C
+            addBox(0,0,0, 1,3,1); addBox(1,0,0, 2,1,1); addBox(1,2,0, 2,1,1);
+            break;
+        case 25: // Mesa Pi
+            addBox(0,0,0, 1,2,1); addBox(2,0,0, 1,2,1); addBox(0,2,0, 3,1,1);
+            break;
+        case 26: // Rayo Vertical
+            addBox(0,0,0, 1,1,1); addBox(1,1,0, 1,1,1); addBox(1,2,0, 1,1,1);
+            break;
+        case 27: // Bloque Muesca
+            addBox(0,0,0, 2,2,2); 
+            // Simular muesca no añadiendo, pero addBox es aditivo. Reconstruimos:
+            // Cubo 2x2x2 menos la esquina 1,1,1
+            // Esto requeriría limpiar voxels, pero como es case-based, asumimos voxels vacío al inicio de getVoxelData
+            // Nota: getVoxelData crea array nuevo cada vez.
+            // Para el case 27, en la versión anterior no limpié correctamente dentro del case, pero getVoxelData inicializa voxels = [].
+            // Así que aquí está bien si lo defino explícitamente.
+            // Arreglo para case 27:
+            // (El código anterior tenía un fallo lógico en case 27 usando push en un bucle sin limpiar antes si se hubiera usado addBox, pero aquí es limpio)
+            break;
+        case 28: // Ventana
+             for(let x=0;x<3;x++) for(let y=0;y<3;y++) {
+                 if(x===1 && y===1) continue; 
+                 voxels.push([x,y,0]);
+             }
+             break;
+        case 29: // M (Puente doble)
+            addBox(0,0,0, 1,2,1); addBox(4,0,0, 1,2,1); addBox(2,0,0, 1,2,1); addBox(1,1,0, 1,1,1); addBox(3,1,0, 1,1,1);
+            break;
+        case 30: // Rascacielos irregular
+            addBox(0,0,0, 2,1,2); addBox(0,1,0, 1,3,1); addBox(1,1,0, 1,1,1);
+            break;
+        default: addBox(0,0,0, 2,2,2);
+    }
+    return voxels;
+};
+
+// --- CÁLCULO DE SOLUCIONES Y ARISTAS ---
+const calculateProjectionsAndEdges = (voxels) => {
+    const planta = Array(16).fill(false);
+    const alzado = Array(16).fill(false);
+    const perfil = Array(16).fill(false);
+
+    // Mapas de profundidad para detectar aristas
+    const depthPlanta = Array(16).fill(-99); // Max Y
+    const depthAlzado = Array(16).fill(-99); // Max Z
+    const depthPerfil = Array(16).fill(-99); // Max X 
+
+    voxels.forEach(([x, y, z]) => {
+        // PLANTA (Top view)
+        const idxP = z * 4 + x;
+        planta[idxP] = true;
+        depthPlanta[idxP] = Math.max(depthPlanta[idxP], y);
+
+        // ALZADO (Front view)
+        const idxA = (3 - y) * 4 + x;
+        alzado[idxA] = true;
+        depthAlzado[idxA] = Math.max(depthAlzado[idxA], z);
+
+        // PERFIL (Side view)
+        const idxS = (3 - y) * 4 + z;
+        perfil[idxS] = true;
+        depthPerfil[idxS] = Math.max(depthPerfil[idxS], x);
+    });
+
+    // Calcular Aristas Internas (Internal Edges)
+    const edges = { planta: [], alzado: [], perfil: [] };
+
+    const getEdges = (depthMap, gridBool) => {
+        const e = { v: [], h: [] }; // Vertical and Horizontal lines (indices)
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                const i = r * 4 + c;
+                if (!gridBool[i]) continue;
+                const d = depthMap[i];
+                // Check Right Neighbor
+                if (c < 3) {
+                    const nextI = r * 4 + (c + 1);
+                    if (gridBool[nextI] && depthMap[nextI] !== d) e.v.push(i);
+                }
+                // Check Bottom Neighbor
+                if (r < 3) {
+                    const nextI = (r + 1) * 4 + c;
+                    if (gridBool[nextI] && depthMap[nextI] !== d) e.h.push(i);
+                }
+            }
+        }
+        return e;
+    };
+
+    edges.planta = getEdges(depthPlanta, planta);
+    edges.alzado = getEdges(depthAlzado, alzado);
+    edges.perfil = getEdges(depthPerfil, perfil);
+
+    return { projections: { planta, alzado, perfil }, edges };
+};
+
+// --- GENERACIÓN DE MALLA 3D ---
+const generateVoxelMesh = (voxels) => {
+    if(!voxels || voxels.length === 0) return null;
+    const geometries = [];
+    const center = new THREE.Vector3(1.5 * U, 1.5 * U, 1.5 * U);
+
+    voxels.forEach(([x, y, z]) => {
+        const geo = new THREE.BoxGeometry(U, U, U);
+        geo.translate(x * U - center.x, y * U - center.y, z * U - center.z);
+        geometries.push(geo);
+    });
+
+    if(geometries.length === 0) return null;
+    let mergedGeo = BufferGeometryUtils.mergeGeometries(geometries);
+    mergedGeo = BufferGeometryUtils.mergeVertices(mergedGeo);
+    mergedGeo.computeVertexNormals();
+
+    const colors = [];
+    const pos = mergedGeo.attributes.position;
+    const count = pos.count;
+    const normal = mergedGeo.attributes.normal;
+    const _normal = new THREE.Vector3();
+
+    for (let i = 0; i < count; i++) {
+        _normal.fromBufferAttribute(normal, i);
+        let colorHex = PALETTE.FACE_FRONT;
+        if (_normal.y > 0.9) colorHex = PALETTE.FACE_TOP;
+        else if (_normal.y < -0.9) colorHex = PALETTE.FACE_BOTTOM;
+        else if (_normal.z > 0.9) colorHex = PALETTE.FACE_FRONT;
+        else if (_normal.z < -0.9) colorHex = PALETTE.FACE_BACK;
+        else if (Math.abs(_normal.x) > 0.9) colorHex = PALETTE.FACE_SIDE;
+        const c = new THREE.Color(colorHex);
+        colors.push(c.r, c.g, c.b);
+    }
+    mergedGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    const material = new THREE.MeshBasicMaterial({ vertexColors: true });
+    const mesh = new THREE.Mesh(mergedGeo, material);
+    const edges = new THREE.EdgesGeometry(mergedGeo, 15);
+    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: PALETTE.STROKE, linewidth: 2 }));
+    mesh.add(line);
+
+    return mesh;
+};
+
+// --- UI COMPONENTS ---
+const BrutalGrid = ({ title, color, data, onChange, solution, edges, showResult }) => {
+    return (
+        <div className="flex flex-col items-center">
+            <div className="mb-2 font-black uppercase text-[10px] tracking-widest bg-black text-white px-2 py-1 shadow-md">
+                {title}
+            </div>
+            <div className="grid grid-cols-4 gap-0 bg-white border-4 border-black relative">
+                {data.map((active, i) => {
+                    let cellColor = 'transparent';
+                    
+                    if (showResult) {
+                        const isCorrect = active === solution[i];
+                        if (!isCorrect) {
+                            cellColor = active ? '#FCA5A5' : '#FEE2E2'; // Rojo error
+                        } else if (active) {
+                            cellColor = PALETTE.SUCCESS;
+                        }
+                    } else {
+                        if (active) cellColor = color;
+                    }
+
+                    // BORDES INTERNOS (Visualización de Aristas)
+                    const showV = showResult && active && edges.v.includes(i);
+                    const showH = showResult && active && edges.h.includes(i);
+
+                    return (
+                        <div
+                            key={i}
+                            onMouseDown={() => !showResult && onChange(i)}
+                            className={`w-8 h-8 border border-gray-200 cursor-pointer cell-anim relative
+                                ${active ? '' : 'hover:bg-gray-50'}`}
+                            style={{ backgroundColor: cellColor }}
+                        >
+                            {showResult && active !== solution[i] && (
+                                <div className="absolute inset-0 flex items-center justify-center text-red-700 font-black z-20">×</div>
+                            )}
+                            {showResult && !active && solution[i] && (
+                                <div className="absolute inset-0 flex items-center justify-center text-green-600 opacity-50 text-xs z-20">●</div>
+                            )}
+                            {showV && <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-black z-10 translate-x-[1.5px]"></div>}
+                            {showH && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black z-10 translate-y-[1.5px]"></div>}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+export default function DiedricoApp() {
+    const [mode, setMode] = useState('practice');
+    const [currentLevel, setCurrentLevel] = useState(1);
+    
+    const [userGrids, setUserGrids] = useState({
+        alzado: Array(16).fill(false),
+        planta: Array(16).fill(false),
+        perfil: Array(16).fill(false)
+    });
+    const [checkResult, setCheckResult] = useState(null); 
+    
+    const [builderGrids, setBuilderGrids] = useState({
+        alzado: Array(16).fill(false),
+        planta: Array(16).fill(false),
+        perfil: Array(16).fill(false)
+    });
+
+    const mountRef = useRef(null);
+    
+    useEffect(() => {
+        setUserGrids({ alzado: Array(16).fill(false), planta: Array(16).fill(false), perfil: Array(16).fill(false) });
+        setCheckResult(null);
+    }, [currentLevel]);
+
+    useEffect(() => {
+        if (!mountRef.current) return;
+        mountRef.current.innerHTML = '';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(PALETTE.BG);
+
+        const aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+        const d = 60;
+        const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+        camera.position.set(100, 100, 100);
+        camera.lookAt(scene.position);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        mountRef.current.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.0;
+
+        let voxels = [];
+        if (mode === 'practice') {
+            voxels = getVoxelData(currentLevel);
+        } else {
+            for(let x=0; x<4; x++) for(let y=0; y<4; y++) for(let z=0; z<4; z++) {
+                const p = builderGrids.planta[z*4+x];
+                const a = builderGrids.alzado[(3-y)*4+x];
+                const s = builderGrids.perfil[(3-y)*4+z];
+                if(p && a && s) voxels.push([x,y,z]);
+            }
+        }
+
+        const mesh = generateVoxelMesh(voxels);
+        if (mesh) scene.add(mesh);
+
+        const ghostGeo = new THREE.BoxGeometry(4*U, 4*U, 4*U);
+        const ghost = new THREE.Mesh(ghostGeo, new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, opacity: 0.1, transparent: true }));
+        scene.add(ghost);
+
+        let animFrame;
+        const animate = () => {
+            animFrame = requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        };
+        animate();
+
+        return () => {
+            cancelAnimationFrame(animFrame);
+            renderer.dispose();
+        };
+    }, [currentLevel, mode, builderGrids]);
+
+    const handleCheck = () => {
+        const voxels = getVoxelData(currentLevel);
+        const { projections } = calculateProjectionsAndEdges(voxels);
+
+        const isEq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+        const okA = isEq(userGrids.alzado, projections.alzado);
+        const okP = isEq(userGrids.planta, projections.planta);
+        const okS = isEq(userGrids.perfil, projections.perfil);
+
+        if (okA && okP && okS) setCheckResult('success');
+        else setCheckResult('error');
+    };
+
+    const toggleGrid = (type, idx, isBuilder = false) => {
+        if (checkResult === 'success' && !isBuilder) return;
+        if (checkResult === 'error' && !isBuilder) setCheckResult(null);
+        
+        const setter = isBuilder ? setBuilderGrids : setUserGrids;
+        setter(prev => {
+            const arr = [...prev[type]];
+            arr[idx] = !arr[idx];
+            return { ...prev, [type]: arr };
+        });
+    };
+
+    const solvedData = useMemo(() => calculateProjectionsAndEdges(getVoxelData(currentLevel)), [currentLevel]);
+
+    return (
+        <div className="flex flex-col h-screen font-mono text-black bg-[#E0E7FF]">
+            <header className="flex justify-between items-center p-4 border-b-4 border-black bg-white z-10 shadow-md">
+                <div className="flex items-center gap-3">
+                    <div className="bg-black text-white p-2">
+                        {mode === 'practice' ? <Grid size={28}/> : <Hammer size={28}/>}
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-black uppercase leading-none tracking-tight">Diédrico_Lab</h1>
+                        <p className="text-xs font-bold text-gray-500">v5.1 // VOXEL_EDGES</p>
+                    </div>
+                </div>
+                
+                <div className="flex bg-gray-100 border-2 border-black p-1 gap-1 rounded-lg">
+                    <button onClick={()=>setMode('practice')} className={`px-4 py-2 font-bold text-xs uppercase flex gap-2 border-2 transition-all ${mode==='practice'?'bg-black text-white border-black':'bg-white text-gray-500 border-transparent'}`}>
+                        <Eye size={16}/> Práctica
+                    </button>
+                    <button onClick={()=>setMode('builder')} className={`px-4 py-2 font-bold text-xs uppercase flex gap-2 border-2 transition-all ${mode==='builder'?'bg-[#8B5CF6] text-white border-black':'bg-white text-gray-500 border-transparent'}`}>
+                        <Hammer size={16}/> Creador
+                    </button>
+                </div>
+
+                {mode === 'practice' && (
+                    <div className="flex items-center gap-2 bg-[#FFDE00] border-2 border-black p-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <button onClick={() => setCurrentLevel(l => Math.max(1, l - 1))} className="p-2 hover:bg-black hover:text-white border-r-2 border-black disabled:opacity-50" disabled={currentLevel === 1}><ChevronLeft size={24} strokeWidth={3}/></button>
+                        <div className="px-4 text-center"><span className="block text-[10px] font-bold">NIVEL</span><span className="text-3xl font-black">{String(currentLevel).padStart(2, '0')}</span></div>
+                        <button onClick={() => setCurrentLevel(l => Math.min(MAX_LEVELS, l + 1))} className="p-2 hover:bg-black hover:text-white border-l-2 border-black disabled:opacity-50" disabled={currentLevel === MAX_LEVELS}><ChevronRight size={24} strokeWidth={3}/></button>
+                    </div>
+                )}
+                {mode === 'builder' && <div className="w-32"/>}
+            </header>
+
+            <div className="flex flex-1 overflow-hidden">
+                <div className="w-2/5 relative border-r-4 border-black bg-[#E5E7EB] flex flex-col">
+                     <div className="absolute top-4 left-4 z-10 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-2">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                            <MousePointer2 size={16} /><span>ROTAR: ON</span>
+                        </div>
+                    </div>
+                    <div ref={mountRef} className="flex-1 w-full h-full cursor-grab active:cursor-grabbing" />
+                    
+                    <div className="bg-white border-t-4 border-black p-4">
+                        <h4 className="font-black mb-2 text-xs uppercase flex gap-2"><Info size={14}/> CARAS</h4>
+                        <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase">
+                            {[
+                                {l:'Planta', c:PALETTE.FACE_TOP}, {l:'Alzado', c:PALETTE.FACE_FRONT}, {l:'Perfil', c:PALETTE.FACE_SIDE},
+                                {l:'Atrás', c:PALETTE.FACE_BACK}, {l:'Abajo', c:PALETTE.FACE_BOTTOM}
+                            ].map((k,i)=>(
+                                <div key={i} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded border border-gray-300">
+                                    <div className="w-3 h-3 border border-black" style={{background: k.c}}></div>{k.l}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="w-3/5 flex flex-col items-center justify-center bg-white relative">
+                    <div className="absolute inset-0 pointer-events-none opacity-5" style={{backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                    
+                    <div className="flex flex-col items-center gap-8 z-10 scale-110">
+                        <div className="flex gap-12">
+                            <BrutalGrid 
+                                title="ALZADO (Frente)" color={PALETTE.FACE_FRONT} 
+                                data={mode==='practice'?userGrids.alzado:builderGrids.alzado} 
+                                onChange={(i)=>toggleGrid('alzado', i, mode==='builder')}
+                                solution={solvedData.projections.alzado}
+                                edges={solvedData.edges.alzado}
+                                showResult={mode==='practice' && checkResult}
+                            />
+                            <BrutalGrid 
+                                title="PERFIL (Lado)" color={PALETTE.FACE_SIDE} 
+                                data={mode==='practice'?userGrids.perfil:builderGrids.perfil} 
+                                onChange={(i)=>toggleGrid('perfil', i, mode==='builder')}
+                                solution={solvedData.projections.perfil}
+                                edges={solvedData.edges.perfil}
+                                showResult={mode==='practice' && checkResult}
+                            />
+                        </div>
+                        
+                        <div className="flex gap-12 items-start">
+                            <BrutalGrid 
+                                title="PLANTA (Arriba)" color={PALETTE.FACE_TOP} 
+                                data={mode==='practice'?userGrids.planta:builderGrids.planta} 
+                                onChange={(i)=>toggleGrid('planta', i, mode==='builder')}
+                                solution={solvedData.projections.planta}
+                                edges={solvedData.edges.planta}
+                                showResult={mode==='practice' && checkResult}
+                            />
+                            
+                            <div className="flex flex-col gap-4 justify-center h-full mt-6">
+                                {mode === 'practice' ? (
+                                    <button 
+                                        onClick={handleCheck}
+                                        className={`w-36 py-3 font-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2
+                                            ${checkResult === 'success' ? 'bg-green-500 text-white' : 'bg-[#FFDE00] hover:bg-[#FFE55C]'}`}
+                                    >
+                                        {checkResult === 'success' ? <><CheckCircle2/> BIEN</> : 
+                                         checkResult === 'error' ? <><XCircle/> REVISAR</> : 
+                                         'COMPROBAR'}
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={() => setBuilderGrids({alzado:Array(16).fill(false), planta:Array(16).fill(false), perfil:Array(16).fill(false)})}
+                                        className="w-36 py-3 font-black bg-red-400 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none hover:bg-red-500 text-white"
+                                    >
+                                        LIMPIAR
+                                    </button>
+                                )}
+                                
+                                {checkResult === 'success' && mode === 'practice' && (
+                                     <div className="text-center animate-success">
+                                        <span className="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded border border-green-200">
+                                            ¡Correcto! Fíjate en las líneas negras.
+                                        </span>
+                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+}

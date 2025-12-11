@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de S.O. - Evaluación por Pares</title>
+    <style>
+        /* NEW BRUTALISM STYLES */
+        /* Usamos Arial Black o monospace para el contraste y la sensación "dura" */
+        body {
+            font-family: 'Arial Black', Gadget, sans-serif;
+            background-color: #f7f7f7; 
+            color: #111; 
+            padding: 20px;
+            margin: 0;
+            border-top: 8px solid #FF0000; /* Borde de impacto */
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            border: 4px solid #000;
+            padding: 30px 20px;
+            background-color: #fff;
+        }
+        h1, h2 {
+            font-size: clamp(1.5em, 5vw, 2.5em); /* Responsive font size */
+            text-transform: uppercase;
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1em;
+            font-family: monospace; /* Fuente de alto contraste para etiquetas */
+        }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 98%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 2px solid #000;
+            background-color: #fff;
+            /* Sombra dura característica del brutalismo */
+            box-shadow: 6px 6px 0 #000;
+            font-family: monospace;
+            font-size: 1em;
+            transition: box-shadow 0.1s;
+        }
+        input:focus, textarea:focus, select:focus {
+            box-shadow: 0 0 0 transparent; 
+            outline: 2px solid #FF0000; /* Borde rojo al enfocar */
+        }
+        .score-group {
+            border: 2px dashed #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #eee;
+        }
+        .score-group label {
+            font-weight: normal;
+            font-family: 'Arial Black', Gadget, sans-serif;
+        }
+        .score-input {
+            width: 60px;
+            text-align: center;
+            margin-right: 15px;
+            display: inline-block;
+        }
+        .submit-btn {
+            background-color: #FF0000;
+            color: #fff;
+            border: 4px solid #000;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 8px 8px 0 #000;
+            transition: all 0.1s;
+            width: 100%; /* Full width button */
+            margin-bottom: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #000;
+            box-shadow: 4px 4px 0 #000;
+        }
+        #result {
+            margin-top: 40px;
+            padding: 20px;
+            border: 4px solid #000;
+            background-color: #FFFF00; /* Amarillo de alto impacto */
+            font-size: 1.2em;
+            display: none; 
+            box-shadow: 10px 10px 0 #FF0000; /* Gran sombra roja para el resultado */
+        }
+        #result p {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            word-wrap: break-word; 
+            background-color: #000;
+            color: #FFFF00;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 2px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #ccc;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+        td input, td select {
+            box-shadow: none;
+            width: 95%;
+            padding: 5px;
+        }
+        /* Media Query para móvil */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 10px;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr { border: 4px solid #000; margin-bottom: 20px; }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                font-weight: bold;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>FICHA DE ANÁLISIS DE S.O. (4º ESO)</h1>
+
+    <form id="evaluationForm">
+        <!-- SECCIÓN 1: DATOS DEL EVALUADOR Y DEL EQUIPO -->
+        <h2>DATOS DE REGISTRO</h2>
+        <label for="evaluatorName">Tu Nombre Completo (Evaluador)</label>
+        <input type="text" id="evaluatorName" placeholder="EJ: JUAN PÉREZ LÓPEZ" required>
+
+        <label for="teamName">Nombre del Equipo Evaluado</label>
+        <input type="text" id="teamName" placeholder="EJ: EQUIPO LINUX" required>
+        
+        <label for="osName">Sistema Operativo Presentado</label>
+        <input type="text" id="osName" placeholder="EJ: UBUNTU o WINDOWS 11" required>
+
+        <label for="presentationSummary">Resumen de la Presentación (Sistema Operativo, Enfoque y Puntos Clave)</label>
+        <textarea id="presentationSummary" rows="4" maxlength="600" required></textarea>
+
+        <hr>
+
+        <!-- SECCIÓN 2: TABLA DE COMPARACIÓN ACTIVA (TCA) -->
+        <h2>ANÁLISIS TÉCNICO Y COMPARATIVO (CE 1)</h2>
+        <p style="font-family: monospace;">Compara el S.O. presentado con uno de referencia (ej. Windows, macOS). Rellena los campos.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>CRITERIO CLAVE</th>
+                    <th>S.O. PRESENTADO</th>
+                    <th>S.O. DE REFERENCIA</th>
+                    <th>LICENCIA</th>
+                    <th>DIFERENCIA CLAVE (Técnica o de Uso)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="CRITERIO CLAVE">IDENTIFICACIÓN / ARQUITECTURA</td>
+                    <td data-label="S.O. PRESENTADO"><input type="text" name="data-presented-1" required></td>
+                    <td data-label="S.O. DE REFERENCIA"><input type="text" name="data-ref-1" required></td>
+                    <td data-label="LICENCIA">
+                        <select name="data-licencia-1" required>
+                            <option value="">--Seleccionar--</option>
+                            <option value="LIBRE">LIBRE</option>
+                            <option value="PROPIETARIO">PROPIETARIO</option>
+                        </select>
+                    </td>
+                    <td data-label="DIFERENCIA CLAVE"><input type="text" name="data-diff-1" required></td>
+                </tr>
+                <tr>
+                    <td data-label="CRITERIO CLAVE">GESTIÓN DE **PRIVACIDAD**</td>
+                    <td data-label="S.O. PRESENTADO"><input type="text" name="data-presented-2" required></td>
+                    <td data-label="S.O. DE REFERENCIA"><input type="text" name="data-ref-2" required></td>
+                    <td data-label="LICENCIA">
+                        <select name="data-licencia-2" required>
+                            <option value="">--Seleccionar--</option>
+                            <option value="ALTA">ALTA</option>
+                            <option value="MEDIA">MEDIA</option>
+                            <option value="BAJA">BAJA</option>
+                        </select>
+                    </td>
+                    <td data-label="DIFERENCIA CLAVE"><input type="text" name="data-diff-2" required></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <!-- SECCIÓN 3: ANÁLISIS CRÍTICO (PUNTUACIÓN POR PARES) -->
+        <h2>EVALUACIÓN CRÍTICA (CE 4)</h2>
+        <p style="font-family: monospace;">Puntúa de 1 (Mínimo, Pobre) a 5 (Máximo, Excelente) y justifica tu nota.</p>
+
+        <div class="score-group">
+            <label>A. USO ÉTICO DE DATOS Y PRIVACIDAD DEL S.O. (Máx. 5)</label>
+            <input type="number" min="1" max="5" class="score-input" id="scoreEtica" required>
+            <label for="justifA" style="margin-top: 10px;">JUSTIFICACIÓN A:</label>
+            <textarea id="justifA" rows="2" placeholder="Explica si se detallaron bien las políticas de datos." required></textarea>
+        </div>
+
+        <div class="score-group">
+            <label>B. CALIDAD Y FIABILIDAD DE LA INFORMACIÓN TÉCNICA (Máx. 5)</label>
+            <input type="number" min="1" max="5" class="score-input" id="scoreCalidad" required>
+            <label for="justifB" style="margin-top: 10px;">JUSTIFICACIÓN B:</label>
+            <textarea id="justifB" rows="2" placeholder="Explica si la información (origen, arquitectura, uso) fue rigurosa." required></textarea>
+        </div>
+
+        <div class="score-group">
+            <label>C. ACTITUD CRÍTICA (Sesgos y Limitaciones del S.O.) (Máx. 5)</label>
+            <input type="number" min="1" max="5" class="score-input" id="scoreCritica" required>
+            <label for="justifC" style="margin-top: 10px;">JUSTIFICACIÓN C:</label>
+            <textarea id="justifC" rows="2" placeholder="Explica si el equipo reconoció los puntos débiles o fue excesivamente sesgado." required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">GENERAR CÓDIGO DE EVALUACIÓN</button>
+    </form>
+
+    <!-- SECCIÓN DE RESULTADO Y CÓDIGO GENERADO -->
+    <div id="result">
+        <h2>✅ CÓDIGO DE ENVÍO GENERADO</h2>
+        <p style="font-family: 'Arial Black', Gadget, sans-serif; color: #111;">Copia el código y envíalo al profesor.</p>
+        <p id="generatedCode" style="font-size: 1.5em;"></p>
+    </div>
+
+</div>
+
+<script>
+    // Función para sanitizar el texto y generar el ID
+    function createId(text) {
+        if (!text) return '';
+        // Eliminar tildes y caracteres especiales, reemplazar espacios con guiones
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                   .toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    document.getElementById('evaluationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        generateCode();
+    });
+
+    function generateCode() {
+        // 1. Obtener datos de identificación
+        const evaluator = document.getElementById('evaluatorName').value.trim();
+        const team = document.getElementById('teamName').value.trim();
+        
+        // 2. Obtener puntuaciones
+        const scoreE = document.getElementById('scoreEtica').value;
+        const scoreC = document.getElementById('scoreCalidad').value;
+        const scoreCr = document.getElementById('scoreCritica').value;
+        
+        // 3. Crear identificadores únicos y simplificados
+        const evalParts = evaluator.split(' ').filter(p => p.length > 0);
+        let evalID = '';
+        if (evalParts.length >= 2) {
+            // Inicial del nombre y 3 primeras del apellido (limpio)
+            evalID = evalParts[0].charAt(0) + createId(evalParts[evalParts.length - 1]).substring(0, 3);
+        } else if (evalParts.length === 1) {
+             evalID = createId(evalParts[0]).substring(0, 4);
+        } else {
+            evalID = 'ANON';
+        }
+        
+        // Tres primeras letras (limpias) del nombre del equipo
+        const teamID = createId(team).substring(0, 3);
+
+        // Fecha en formato DDMMAA
+        const date = new Date();
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yy = String(date.getFullYear()).slice(-2);
+        const dateID = dd + mm + yy;
+
+        // 4. Generar el código final
+        // FORMATO: EVALUADOR_EQUIPO_FECHA_PUNTUACIONES
+        const finalCode = `${evalID}-${teamID}-${dateID}-${scoreE}${scoreC}${scoreCr}`;
+
+        // 5. Mostrar el resultado
+        document.getElementById('generatedCode').textContent = finalCode;
+        document.getElementById('result').style.display = 'block';
+
+        // Opcional: Desplazar la vista al resultado
+        document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Criterios por Proyecto</title>
+    <!-- Cargamos una fuente blocky típica del Neubrutalismo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS GENERALES (Neubrutalismo) --- */
+        * {
+            box-sizing: border-box;a
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            background-color: #f1f1f1;
+            color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #000000;
+            font-weight: 800;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 3px solid #000000;
+            padding-bottom: 10px;
+            font-size: 2.5em;
+        }
+        h4 {
+            font-weight: 700;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 4px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* --- COLUMNA 1: BANCOS DE ELEMENTOS --- */
+        #banks-column {
+            flex: 1;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* --- MODIFICADO: Hacer que la columna sea "sticky" --- */
+            position: sticky;
+            top: 20px;
+            align-self: flex-start; /* Clave para que sticky funcione bien en flex */
+        }
+        
+        /* --- BANCO DE CRITERIOS --- */
+        #criteria-bank {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 0;
+            padding: 15px;
+            height: 45vh; /* Altura ajustada */
+            overflow-y: auto;
+            box-shadow: 8px 8px 0px #000000;
+        }
+        #criteria-bank h2 {
+            margin-top: 0;
+            border-bottom: 3px solid #000;
+            padding-bottom: 8px;
+            position: sticky; /* Se pega al *interior* del banco */
+            top: -15px;
+            background-color: #ffffff;
+            z-index: 10;
+        }
+        
+        /* --- NUEVO: BANCO DE SABERES --- */
+        #saberes-bank {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 0;
+            box-shadow: 8px 8px 0px #000000;
+        }
+        #saberes-bank[open] {
+             /* Cuando está abierto, ocupa más espacio */
+            height: 33vh;
+            overflow-y: auto;
+        }
+        #saberes-bank summary {
+            font-size: 1.5em; /* <h2> */
+            font-weight: 800;
+            padding: 15px;
+            cursor: pointer;
+            border-bottom: 3px solid #000;
+        }
+        #saberes-bank[open] summary {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+        }
+        .saberes-content {
+            padding: 15px;
+        }
+
+
+        /* --- COLUMNA 2: ÁREA DE PROYECTOS --- */
+        #projects-area {
+            flex: 2;
+            min-width: 300px;
+        }
+        #projects-area h2 {
+            margin-top: 0;
+        }
+        
+        /* --- Botones --- */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .neo-button {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 0;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.1s ease-in-out;
+        }
+        .neo-button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        /* Botón más pequeño para añadir evidencia */
+        .add-evidence-btn {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            background-color: #a0c4ff; /* Azul pastel */
+            margin-top: 15px;
+        }
+
+        /* Colores de botones principales */
+        #add-project-btn { background-color: #007bff; }
+        #export-btn { background-color: #28a745; }
+        #import-btn { background-color: #fd7e14; }
+        #copy-json-btn { background-color: #6c757d; color: white; }
+
+        /* --- Área de JSON --- */
+        #json-io-area {
+            width: 100%;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            padding: 10px;
+            min-height: 150px;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            margin-bottom: 20px;
+        }
+        
+        #projects-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        /* --- ESTILOS DE LOS GRUPOS DE COMPETENCIAS --- */
+        .competency-group {
+            margin-bottom: 15px;
+        }
+        .competency-group h3 {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* --- ESTILO DE CADA CRITERIO (Arrastrable) --- */
+        .criterion {
+            border: 2px solid #000;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 0;
+            cursor: grab;
+            font-size: 0.9em;
+            box-shadow: 2px 2px 0px #000;
+            transition: all 0.2s ease-in-out;
+            /* Por defecto, todos están "sin cubrir" */
+            opacity: 1; 
+        }
+        .criterion:active {
+            cursor: grabbing;
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        /* --- Estilo de Criterio CUBIERTO (en el banco) --- */
+        #criteria-bank .criterion.covered {
+            opacity: 0.5;
+            background-color: #eee;
+            box-shadow: none;
+            border-color: #aaa;
+        }
+        /* Estilo de Criterio SIN CUBRIR (en el banco) */
+        #criteria-bank .criterion.uncovered {
+            opacity: 1;
+            /* Vuelve a su color original por si acaso */
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+        /* Restaurar colores en estado "uncovered" */
+        #criteria-bank .criterion.uncovered.ce1 { background-color: #ffd6a5; }
+        #criteria-bank .criterion.uncovered.ce2 { background-color: #caffbf; }
+        #criteria-bank .criterion.uncovered.ce3 { background-color: #9bf6ff; }
+        #criteria-bank .criterion.uncovered.ce4 { background-color: #a0c4ff; }
+        #criteria-bank .criterion.uncovered.ce5 { background-color: #bdb2ff; }
+        #criteria-bank .criterion.uncovered.ce6 { background-color: #ffc6ff; }
+        #criteria-bank .criterion.uncovered.ce7 { background-color: #fffffc; }
+
+
+        /* --- COLORES POR COMPETENCIA --- */
+        .ce1 { background-color: #ffd6a5; } /* Naranja pastel */
+        .ce2 { background-color: #caffbf; } /* Verde pastel */
+        .ce3 { background-color: #9bf6ff; } /* Cyan pastel */
+        .ce4 { background-color: #a0c4ff; } /* Azul pastel */
+        .ce5 { background-color: #bdb2ff; } /* Morado pastel */
+        .ce6 { background-color: #ffc6ff; } /* Magenta pastel */
+        .ce7 { background-color: #fffffc; } /* Crema */
+
+        /* --- NUEVO: ESTILO DE CADA SABER (Arrastrable) --- */
+        .saber-item {
+            /* background-color: #fffba5; /* Amarillo pastel - Se quita de aquí */
+            border: 2px solid #000;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 0;
+            cursor: grab;
+            font-size: 0.9em;
+            box-shadow: 2px 2px 0px #000;
+            transition: all 0.2s ease-in-out;
+            opacity: 1;
+        }
+        .saber-item:active {
+            cursor: grabbing;
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+        .saber-group {
+            margin-bottom: 15px;
+        }
+        .saber-group h4 { /* A, B, C... */
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 5px;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        /* --- NUEVO: Colores y Cobertura para Saberes --- */
+        .saber-a { background-color: #fffba5; } /* Amarillo pastel */
+        .saber-b { background-color: #ffb3c1; } /* Rosa pastel */
+        .saber-c { background-color: #c1fba4; } /* Menta pastel */
+        .saber-d { background-color: #ffdcb8; } /* Melocotón pastel */
+        .saber-e { background-color: #d1d8e0; } /* Gris-azul pastel */
+
+        #saberes-bank .saber-item.covered {
+            opacity: 0.5;
+            background-color: #eee;
+            box-shadow: none;
+            border-color: #aaa;
+        }
+        #saberes-bank .saber-item.uncovered {
+            opacity: 1;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+        #saberes-bank .saber-item.uncovered.saber-a { background-color: #fffba5; }
+        #saberes-bank .saber-item.uncovered.saber-b { background-color: #ffb3c1; }
+        #saberes-bank .saber-item.uncovered.saber-c { background-color: #c1fba4; }
+        #saberes-bank .saber-item.uncovered.saber-d { background-color: #ffdcb8; }
+        #saberes-bank .saber-item.uncovered.saber-e { background-color: #d1d8e0; }
+        /* --- FIN DE NUEVO --- */
+
+
+        /* --- ESTILO DE CADA PROYECTO (Zona de soltar) --- */
+        .project-box {
+            background-color: #ffffff;
+            border: 3px solid #000;
+            border-radius: 0;
+            padding: 15px 20px;
+            box-shadow: 8px 8px 0px #000;
+            transition: all 0.2s;
+        }
+        .project-box h3 {
+            margin-top: 0;
+            color: #2a7f2a;
+            border-bottom: 3px solid #000;
+            padding-bottom: 5px;
+        }
+
+        /* --- NUEVO: Caja de Evidencia --- */
+        .evidence-box {
+            border: 2px dashed #444;
+            padding: 15px;
+            margin-top: 20px;
+            background: #fafafa;
+            border-radius: 0;
+        }
+
+        /* Zona para soltar criterios dentro del proyecto */
+        .criteria-drop-zone {
+            min-height: 80px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 2px dashed #888;
+            border-bottom: 15px;
+        }
+
+        /* Textarea para evidencias */
+        .evidence-textarea {
+            width: 100%;
+            min-height: 80px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            padding: 10px;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        /* --- MODIFICADO: Zona de Drop para Saberes (antes era textarea) --- */
+        .saberes-drop-zone {
+            min-height: 80px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 2px dashed #888;
+            margin-bottom: 15px;
+        }
+
+        /* --- Feedback visual al arrastrar sobre una zona válida --- */
+        .drag-over {
+            background-color: #ffff00; /* Amarillo brillante */
+            border-color: #000;
+        }
+
+        /* --- NUEVO: Estilo del Tooltip --- */
+        #tooltip {
+            position: absolute;
+            display: none;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            border-radius: 0;
+            font-size: 0.9em;
+            max-width: 400px;
+            z-index: 1000;
+            pointer-events: none; /* Para que el ratón no interactúe con el tooltip */
+        }
+
+        /* --- NUEVO: Estilos del Modal --- */
+        #modal-backdrop {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Cubre toda la pantalla */
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            /* Centrar el contenido */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-content {
+            background-color: #ffffff;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        #modal-content h3 {
+            margin-top: 0;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+        }
+
+        #modal-content label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #new-project-name {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            font-family: 'Inter', sans-serif;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        #modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* NUEVO: Animación de error */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Seguimiento de Criterios (Tecnología 2º ESO)</h1>
+
+    <div class="main-container">
+
+        <!-- ============================================= -->
+        <!-- ====== COLUMNA 1: BANCOS DE ELEMENTOS ====== -->
+        <!-- ============================================= -->
+        <div id="banks-column">
+            <!-- BANCO DE CRITERIOS -->
+            <div id="criteria-bank" class="drop-zone">
+                <h2>Banco de Criterios</h2>
+                
+                <!-- CE 1 -->
+                <div class="competency-group" id="group-ce1">
+                    <h3>CE 1: Buscar y seleccionar la información adecuada...</h3>
+                    <div class="criterion ce1" draggable="true" id="c-1-1"
+                        data-full-text="1.1. Definir problemas o necesidades planteadas, buscando y contrastando información de forma guiada procedente de diferentes fuentes de manera crítica y segura.">
+                        <strong>1.1.</strong> Definir problemas o necesidades planteadas...
+                    </div>
+                    <div class="criterion ce1" draggable="true" id="c-1-2"
+                        data-full-text="1.2. Comprender y examinar productos tecnológicos de uso habitual a través del análisis de objetos y sistemas cotidianos, empleando el método científico y utilizando herramientas de simulación adecuadas al nivel del alumnado que faciliten la construcción de conocimiento.">
+                        <strong>1.2.</strong> Comprender y examinar productos tecnológicos de uso habitual...
+                    </div>
+                </div>
+                <!-- CE 2 -->
+                <div class="competency-group" id="group-ce2">
+                    <h3>CE 2: Abordar problemas tecnológicos con autonomía y actitud creativa...</h3>
+                    <div class="criterion ce2" draggable="true" id="c-2-1"
+                        data-full-text="2.1. Idear y describir soluciones originales a problemas definidos sencillos, aplicando conceptos, técnicas y procedimientos interdisciplinares, así como criterios de sostenibilidad con actitud emprendedora, perseverante y creativa.">
+                        <strong>2.1.</strong> Idear y describir soluciones originales a problemas definidos sencillos...
+                    </div>
+                    <div class="criterion ce2" draggable="true" id="c-2-2"
+                        data-full-text="2.2. Seleccionar, planificar y organizar los materiales y herramientas, así como establecer de forma guiada la secuencia de las tareas necesarias para la construcción de una solución a un problema planteado, trabajando individualmente o en grupo.">
+                        <strong>2.2.</strong> Seleccionar, planificar y organizar los materiales y herramientas...
+                    </div>
+                </div>
+                <!-- CE 3 -->
+                <div class="competency-group" id="group-ce3">
+                    <h3>CE 3: Aplicar de forma apropiada y segura distintas técnicas...</h3>
+                    <div class="criterion ce3" draggable="true" id="c-3-1"
+                        data-full-text="3.1. Fabricar objetos o modelos mediante la manipulación y conformación de materiales, empleando herramientas y máquinas adecuadas, aplicando los fundamentos de estructuras, mecanismos y electricidad y respetando las normas de seguridad y salud.">
+                        <strong>3.1.</strong> Fabricar objetos o modelos mediante la manipulación...
+                    </div>
+                    <div class="criterion ce3" draggable="true" id="c-3-2"
+                        data-full-text="3.2. Estimar cualitativamente las transformaciones de velocidades y fuerzas en mecanismos simples.">
+                        <strong>3.2.</strong> Estimar cualitativamente las transformaciones de velocidades y fuerzas...
+                    </div>
+                    <div class="criterion ce3" draggable="true" id="c-3-3"
+                        data-full-text="3.3. Identificar las magnitudes eléctricas básicas, su relación y su efecto en circuitos sencillos.">
+                        <strong>3.3.</strong> Identificar las magnitudes eléctricas básicas...
+                    </div>
+                </div>
+                <!-- CE 4 -->
+                <div class="competency-group" id="group-ce4">
+                    <h3>CE 4: Describir, representar e intercambiar ideas o soluciones...</h3>
+                    <div class="criterion ce4" draggable="true" id="c-4-1"
+                        data-full-text="4.1. Identificar las fases del proceso de creación de un producto desde su diseño hasta su difusión.">
+                        <strong>4.1.</strong> Identificar las fases del proceso de creación de un producto...
+                    </div>
+                    <div class="criterion ce4" draggable="true" id="c-4-2"
+                        data-full-text="4.2. Conocer y elaborar de forma guiada la documentación técnica y gráfica básica, utilizando la simbología y el vocabulario técnico adecuados, tanto presencialmente como en remoto.">
+                        <strong>4.2.</strong> Conocer y elaborar de forma guiada la documentación técnica y gráfica...
+                    </div>
+                </div>
+                <!-- CE 5 -->
+                <div class="competency-group" id="group-ce5">
+                    <h3>CE 5: Desarrollar algoritmos y aplicaciones informáticas...</h3>
+                    <div class="criterion ce5" draggable="true" id="c-5-1"
+                        data-full-text="5.1. Describir, interpretar y diseñar soluciones a problemas informáticos a través de algoritmos básicos y diagramas de flujo sencillos, aplicando los elementos y técnicas de programación de manera creativa.">
+                        <strong>5.1.</strong> Describir, interpretar y diseñar soluciones a problemas informáticos...
+                    </div>
+                    <div class="criterion ce5" draggable="true" id="c-5-2"
+                        data-full-text="5.2. Programar aplicaciones sencillas, de forma guiada con una finalidad concreta y definida, para distintos dispositivos (ordenadores, dispositivos móviles y otros) aplicando herramientas de edición y empleando los elementos de programación por bloques de manera apropiada.">
+                        <strong>5.2.</strong> Programar aplicaciones sencillas, de forma guiada...
+                    </div>
+                </div>
+                <!-- CE 6 -->
+                <div class="competency-group" id="group-ce6">
+                    <h3>CE 6: Comprender los fundamentos del funcionamiento de los dispositivos...</h3>
+                    <div class="criterion ce6" draggable="true" id="c-6-1"
+                        data-full-text="6.1. Usar de manera eficiente y segura los dispositivos digitales de uso cotidiano en la resolución de problemas sencillos, conociendo los riesgos y adoptando medidas de seguridad para la protección de datos y equipos.">
+                        <strong>6.1.</strong> Usar de manera eficiente y segura los dispositivos digitales...
+                    </div>
+                    <div class="criterion ce6" draggable="true" id="c-6-2"
+                        data-full-text="6.2. Crear contenidos y elaborar materiales sencillos y estructurados, configurando correctamente las herramientas digitales habituales del entorno de aprendizaje, ajustándolas a sus necesidades y respetando los derechos de autor y la etiqueta digital.">
+                        <strong>6.2.</strong> Crear contenidos y elaborar materiales sencillos y estructurados...
+                    </div>
+                    <!-- NUEVO: Criterio 6.3 añadido -->
+                    <div class="criterion ce6" draggable="true" id="c-6-3"
+                        data-full-text="6.3. Organizar la información de manera estructurada, aplicando técnicas de almacenamiento seguro y haciendo uso de los formatos de ficheros más apropiados.">
+                        <strong>6.3.</strong> Organizar la información de manera estructurada...
+                    </div>
+                </div>
+                <!-- CE 7 -->
+                <div class="competency-group" id="group-ce7">
+                    <h3>CE 7: Hacer un uso responsable de la tecnología...</h3>
+                    <div class="criterion ce7" draggable="true" id="c-7-1"
+                        data-full-text="7.1. Reconocer la influencia de la actividad tecnológica en la sociedad y en el entorno a lo largo de su historia.">
+                        <strong>7.1.</strong> Reconocer la influencia de la actividad tecnológica...
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- NUEVO: BANCO DE SABERES BÁSICOS (Contenidos) -->
+            <details id="saberes-bank" class="drop-zone">
+                <summary>Saberes Básicos (Contenidos)</summary>
+                <div class="saberes-content">
+                    
+                    <div class="saber-group" id="group-saber-a">
+                        <h4>A. Proceso de resolución de problemas</h4>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-1" data-full-text="A.1. Introducción a las estrategias, técnicas y marcos de resolución de problemas en diferentes contextos y sus fases."><strong>A.1.</strong> Estrategias de resolución de problemas...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-2" data-full-text="A.2. Introducción a la búsqueda crítica de información durante la investigación y definición de problemas planteados."><strong>A.2.</strong> Búsqueda crítica de información...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-3" data-full-text="A.3. Estructuras para la construcción de modelos: Resistencia, estabilidad y rigidez de estructuras. Esfuerzos estructurales: compresión, tracción, flexión, torsión y cortante."><strong>A.3.</strong> Estructuras: Resistencia, estabilidad, esfuerzos...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-4" data-full-text="A.4. Materiales técnicos en estructuras industriales y arquitectónicas. Diseño de elementos de soporte y estructuras de apoyo. Estructuras de barras, triangulación."><strong>A.4.</strong> Materiales técnicos y diseño de estructuras...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-5" data-full-text="A.5. Sistemas mecánicos básicos: Montajes físicos o uso de simuladores. Palancas de primer, segundo y tercer grado. Ley de la palanca. Análisis cualitativo de sistemas poleas y engranajes."><strong>A.5.</strong> Sistemas mecánicos: Palancas, poleas, engranajes...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-6" data-full-text="A.6. Electricidad básica para el montaje de esquemas y circuitos físicos o simulados: Elementos de un circuito eléctrico básico. Magnitudes fundamentales eléctricas: concepto y unidades de medida. Simbología normalizada de circuitos. Interpretación."><strong>A.6.</strong> Electricidad básica: Circuitos, magnitudes, simbología...</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-7" data-full-text="A.7. Materiales tecnológicos y su impacto ambiental."><strong>A.7.</strong> Materiales tecnológicos e impacto ambiental.</div>
+                        <div class="saber-item saber-a" draggable="true" id="s-a-8" data-full-text="A.8. Herramientas y técnicas de manipulación y mecanizado básicas de materiales en la construcción de objetos y prototipos. Respeto de las normas de seguridad e higiene."><strong>A.8.</strong> Herramientas, técnicas y seguridad...</div>
+                    </div>
+
+                    <div class="saber-group" id="group-saber-b">
+                        <h4>B. Comunicación y difusión de ideas</h4>
+                        <div class="saber-item saber-b" draggable="true" id="s-b-1" data-full-text="B.1. Habilidades básicas de comunicación interpersonal. Pautas de conducta propias del entorno virtual (etiqueta digital)."><strong>B.1.</strong> Habilidades de comunicación y etiqueta digital.</div>
+                        <div class="saber-item saber-b" draggable="true" id="s-b-2" data-full-text="B.2. Técnicas de representación gráfica: Boceto y croquis. Proyección cilíndrica ortogonal para la representación de objetos: vistas normalizadas de una pieza. Acotación normalizada de piezas sencillas."><strong>B.2.</strong> Técnicas de representación: Boceto, croquis, vistas, acotación...</div>
+                        <div class="saber-item saber-b" draggable="true" id="s-b-3" data-full-text="B.3. Introducción al software de diseño gráfico en dos dimensiones."><strong>B.3.</strong> Software de diseño gráfico 2D.</div>
+                        <div class="saber-item saber-b" draggable="true" id="s-b-4" data-full-text="B.4. Herramientas digitales para la elaboración y presentación de documentación técnica e información multimedia relativa a proyectos."><strong>B.4.</strong> Herramientas digitales para documentación...</div>
+                    </div>
+                    
+                    <div class="saber-group" id="group-saber-c">
+                        <h4>C. Pensamiento computacional, programación y robótica</h4>
+                        <div class="saber-item saber-c" draggable="true" id="s-c-1" data-full-text="C.1. Algorítmia y diagramas de flujo."><strong>C.1.</strong> Algoritmia y diagramas de flujo.</div>
+                        <div class="saber-item saber-c" draggable="true" id="s-c-2" data-full-text="C.2. Aplicaciones informáticas sencillas para ordenador y dispositivos móviles."><strong>C.2.</strong> Aplicaciones informáticas sencillas...</div>
+                        <div class="saber-item saber-c" draggable="true" id="s-c-3" data-full-text="C.3. Uso de herramientas de programación por bloques."><strong>C.3.</strong> Programación por bloques.</div>
+                        <div class="saber-item saber-c" draggable="true" id="s-c-4" data-full-text="C.4. Autoconfianza e iniciativa: el error, la reevaluación y la depuración de errores como parte del proceso de aprendizaje."><strong>C.4.</strong> Autoconfianza, error y depuración...</div>
+                    </div>
+
+                    <div class="saber-group" id="group-saber-d">
+                        <h4>D. Digitalización del entorno personal de aprendizaje</h4>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-1" data-full-text="D.1. Dispositivos digitales: Elementos del hardware y del software. Identificación y resolución de problemas técnicos sencillos."><strong>D.1.</strong> Dispositivos digitales: Hardware, software y problemas.</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-2" data-full-text="D.2. Sistemas de comunicación digital de uso común."><strong>D.2.</strong> Sistemas de comunicación digital.</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-3" data-full-text="D.3. Uso seguro y responsable de internet: búsqueda de información, correo electrónico, mensajería instantánea, redes sociales."><strong>D.3.</strong> Uso seguro de internet...</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-4" data-full-text="D.4. Herramientas y plataformas de aprendizaje: configuración, mantenimiento y uso crítico."><strong>D.4.</strong> Herramientas y plataformas de aprendizaje...</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-5" data-full-text="D.5. Técnicas de tratamiento, organización y almacenamiento seguro de la información. Formatos de ficheros. Copias de seguridad."><strong>D.5.</strong> Organización y almacenamiento de información...</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-6" data-full-text="D.6. Seguridad en la red: Riesgos, amenazas y ataques. Medidas de protección de datos y de información: antivirus, cortafuegos, servidores proxy, entre otros."><strong>D.6.</strong> Seguridad en la red: Riesgos, medidas...</div>
+                        <div class="saber-item saber-d" draggable="true" id="s-d-7" data-full-text="D.7. Buen uso digital: prácticas seguras y riesgos (ciberacoso, sextorsión, vulneración de la propia imagen y de la intimidad, acceso a contenidos inadecuados, adicciones, etc.)."><strong>D.7.</strong> Buen uso digital: prácticas seguras y riesgos...</div>
+                    </div>
+
+                    <div class="saber-group" id="group-saber-e">
+                        <h4>E. Tecnología sostenible</h4>
+                        <div class="saber-item saber-e" draggable="true" id="s-e-1" data-full-text="E.1. Desarrollo tecnológico: creatividad, innovación, investigación, obsolescencia e impacto."><strong>E.1.</strong> Desarrollo tecnológico: creatividad, innovación...</div>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- ============================================= -->
+        <!-- ====== COLUMNA 2: ÁREA DE PROYECTOS ======= -->
+        <!-- ============================================= -->
+        <div id="projects-area">
+            <h2>Mis Proyectos</h2>
+            <div class="button-group">
+                <button id="add-project-btn" class="neo-button">+ Crear Proyecto</button>
+                <button id="export-btn" class="neo-button">Exportar a JSON</button>
+                <button id="import-btn" class="neo-button">Importar JSON</button>
+                <button id="copy-json-btn" class="neo-button">Copiar JSON</button>
+            </div>
+
+            <textarea id="json-io-area" placeholder="Pega el JSON aquí para importar y haz clic en 'Importar JSON'. El JSON exportado aparecerá aquí."></textarea>
+            
+            <div id="projects-container">
+                <!-- Los nuevos proyectos se añadirán aquí dinámicamente -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NUEVO: Elemento Tooltip (un solo elemento para toda la página) -->
+    <div id="tooltip"></div>
+
+    <!-- NUEVO: Modal para Crear Proyecto -->
+    <div id="modal-backdrop">
+        <div id="modal-content">
+            <h3>Crear Nuevo Proyecto</h3>
+            <label for="new-project-name">Nombre del Proyecto:</label>
+            <input type="text" id="new-project-name" placeholder="Ej: Proyecto Robot-Móvil">
+            <div id="modal-buttons">
+                <button id="modal-create-btn" class="neo-button" style="background-color: #007bff;">Crear</button>
+                <button id="modal-cancel-btn" class="neo-button" style="background-color: #6c757d; color: white;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let draggedElement = null;
+            // Unir ambas listas de elementos arrastrables
+            const draggables = document.querySelectorAll('.criterion, .saber-item'); 
+            const projectsContainer = document.getElementById('projects-container');
+            const criteriaBank = document.getElementById('criteria-bank');
+            const saberesBank = document.getElementById('saberes-bank'); // NUEVO
+            const addProjectBtn = document.getElementById('add-project-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+            const copyBtn = document.getElementById('copy-json-btn');
+            const jsonIOArea = document.getElementById('json-io-area');
+            const tooltip = document.getElementById('tooltip'); // NUEVO: Capturar el tooltip
+            
+            // --- NUEVO: Elementos del Modal ---
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalContent = document.getElementById('modal-content');
+            const modalCreateBtn = document.getElementById('modal-create-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            const newProjectNameInput = document.getElementById('new-project-name');
+            // --- FIN DE NUEVO ---
+
+            let projectCounter = 0;
+
+            // --- 1. Lógica de Arrastrar (Drag) ---
+            /**
+             * Añade los eventos de 'drag' a un elemento
+             * @param {HTMLElement} el - El elemento que se hará arrastrable
+             */
+            function addDragEvents(el) {
+                el.addEventListener('dragstart', (e) => {
+                    draggedElement = e.target;
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                    e.stopPropagation(); // Evita que el evento se propague
+                    setTimeout(() => { 
+                        if (draggedElement) draggedElement.style.opacity = '0.5'; 
+                    }, 0);
+                });
+
+                el.addEventListener('dragend', (e) => {
+                    if (draggedElement) {
+                        draggedElement.style.opacity = '1';
+                    }
+                    draggedElement = null;
+                });
+
+                // --- NUEVO: Eventos de Tooltip ---
+                el.addEventListener('mouseover', (e) => {
+                    const fullText = e.currentTarget.dataset.fullText;
+                    if (fullText) {
+                        tooltip.textContent = fullText;
+                        tooltip.style.display = 'block';
+                    }
+                });
+
+                el.addEventListener('mouseout', (e) => {
+                    tooltip.style.display = 'none';
+                });
+
+                el.addEventListener('mousemove', (e) => {
+                    // +10 para evitar que el tooltip parpadee al estar debajo del cursor
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+            }
+
+            // Añadir eventos a los criterios iniciales del banco
+            draggables.forEach(addDragEvents);
+
+            // --- 2. Lógica de Zonas de Soltar (Drop) ---
+            /**
+             * Configura una zona para que acepte elementos arrastrables
+             * @param {HTMLElement} zone - La zona que aceptará los 'drop'
+             */
+            function setupDropZone(zone) {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // Previene que el proyecto padre capture el drop
+                    zone.classList.remove('drag-over');
+
+                    const id = e.dataTransfer.getData('text/plain');
+                    if (!id) return;
+                    const sourceElement = document.getElementById(id);
+                    if (!sourceElement) return;
+
+                    const isFromCriteriaBank = sourceElement.closest('#criteria-bank') !== null;
+                    const isFromSaberesBank = sourceElement.closest('#saberes-bank') !== null; // NUEVO
+                    const isFromBank = isFromCriteriaBank || isFromSaberesBank;
+
+                    // CASO 1: Soltar en el Banco de Criterios
+                    if (zone.id === 'criteria-bank') {
+                        if (!isFromBank && sourceElement.classList.contains('criterion')) {
+                            sourceElement.remove(); // Borra el clon de criterio
+                        }
+                    }
+                    // NUEVO: CASO 2: Soltar en el Banco de Saberes
+                    else if (zone.id === 'saberes-bank') {
+                         if (!isFromBank && sourceElement.classList.contains('saber-item')) {
+                            sourceElement.remove(); // Borra el clon de saber
+                        }
+                    } 
+                    // CASO 3: Soltar en una zona de evidencia (para criterios)
+                    else if (zone.classList.contains('criteria-drop-zone')) {
+                        if (sourceElement.classList.contains('criterion')) { // Solo aceptar criterios
+                            if (isFromBank) { // Viene del banco: CLONAR
+                                const originalId = sourceElement.id;
+                                const clone = sourceElement.cloneNode(true);
+                                clone.id = `${originalId}-clone-${Date.now()}`; // ID único para el clon
+                                clone.dataset.originalId = originalId; // Guardar referencia al original
+                                addDragEvents(clone); // Hacer que el clon también sea arrastrable
+                                zone.appendChild(clone);
+                            } else { // Viene de otra evidencia: MOVER
+                                zone.appendChild(sourceElement);
+                            }
+                        }
+                    }
+                    // NUEVO: CASO 4: Soltar en una zona de saberes
+                    else if (zone.classList.contains('saberes-drop-zone')) {
+                        if (sourceElement.classList.contains('saber-item')) { // Solo aceptar saberes
+                             if (isFromBank) { // Viene del banco: CLONAR
+                                const originalId = sourceElement.id;
+                                const clone = sourceElement.cloneNode(true);
+                                clone.id = `${originalId}-clone-${Date.now()}`;
+                                clone.dataset.originalId = originalId;
+                                addDragEvents(clone);
+                                zone.appendChild(clone);
+                            } else { // Viene de otra zona de saberes: MOVER
+                                zone.appendChild(sourceElement);
+                            }
+                            sortSaberes(zone); // NUEVO: Ordenar la zona
+                        }
+                    }
+                    
+                    // Actualizar el estado visual de cobertura
+                    updateAllCoverage(); // MODIFICADO: Llamar a la función principal
+                });
+            }
+
+            // Configurar los bancos como zonas de "drop" (para borrar)
+            setupDropZone(criteriaBank);
+            setupDropZone(saberesBank); // NUEVO
+
+            // --- 3. Lógica de Proyectos y Evidencias ---
+
+            /**
+             * NUEVO: Ordena los saberes en una zona de drop
+             * @param {HTMLElement} zone - La zona de saberes a ordenar
+             */
+            function sortSaberes(zone) {
+                const items = Array.from(zone.querySelectorAll('.saber-item'));
+                items.sort((a, b) => {
+                    const idA = a.dataset.originalId || a.id;
+                    const idB = b.dataset.originalId || b.id;
+                    return idA.localeCompare(idB);
+                });
+                // Re-append en el orden correcto
+                items.forEach(item => zone.appendChild(item));
+            }
+
+            /**
+             * Crea una nueva caja de Evidencia dentro de un proyecto
+             * @param {HTMLElement} projectElement - El elemento del proyecto padre
+             * @param {string} text - El texto para el textarea (al importar)
+             * @returns {HTMLElement} El elemento de la evidencia creada
+             */
+            function createEvidence(projectElement, text = "") {
+                const evidenceBox = document.createElement('div');
+                evidenceBox.classList.add('evidence-box');
+
+                // Título y Textarea
+                const evidenceTitle = document.createElement('h4');
+                evidenceTitle.textContent = "Evidencia";
+                evidenceBox.appendChild(evidenceTitle);
+
+                const evidenceText = document.createElement('textarea');
+                evidenceText.classList.add('evidence-textarea');
+                evidenceText.placeholder = "Escribe aquí tus notas, enlaces a documentos, etc...";
+                evidenceText.value = text;
+                evidenceBox.appendChild(evidenceText);
+                
+                // Título y Zona de Criterios
+                const criteriaTitle = document.createElement('h4');
+                criteriaTitle.textContent = "Criterios Asignados a esta Evidencia";
+                evidenceBox.appendChild(criteriaTitle);
+
+                const criteriaZone = document.createElement('div');
+                criteriaZone.classList.add('criteria-drop-zone', 'drop-zone');
+                setupDropZone(criteriaZone); // Hacer que esta zona acepte criterios
+                evidenceBox.appendChild(criteriaZone);
+
+                // Añadir la caja de evidencia al proyecto
+                projectElement.appendChild(evidenceBox);
+                return evidenceBox;
+            }
+            
+            /**
+             * Crea un nuevo bloque de Proyecto en el DOM
+             * @param {string} name - El nombre del proyecto
+             * @param {string[]} saberes - Array de IDs de saberes (para importación)
+             * @returns {HTMLElement} El elemento del proyecto creado
+             */
+            function createProject(name, saberes = []) { // MODIFICADO: saberes es ahora un array de IDs
+                projectCounter++;
+                
+                const projectBox = document.createElement('div');
+                projectBox.classList.add('project-box');
+                projectBox.id = `project-${projectCounter}`;
+
+                // Título del Proyecto
+                const title = document.createElement('h3');
+                title.textContent = name;
+                projectBox.appendChild(title);
+
+                // --- MODIFICADO: Saberes Básicos ---
+                const saberesTitle = document.createElement('h4');
+                saberesTitle.textContent = "Saberes Básicos Asignados";
+                projectBox.appendChild(saberesTitle);
+
+                const saberesZone = document.createElement('div');
+                saberesZone.classList.add('saberes-drop-zone', 'drop-zone');
+                setupDropZone(saberesZone); // Hacer que esta zona acepte saberes
+                
+                // (Lógica de importación) Añadir saberes guardados
+                saberes.forEach(saberId => {
+                    const originalEl = document.getElementById(saberId);
+                    if (originalEl) {
+                        const clone = originalEl.cloneNode(true);
+                        clone.id = `${saberId}-clone-${Date.now()}`;
+                        clone.dataset.originalId = saberId;
+                        addDragEvents(clone);
+                        saberesZone.appendChild(clone);
+                    }
+                });
+                projectBox.appendChild(saberesZone);
+                // --- FIN DE MODIFICADO ---
+
+                // Botón para Añadir Evidencias
+                const addEvidenceBtn = document.createElement('button');
+                addEvidenceBtn.textContent = "+ Añadir Evidencia";
+                addEvidenceBtn.classList.add('neo-button', 'add-evidence-btn');
+                
+                addEvidenceBtn.addEventListener('click', () => {
+                    createEvidence(projectBox); // Añade una evidencia a ESTE proyecto
+                });
+                projectBox.appendChild(addEvidenceBtn);
+                
+                // Añadir al contenedor
+                projectsContainer.appendChild(projectBox);
+                return projectBox;
+            }
+
+            // Botón de Añadir Proyecto
+            // --- MODIFICADO: Reemplazar prompt() con modal ---
+            addProjectBtn.addEventListener('click', () => {
+                // Abre el modal
+                modalBackdrop.style.display = 'flex';
+                newProjectNameInput.focus();
+            });
+
+            // --- NUEVO: Lógica del Modal ---
+            modalCancelBtn.addEventListener('click', () => {
+                modalBackdrop.style.display = 'none';
+                newProjectNameInput.value = ''; // Limpiar input
+            });
+
+            // Cerrar al hacer clic fuera del contenido
+            modalBackdrop.addEventListener('click', (e) => {
+                if (e.target === modalBackdrop) {
+                    modalBackdrop.style.display = 'none';
+                    newProjectNameInput.value = ''; // Limpiar input
+                }
+            });
+
+            modalCreateBtn.addEventListener('click', () => {
+                const projectName = newProjectNameInput.value.trim();
+                if (projectName) {
+                    createProject(projectName);
+                    // Cerrar y limpiar modal
+                    modalBackdrop.style.display = 'none';
+                    newProjectNameInput.value = '';
+                } else {
+                    // Opcional: feedback de error (ej. mover el modal)
+                    modalContent.style.animation = 'shake 0.3s';
+                    setTimeout(() => {
+                        modalContent.style.animation = '';
+                    }, 300);
+                }
+            });
+
+            // --- 4. Lógica de Cobertura (Covered/Uncovered) ---
+            
+            /**
+             * NUEVO: Función principal que actualiza toda la cobertura
+             */
+            function updateAllCoverage() {
+                updateCriteriaCoverage();
+                updateSaberesCoverage(); // NUEVO
+            }
+
+            /**
+             * MODIFICADO: Renombrada de updateCoverage a updateCriteriaCoverage
+             */
+            function updateCriteriaCoverage() {
+                // Obtener todos los IDs *originales* del banco
+                const allOriginalIds = new Set();
+                document.querySelectorAll('#criteria-bank .criterion').forEach(c => allOriginalIds.add(c.id));
+
+                // Obtener todos los IDs *usados* en los proyectos
+                const usedOriginalIds = new Set();
+                document.querySelectorAll('#projects-container .criterion').forEach(c => {
+                    // Usamos dataset.originalId que guardamos en el clon
+                    if (c.dataset.originalId) {
+                        usedOriginalIds.add(c.dataset.originalId);
+                    }
+                });
+
+                // Actualizar las clases en el banco
+                allOriginalIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (usedOriginalIds.has(id)) {
+                        el.classList.add('covered');
+                        el.classList.remove('uncovered');
+                    } else {
+                        el.classList.add('uncovered');
+                        el.classList.remove('covered');
+                    }
+                });
+            }
+
+            /**
+             * NUEVO: Lógica de cobertura para Saberes
+             */
+            function updateSaberesCoverage() {
+                const allOriginalSaberIds = new Set();
+                document.querySelectorAll('#saberes-bank .saber-item').forEach(s => allOriginalSaberIds.add(s.id));
+
+                const usedOriginalSaberIds = new Set();
+                document.querySelectorAll('#projects-container .saber-item').forEach(s => {
+                    if (s.dataset.originalId) {
+                        usedOriginalSaberIds.add(s.dataset.originalId);
+                    }
+                });
+
+                allOriginalSaberIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (usedOriginalSaberIds.has(id)) {
+                        el.classList.add('covered');
+                        el.classList.remove('uncovered');
+                    } else {
+                        el.classList.add('uncovered');
+                        el.classList.remove('covered');
+                    }
+                });
+            }
+
+            // --- 5. Lógica de JSON (Importar/Exportar) ---
+
+            // EXPORTAR
+            exportBtn.addEventListener('click', () => {
+                const data = {
+                    projects: []
+                };
+
+                document.querySelectorAll('.project-box').forEach(projectEl => {
+                    const projectData = {
+                        name: projectEl.querySelector('h3').textContent,
+                        saberes: [], // MODIFICADO: saberes es un array
+                        evidences: []
+                    };
+
+                    // NUEVO: Guardar Saberes
+                    projectEl.querySelectorAll('.saberes-drop-zone .saber-item').forEach(saberEl => {
+                        projectData.saberes.push(saberEl.dataset.originalId);
+                    });
+
+                    projectEl.querySelectorAll('.evidence-box').forEach(evidenceEl => {
+                        const evidenceData = {
+                            text: evidenceEl.querySelector('.evidence-textarea').value,
+                            criteria: []
+                        };
+                        
+                        evidenceEl.querySelectorAll('.criteria-drop-zone .criterion').forEach(criterionEl => {
+                            evidenceData.criteria.push(criterionEl.dataset.originalId); // Guardar ID original
+                        });
+                        
+                        projectData.evidences.push(evidenceData);
+                    });
+
+                    data.projects.push(projectData);
+                });
+
+                const jsonString = JSON.stringify(data, null, 2);
+                jsonIOArea.value = jsonString;
+            });
+
+            // IMPORTAR
+            importBtn.addEventListener('click', () => {
+                const jsonString = jsonIOArea.value;
+                if (!jsonString.trim()) {
+                    // MODIFICADO: Usar el modal para alertas
+                    alert("Pega el JSON en el área de texto para importar.");
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(jsonString);
+
+                    // 1. Limpiar estado actual
+                    projectsContainer.innerHTML = ''; // Borrar proyectos existentes
+                    document.querySelectorAll('#projects-container .criterion').forEach(c => c.remove()); // Borrar clones
+                    document.querySelectorAll('#projects-container .saber-item').forEach(c => c.remove()); // NUEVO: Borrar clones de saberes
+
+                    // 2. Reconstruir estado desde JSON
+                    if (data.projects && Array.isArray(data.projects)) {
+                        data.projects.forEach(projectData => {
+                            // Crear el proyecto
+                            const newProjectEl = createProject(projectData.name, projectData.saberes || []); // MODIFICADO: Pasar array de saberes
+                            
+                            // Crear sus evidencias
+                            if (projectData.evidences && Array.isArray(projectData.evidences)) {
+                                projectData.evidences.forEach(evidenceData => {
+                                    const newEvidenceEl = createEvidence(newProjectEl, evidenceData.text || "");
+                                    const dropZone = newEvidenceEl.querySelector('.criteria-drop-zone');
+
+                                    // Añadir los criterios a la evidencia
+                                    if (evidenceData.criteria && Array.isArray(evidenceData.criteria)) {
+                                        evidenceData.criteria.forEach(criterionId => {
+                                            const originalEl = document.getElementById(criterionId);
+                                            if (originalEl) {
+                                                const clone = originalEl.cloneNode(true);
+                                                clone.id = `${criterionId}-clone-${Date.now()}`;
+                                                clone.dataset.originalId = criterionId;
+                                                addDragEvents(clone);
+                                                dropZone.appendChild(clone);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            // NUEVO: Ordenar los saberes después de importarlos
+                            const saberesZone = newProjectEl.querySelector('.saberes-drop-zone');
+                            if (saberesZone) {
+                                sortSaberes(saberesZone);
+                            }
+                        });
+                    }
+                    
+                    jsonIOArea.value = ""; // Limpiar área tras importar
+                    updateAllCoverage(); // MODIFICADO: Llamar a la función principal
+                    alert("¡Proyectos importados con éxito!");
+
+                } catch (e) {
+                    alert("Error al importar: El formato del JSON no es válido.");
+                    console.error("Error al parsear JSON:", e);
+                }
+            });
+
+            // COPIAR
+            copyBtn.addEventListener('click', () => {
+                if (!jsonIOArea.value) {
+                    alert("Primero debes exportar para poder copiar.");
+                    return;
+                }
+                
+                try {
+                    jsonIOArea.select();
+                    // Usar 'copy'
+                    document.execCommand('copy');
+                    
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = "¡Copiado!";
+                    setTimeout(() => { copyBtn.textContent = originalText; }, 1500);
+
+                } catch (err) {
+                    alert("No se pudo copiar el texto.");
+                }
+            });
+            
+            // Reemplazar alerts nativos (que no funcionan en preview) por un modal simple
+            // Sobreescribimos la función 'alert'
+            const originalAlert = window.alert;
+            window.alert = function(message) {
+                // Reutilizamos el modal de creación de proyecto para mostrar un mensaje
+                const modalTitle = modalContent.querySelector('h3');
+                const modalBody = modalContent.querySelector('label');
+                const modalButtons = modalContent.querySelector('#modal-buttons');
+                
+                // Guardar estado anterior
+                const oldTitle = modalTitle.textContent;
+                const oldBody = modalBody.innerHTML; // Guardamos innerHTML por si acaso
+                const oldButtons = modalButtons.innerHTML;
+                
+                // Configurar modal para alerta
+                modalTitle.textContent = "Notificación";
+                modalBody.innerHTML = message; // Usamos innerHTML para mostrar el mensaje
+                newProjectNameInput.style.display = 'none'; // Ocultar input
+                
+                // Botón de OK
+                modalButtons.innerHTML = '<button id="modal-ok-btn" class="neo-button" style="background-color: #007bff; margin: auto;">OK</button>';
+                
+                // Mostrar modal
+                modalBackdrop.style.display = 'flex';
+
+                document.getElementById('modal-ok-btn').addEventListener('click', () => {
+                    // Ocultar modal
+                    modalBackdrop.style.display = 'none';
+                    
+                    // Restaurar modal de creación
+                    modalTitle.textContent = oldTitle;
+                    modalBody.innerHTML = oldBody;
+                    modalButtons.innerHTML = oldButtons;
+                    newProjectNameInput.style.display = 'block'; // Mostrar input
+                    
+                    // Re-enganchar los listeners originales
+                    modalContent.querySelector('#modal-create-btn').addEventListener('click', createProjectFromModal);
+                    modalContent.querySelector('#modal-cancel-btn').addEventListener('click', cancelProjectFromModal);
+                }, { once: true }); // El listener se ejecuta solo una vez
+            }
+            
+            // Extraer la lógica de creación y cancelación a funciones para poder re-engancharlas
+            function createProjectFromModal() {
+                 const projectName = newProjectNameInput.value.trim();
+                if (projectName) {
+                    createProject(projectName);
+                    modalBackdrop.style.display = 'none';
+                    newProjectNameInput.value = '';
+                } else {
+                    modalContent.style.animation = 'shake 0.3s';
+                    setTimeout(() => {
+                        modalContent.style.animation = '';
+                    }, 300);
+                }
+            }
+            
+            function cancelProjectFromModal() {
+                modalBackdrop.style.display = 'none';
+                newProjectNameInput.value = ''; // Limpiar input
+            }
+            
+            // Enganchar los listeners por primera vez
+            modalCreateBtn.addEventListener('click', createProjectFromModal);
+            modalCancelBtn.addEventListener('click', cancelProjectFromModal);
+            
+            // --- 6. Estado Inicial ---
+            updateAllCoverage(); // MODIFICADO: Llamar a la función principal
+        });
+    </script>
+
+</body>
+</html>

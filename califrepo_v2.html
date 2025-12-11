@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorio de Rúbricas (Cloud)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo Neubrutalista */
+        body { font-family: 'Inter', sans-serif; background-color: #f0f0f0; }
+        .neubrutalist {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 6px 6px 0 #000000;
+            border-radius: 8px;
+        }
+        .neubrutalist-button {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0 #000000;
+            cursor: pointer;
+        }
+        .neubrutalist-button:hover {
+            box-shadow: 2px 2px 0 #000000;
+            transform: translate(2px, 2px);
+        }
+        .neubrutalist-button:active {
+            box-shadow: 0 0 0 #000000;
+            transform: translate(4px, 4px);
+        }
+        /* Modal */
+        .modal {
+            display: none; position: fixed; z-index: 50;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.6);
+            align-items: center; justify-content: center;
+        }
+        .header-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+        .input-constr {
+            border: 2px solid #000; border-radius: 6px; padding: 8px 12px;
+            font-size: 1rem; box-shadow: 3px 3px 0 #000; transition: all 0.2s ease;
+        }
+        .input-constr:focus { outline: none; box-shadow: 1px 1px 0 #000; transform: translate(2px, 2px); }
+        .tag-constr {
+            display: inline-flex; align-items: center; background-color: #e0e0e0;
+            border: 2px solid #000; border-radius: 6px; padding: 4px 8px;
+            font-weight: 600; box-shadow: 2px 2px 0 #000;
+        }
+        .tag-constr button { margin-left: 8px; font-weight: bold; color: #ef4444; }
+        .tag-constr button:hover { color: #000; }
+        /* Loader */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Estado Auth */
+        .auth-badge { padding: 4px 8px; border-radius: 4px; border: 2px solid black; font-weight: bold; font-size: 0.75rem; }
+        .auth-success { background-color: #86efac; color: black; }
+        .auth-error { background-color: #fca5a5; color: black; }
+        .auth-loading { background-color: #f3f4f6; color: gray; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Cabecera Fija -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b-2 border-black p-3 z-50 header-shadow flex justify-between items-center">
+        <div class="flex gap-2">
+            <a href="califtool_v2.html" id="repo-link-btn" class="neubrutalist-button bg-blue-300 hover:bg-blue-400 !py-2 !px-3 text-sm sm:text-base">
+                &larr; Volver a Herramienta
+            </a>
+        </div>
+        <div id="header-main-title" class="flex-grow text-center">
+            <h1 class="text-lg sm:text-xl font-bold truncate">Editor de Rúbricas (Cloud)</h1>
+        </div>
+        <div class="w-auto flex justify-end items-center px-2">
+            <div id="auth-status" class="auth-badge auth-loading">Conectando...</div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto space-y-8 mt-24">
+        
+        <!-- BLOQUE DE IMPORTACIÓN -->
+        <section class="neubrutalist p-5 bg-orange-50 border-orange-500 border-4 border-dashed relative">
+            <h2 class="text-2xl font-bold mb-2">📥 Importación Masiva (JSON)</h2>
+            <p class="text-sm text-gray-600 mb-3">
+                Pega aquí tu JSON de rúbricas antiguas. El sistema intentará detectar si es una colección o una rúbrica individual.
+            </p>
+            <textarea id="import-json-text" class="w-full h-24 p-3 border-2 border-black rounded-lg bg-white font-mono text-xs focus:outline-none" placeholder='Pegar JSON aquí...'></textarea>
+            <button id="btn-import-process" class="neubrutalist-button w-full bg-orange-300 hover:bg-orange-400 mt-2 flex justify-center items-center gap-2">
+                <span>🚀 Procesar e Importar a la Nube</span>
+            </button>
+        </section>
+
+        <!-- Constructor -->
+        <section class="neubrutalist p-5 relative">
+            <div id="editing-indicator" class="hidden absolute -top-4 left-5 bg-yellow-300 border-2 border-black px-3 py-1 font-bold shadow-md transform -rotate-2">
+                ✏️ Editando Rúbrica Existente
+            </div>
+
+            <div class="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
+                <h2 class="text-3xl font-bold">Constructor</h2>
+                <button id="toggle-constructor" class="neubrutalist-button !py-1 !px-3 text-sm bg-gray-200 hover:bg-gray-300">
+                    Mostrar ▼
+                </button>
+            </div>
+            
+            <div id="constructor-content" style="display: none;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label for="c-title" class="text-lg font-bold">1. Título de la Rúbrica</label>
+                            <input type="text" id="c-title" class="input-constr w-full" placeholder="Ej: Test de Ciberseguridad">
+                        </div>
+
+                        <label class="text-lg font-bold">2. Criterios (CE) y Colores</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="c-ce-id" class="input-constr w-1/3" placeholder="CE 3.3">
+                            <input type="text" id="c-ce-title" class="input-constr w-1/3" placeholder="Identificar...">
+                            <input type="text" id="c-ce-color" class="input-constr w-1/3" placeholder="red">
+                            <button id="c-ce-add" class="neubrutalist-button !p-2 !shadow-sm !border-2">+</button>
+                        </div>
+                        <div id="c-ce-list" class="flex flex-wrap gap-2 pt-2"></div>
+
+                        <div class="space-y-2 mt-4">
+                            <label class="text-lg font-bold">3. Secciones (Casos) y Colores</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="c-s-id" class="input-constr w-1/3" placeholder="s1">
+                                <input type="text" id="c-s-title" class="input-constr w-1/3" placeholder="Caso 1...">
+                                <input type="text" id="c-s-color" class="input-constr w-1/3" placeholder="blue">
+                                <button id="c-s-add" class="neubrutalist-button !p-2 !shadow-sm !border-2">+</button>
+                            </div>
+                            <div id="c-s-list" class="flex flex-wrap gap-2 pt-2"></div>
+                        </div>
+
+                        <div class="space-y-4 neubrutalist p-4 !mt-8 border-2 border-black">
+                            <h3 class="text-xl font-bold">4. Añadir Ítems</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="c-i-id" class="input-constr w-full col-span-1" placeholder="ID (c1.1)">
+                                <input type="number" id="c-i-points" class="input-constr w-full col-span-1" placeholder="Puntos" step="0.25">
+                            </div>
+                            <input type="text" id="c-i-title" class="input-constr w-full" placeholder="Título del Ítem">
+                            <input type="text" id="c-i-text" class="input-constr w-full" placeholder="Descripción (Texto de ayuda)">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="c-i-section" class="input-constr w-full" placeholder="Sección (ID)">
+                                <input type="text" id="c-i-criteria" class="input-constr w-full" placeholder="Criterios (sep por coma)">
+                            </div>
+                            <button id="c-i-add" class="neubrutalist-button w-full bg-blue-300 hover:bg-blue-400">Añadir Ítem</button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold">5. Guardar / Exportar</h3>
+                        <textarea id="c-output-json" class="w-full h-64 p-3 border-2 border-black rounded-lg bg-gray-100 font-mono text-sm" readonly></textarea>
+                        
+                        <button id="btn-save-cloud" class="neubrutalist-button w-full bg-purple-300 hover:bg-purple-400 flex justify-center items-center gap-2 text-lg">
+                            <span>☁️ Guardar en la Nube</span>
+                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button id="c-copy-json" class="neubrutalist-button flex-1 bg-green-300 hover:bg-green-400">Copiar JSON</button>
+                            <button id="c-reset-form" class="neubrutalist-button flex-1 bg-red-300 hover:bg-red-400">Nuevo / Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Rúbricas (FIREBASE) -->
+        <section>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Rúbricas en la Nube</h2>
+                <div id="loading-spinner" class="loader" style="display: none;"></div>
+            </div>
+            <div id="rubricas-container" class="space-y-6">
+                <p class="text-gray-500 italic">Esperando conexión...</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal Alertas -->
+    <div id="simple-modal" class="modal" style="display: none;">
+        <div id="simple-modal-overlay" class="fixed inset-0 bg-black opacity-60" style="z-index: -1;"></div>
+        <div class="neubrutalist p-6 w-full max-w-sm relative bg-white">
+            <h3 id="simple-modal-title" class="text-xl font-bold mb-2 text-center">Aviso</h3>
+            <p id="simple-modal-message" class="text-gray-700 text-center text-lg mb-4">Mensaje.</p>
+            <button id="simple-modal-close" class="neubrutalist-button w-full bg-blue-300 hover:bg-blue-400">OK</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // TUS CLAVES DE FIREBASE INTEGRADAS
+        const firebaseConfig = {
+           apiKey: "AIzaSyBQEKMlgY-8lQtG1AbaPlJqFTwJmJI-kQ4",
+           authDomain: "rubric-repo.firebaseapp.com",
+           projectId: "rubric-repo",
+           storageBucket: "rubric-repo.firebasestorage.app",
+           messagingSenderId: "500836148512",
+           appId: "1:500836148512:web:da33f04b80cac2b7b22345"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // ID de la App (para estructura de datos)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rubricas-app-v1';
+
+        // Variables de Estado
+        let currentUser = null;
+        let constructorData = { title: "", reportMap: {}, evaluationData: [] };
+        let editingId = null; 
+
+        // Referencias DOM
+        const els = {
+            container: document.getElementById('rubricas-container'),
+            saveBtn: document.getElementById('btn-save-cloud'),
+            resetBtn: document.getElementById('c-reset-form'),
+            copyBtn: document.getElementById('c-copy-json'),
+            output: document.getElementById('c-output-json'),
+            spinner: document.getElementById('loading-spinner'),
+            authStatus: document.getElementById('auth-status'),
+            
+            // Importación
+            importBtn: document.getElementById('btn-import-process'),
+            importTxt: document.getElementById('import-json-text'),
+
+            // Constructor
+            editingIndicator: document.getElementById('editing-indicator'),
+            toggleBtn: document.getElementById('toggle-constructor'),
+            constructorContent: document.getElementById('constructor-content'),
+            
+            // Inputs
+            title: document.getElementById('c-title'),
+            ceId: document.getElementById('c-ce-id'), ceTitle: document.getElementById('c-ce-title'), ceColor: document.getElementById('c-ce-color'), ceAdd: document.getElementById('c-ce-add'), ceList: document.getElementById('c-ce-list'),
+            sId: document.getElementById('c-s-id'), sTitle: document.getElementById('c-s-title'), sColor: document.getElementById('c-s-color'), sAdd: document.getElementById('c-s-add'), sList: document.getElementById('c-s-list'),
+            iId: document.getElementById('c-i-id'), iTitle: document.getElementById('c-i-title'), iText: document.getElementById('c-i-text'), iPoints: document.getElementById('c-i-points'), iSection: document.getElementById('c-i-section'), iCriteria: document.getElementById('c-i-criteria'), iAdd: document.getElementById('c-i-add')
+        };
+
+        // --- 1. Autenticación Robusta ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                     await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                     await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                els.authStatus.textContent = "Error Auth";
+                els.authStatus.className = "auth-badge auth-error";
+                showMessage("Error de Autenticación: " + error.message + "\n\nVerifica en la consola de Firebase > Authentication que el proveedor 'Anónimo' esté habilitado.");
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                els.authStatus.textContent = "Conectado";
+                els.authStatus.className = "auth-badge auth-success";
+                subscribeToRubrics();
+            } else {
+                els.authStatus.textContent = "Desconectado";
+                els.authStatus.className = "auth-badge auth-loading";
+            }
+        });
+
+        // --- 2. Funciones Auxiliares ---
+        function showMessage(msg, title="Aviso") {
+            document.getElementById('simple-modal-title').innerText = title;
+            document.getElementById('simple-modal-message').innerText = msg;
+            document.getElementById('simple-modal').style.display = 'flex';
+        }
+        document.getElementById('simple-modal-close').addEventListener('click', () => document.getElementById('simple-modal').style.display = 'none');
+        document.getElementById('simple-modal-overlay').addEventListener('click', () => document.getElementById('simple-modal').style.display = 'none');
+
+        function updateOutput() {
+            if (els.title.value) constructorData.title = els.title.value;
+            els.output.value = JSON.stringify(constructorData, null, 4);
+        }
+
+        function createTag(id, text, listEl, mapKey) {
+            const tag = document.createElement('div');
+            tag.className = 'tag-constr';
+            tag.innerHTML = `<span>${text}</span>`;
+            const delBtn = document.createElement('button');
+            delBtn.innerText = '×';
+            delBtn.onclick = () => {
+                tag.remove();
+                delete constructorData.reportMap[id];
+                if (mapKey === 'isSection') {
+                    constructorData.evaluationData = constructorData.evaluationData.filter(item => item.section !== id);
+                }
+                updateOutput();
+            };
+            tag.appendChild(delBtn);
+            listEl.appendChild(tag);
+        }
+
+        function resetForm() {
+            constructorData = { title: "", reportMap: {}, evaluationData: [] };
+            editingId = null;
+            els.title.value = '';
+            els.ceList.innerHTML = '';
+            els.sList.innerHTML = '';
+            els.output.value = '';
+            els.editingIndicator.classList.add('hidden');
+            els.saveBtn.innerHTML = '<span>☁️ Guardar en la Nube</span>';
+            [els.ceId, els.ceTitle, els.ceColor, els.sId, els.sTitle, els.sColor, els.iId, els.iTitle, els.iText, els.iPoints, els.iSection, els.iCriteria].forEach(el => el.value = '');
+        }
+
+        // --- 3. Lógica Constructor (Inputs) ---
+        // (Igual que antes, omitido por brevedad pero funcional en el código completo)
+        els.ceAdd.addEventListener('click', () => {
+            const id = els.ceId.value.trim();
+            if (!id) return showMessage("Falta ID");
+            constructorData.reportMap[id] = { title: els.ceTitle.value.trim(), color: els.ceColor.value.trim(), isSection: false };
+            createTag(id, id, els.ceList, false);
+            els.ceId.value = ''; els.ceTitle.value = ''; els.ceColor.value = '';
+            updateOutput();
+        });
+        els.sAdd.addEventListener('click', () => {
+            const id = els.sId.value.trim();
+            if (!id) return showMessage("Falta ID");
+            constructorData.reportMap[id] = { title: els.sTitle.value.trim(), color: els.sColor.value.trim(), isSection: true };
+            createTag(id, id, els.sList, true);
+            els.sId.value = ''; els.sTitle.value = ''; els.sColor.value = '';
+            updateOutput();
+        });
+        els.iAdd.addEventListener('click', () => {
+            const item = {
+                id: els.iId.value.trim(), title: els.iTitle.value.trim(), text: els.iText.value.trim(),
+                points: parseFloat(els.iPoints.value), section: els.iSection.value.trim(),
+                criteria: els.iCriteria.value.split(',').map(s => s.trim()).filter(s => s)
+            };
+            if(!item.id || !item.points || !item.section) return showMessage("Faltan datos obligatorios");
+            if(!constructorData.reportMap[item.section]) return showMessage(`Sección ${item.section} no existe`);
+            constructorData.evaluationData.push(item);
+            showMessage(`Ítem ${item.id} añadido`);
+            updateOutput();
+        });
+        
+        els.title.addEventListener('input', updateOutput);
+        els.toggleBtn.addEventListener('click', () => {
+            const isHidden = els.constructorContent.style.display === 'none';
+            els.constructorContent.style.display = isHidden ? 'block' : 'none';
+            els.toggleBtn.innerText = isHidden ? 'Ocultar ▲' : 'Mostrar ▼';
+        });
+        els.resetBtn.addEventListener('click', resetForm);
+        els.copyBtn.addEventListener('click', () => { els.output.select(); document.execCommand('copy'); showMessage("JSON copiado"); });
+
+
+        // --- 4. IMPORTACIÓN ROBUSTA (Fix hanging) ---
+        
+        els.importBtn.addEventListener('click', async () => {
+            // 1. Verificar Auth
+            if (!currentUser) {
+                return showMessage("No estás conectado a Firebase. Espera a que el indicador arriba diga 'Conectado'.", "Error de Conexión");
+            }
+
+            const rawJson = els.importTxt.value.trim();
+            if(!rawJson) return showMessage("Pega un JSON primero.");
+
+            els.importBtn.innerHTML = '<span>⏳ Procesando...</span>';
+            els.importBtn.disabled = true;
+
+            try {
+                let data;
+                try {
+                    data = JSON.parse(rawJson);
+                } catch(e) {
+                    throw new Error("El texto no es un JSON válido. Revisa comas y llaves.");
+                }
+
+                let importedCount = 0;
+                const batchPromises = [];
+
+                // Detectar Tipo de Importación
+                // A. Colección (Objeto con claves rubr_1, rubr_2...)
+                if (!data.title && typeof data === 'object') {
+                    for (const key in data) {
+                        const rubrica = data[key];
+                        if (rubrica.title && rubrica.evaluationData) {
+                            // Usar la clave del JSON como ID del doc
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'rubricas', key);
+                            batchPromises.push(setDoc(docRef, rubrica));
+                            importedCount++;
+                        }
+                    }
+                } 
+                // B. Rúbrica Única
+                else if (data.title && data.evaluationData) {
+                    const cleanTitle = data.title.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20);
+                    const newId = `${cleanTitle}_imp_${Date.now()}`;
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'rubricas', newId);
+                    batchPromises.push(setDoc(docRef, data));
+                    importedCount = 1;
+                } else {
+                    throw new Error("Formato no reconocido. No parece una rúbrica ni una colección de rúbricas.");
+                }
+
+                if (importedCount === 0) {
+                    throw new Error("No se encontraron rúbricas válidas en el JSON.");
+                }
+
+                // Ejecutar promesas
+                await Promise.all(batchPromises);
+
+                showMessage(`✅ ¡Éxito! Se han importado ${importedCount} rúbricas.`);
+                els.importTxt.value = ''; 
+
+            } catch(e) {
+                console.error(e);
+                showMessage(`Error de importación: ${e.message}`, "Falló la importación");
+            } finally {
+                els.importBtn.innerHTML = '<span>🚀 Procesar e Importar a la Nube</span>';
+                els.importBtn.disabled = false;
+            }
+        });
+
+        // --- 5. Firebase CRUD ---
+        
+        els.saveBtn.addEventListener('click', async () => {
+            if (!currentUser) return showMessage("Esperando conexión...");
+            if (!constructorData.title) return showMessage("Ponle título.");
+
+            try {
+                els.saveBtn.innerHTML = '<span>⏳ Guardando...</span>';
+                if (!editingId) {
+                    const cleanTitle = constructorData.title.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20);
+                    editingId = `${cleanTitle}_${Date.now().toString().slice(-4)}`;
+                }
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'rubricas', editingId);
+                await setDoc(docRef, constructorData);
+                showMessage("✅ Guardado.");
+                resetForm();
+            } catch (error) {
+                console.error(error);
+                showMessage(`Error al guardar: ${error.message}`);
+            } finally {
+                els.saveBtn.innerHTML = '<span>☁️ Guardar en la Nube</span>';
+            }
+        });
+
+        function subscribeToRubrics() {
+            els.spinner.style.display = 'inline-block';
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'rubricas');
+            
+            onSnapshot(q, (snapshot) => {
+                els.spinner.style.display = 'none';
+                els.container.innerHTML = '';
+                if (snapshot.empty) {
+                    els.container.innerHTML = '<p class="text-gray-500">No hay rúbricas. ¡Importa o crea una!</p>';
+                    return;
+                }
+                snapshot.forEach((docSnap) => {
+                    els.container.appendChild(createRubricCard(docSnap.id, docSnap.data()));
+                });
+            }, (error) => {
+                console.error("Snapshot error:", error);
+                els.container.innerHTML = `<p class="text-red-500">Error leyendo base de datos: ${error.message}. <br> Verifica las Reglas de Firestore.</p>`;
+            });
+        }
+
+        function createRubricCard(id, data) {
+            const el = document.createElement('div');
+            el.className = 'neubrutalist p-5 bg-white';
+            const criteriaChips = Object.keys(data.reportMap || {}).filter(k => !data.reportMap[k].isSection).map(k => `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border-2 border-black bg-${data.reportMap[k].color}-200 text-black">${k}</span>`).join(' ');
+            el.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h3 class="text-2xl font-bold">${data.title}</h3>
+                    <span class="text-xs font-mono bg-gray-100 p-1 border border-gray-300 rounded text-gray-500">${id}</span>
+                </div>
+                <div class="mt-3 mb-4"><div class="flex flex-wrap gap-2">${criteriaChips || '<span class="text-gray-400">Sin criterios</span>'}</div></div>
+                <div class="flex gap-2 border-t-2 border-black pt-4">
+                    <button class="btn-edit neubrutalist-button bg-yellow-300 hover:bg-yellow-400 flex-1 text-sm">✏️ Editar</button>
+                    <button class="btn-delete neubrutalist-button bg-red-300 hover:bg-red-400 flex-1 text-sm">🗑️ Borrar</button>
+                    <button class="btn-json neubrutalist-button bg-gray-200 hover:bg-gray-300 px-3 text-sm" title="Copiar JSON">📋</button>
+                </div>
+            `;
+            el.querySelector('.btn-delete').addEventListener('click', async () => { if (confirm(`¿Borrar "${data.title}"?`)) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rubricas', id)); });
+            el.querySelector('.btn-edit').addEventListener('click', () => loadForEditing(id, data));
+            el.querySelector('.btn-json').addEventListener('click', () => { navigator.clipboard.writeText(JSON.stringify(data, null, 4)); showMessage("JSON copiado"); });
+            return el;
+        }
+
+        function loadForEditing(id, data) {
+            resetForm();
+            editingId = id;
+            constructorData = JSON.parse(JSON.stringify(data));
+            els.title.value = data.title;
+            els.editingIndicator.classList.remove('hidden');
+            els.saveBtn.innerHTML = '<span>💾 Actualizar Rúbrica Existente</span>';
+            Object.keys(data.reportMap).forEach(key => {
+                const item = data.reportMap[key];
+                if(item.isSection) createTag(key, key, els.sList, true); else createTag(key, key, els.ceList, false);
+            });
+            updateOutput();
+            els.constructorContent.style.display = 'block';
+            els.toggleBtn.innerText = 'Ocultar ▲';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
