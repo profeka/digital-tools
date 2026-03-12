@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoevaluación de Digitalización</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background-color: #f0f0f0;
+            color: #000;
+        }
+
+        /* Estilos Neubrutalistas */
+        .nb-card {
+            background: white;
+            border: 3px solid black;
+            box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+        }
+
+        .nb-button {
+            border: 2px solid black;
+            box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+            transition: all 0.1s ease;
+            font-weight: 900;
+        }
+
+        .nb-button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px 0px rgba(0,0,0,1);
+        }
+
+        .active-sel { 
+            background-color: #000 !important; 
+            color: #fff !important; 
+            transform: translate(3px, 3px);
+            box-shadow: none !important;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border: 2px solid black;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(-1deg);
+            margin-bottom: 1rem;
+        }
+
+        .desc-box {
+            font-size: 0.7rem;
+            line-height: 1.2;
+            padding: 8px;
+            border: 2px solid black;
+            background: #fff;
+        }
+
+        .audit-detail {
+            font-size: 0.65rem;
+            color: #444;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-48">
+
+    <div class="max-w-3xl mx-auto p-4 md:p-8">
+        <!-- CABECERA -->
+        <header class="nb-card p-6 mb-12 bg-[#ff60ff]">
+            <h1 class="text-3xl font-black leading-none mb-2 italic uppercase tracking-tighter">Autoevaluación de Digitalización</h1>
+            <p class="text-black font-bold mb-6 italic text-sm">Registro detallado de desempeño y proyectos</p>
+            
+            <div class="bg-white p-4 border-2 border-black">
+                <label class="block text-[10px] font-black text-black uppercase mb-1">Nombre</label>
+                <input type="text" id="student-name" placeholder="Escribe tu nombre aquí..." 
+                    class="w-full text-lg p-2 bg-transparent border-b-4 border-black outline-none font-bold placeholder:text-gray-300">
+            </div>
+        </header>
+
+        <!-- 1. TRABAJO EN CLASE (20%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#fbbf24]">Trabajo en clase (20%)</div>
+            <div class="nb-card p-4 bg-white" data-section="trabajo">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                    <div class="desc-box bg-red-50">0-4: Distracciones continuas. No participa o molesta.</div>
+                    <div class="desc-box bg-amber-50">5-8: Realiza su tarea, pero requiere ser animado a veces.</div>
+                    <div class="desc-box bg-emerald-50 italic font-bold">9-10: Constante, enfocado y ayuda activamente.</div>
+                </div>
+                <div class="flex flex-wrap gap-2 btn-10"></div>
+            </div>
+        </section>
+
+        <!-- 2. DOSSIER HTML (20%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#ff60ff]">Dossier HTML (20%)</div>
+            <div class="nb-card p-4 bg-white" data-section="dossier">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                    <div class="desc-box bg-red-50 text-[10px]">0-4: No entrega dossier o falta información técnica básica.</div>
+                    <div class="desc-box bg-amber-50 text-[10px]">5-8: Incompleto o créditos con enlaces genéricos.</div>
+                    <div class="desc-box bg-emerald-50 text-[10px] italic font-bold">9-10: Memoria completa, Copyright profundo y créditos exactos.</div>
+                </div>
+                <div class="flex flex-wrap gap-2 btn-10"></div>
+            </div>
+        </section>
+
+        <!-- 3. WEB FINAL ZIP (20%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#fb923c]">Web Final ZIP (20%)</div>
+            <div class="nb-card p-4 bg-white" data-section="web">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                    <div class="desc-box bg-red-50 text-[10px]">0-4: No funciona, faltan páginas o CSS no vinculado.</div>
+                    <div class="desc-box bg-amber-50 text-[10px]">5-8: Estética básica. Fallos menores en nombres o rutas.</div>
+                    <div class="desc-box bg-emerald-50 text-[10px] italic font-bold">9-10: Diseño pulido, Personalización de fuentes, rutas OK y navegación fluida.</div>
+                </div>
+                <div class="flex flex-wrap gap-2 btn-10"></div>
+            </div>
+        </section>
+
+        <!-- 4. AUDITORÍA ORAL (15%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#22d3ee]">Auditoría Oral (15%)</div>
+            <div class="space-y-4">
+                <div class="nb-card p-4 bg-white" data-crit="html">
+                    <h3 class="font-black text-sm uppercase mb-1 italic tracking-tight italic">1. Estructura HTML</h3>
+                    <div class="audit-detail">Localiza etiquetas h1, p, img sin dudar y explica para qué sirven.</div>
+                    <div class="flex flex-wrap gap-2 btn-25"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-crit="css">
+                    <h3 class="font-black text-sm uppercase mb-1 italic tracking-tight italic">2. Estilos CSS</h3>
+                    <div class="audit-detail">Cambia color, tamaño o fondo usando el inspector de elementos o el código.</div>
+                    <div class="flex flex-wrap gap-2 btn-25"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-crit="rutas">
+                    <h3 class="font-black text-sm uppercase mb-1 italic tracking-tight italic">3. Rutas y Enlaces</h3>
+                    <div class="audit-detail">Entiende rutas relativas, carpetas y soluciona fallos de carga de imágenes.</div>
+                    <div class="flex flex-wrap gap-2 btn-25"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-crit="ia">
+                    <h3 class="font-black text-sm uppercase mb-1 italic tracking-tight italic">4. Validación IA</h3>
+                    <div class="audit-detail">Explica código complejo generado por IA, detecta errores y borra lo innecesario.</div>
+                    <div class="flex flex-wrap gap-2 btn-25"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TAREAS REDES (15%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#a855f7] text-white">Tareas Redes (15%)</div>
+            <div class="space-y-4" data-section="redes">
+                <div class="nb-card p-4 bg-white" data-crit="r1">
+                    <h3 class="font-bold text-xs uppercase mb-1 italic">Redes 1</h3>
+                    <div class="flex flex-wrap gap-2 btn-5"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-crit="r2">
+                    <h3 class="font-bold text-xs uppercase mb-1 italic">Redes 2</h3>
+                    <div class="flex flex-wrap gap-2 btn-5"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-crit="r3">
+                    <h3 class="font-bold text-xs uppercase mb-1 italic">Redes 3</h3>
+                    <div class="flex flex-wrap gap-2 btn-5"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. DISEÑO (10%) -->
+        <section class="mb-12">
+            <div class="phase-badge bg-[#39ff14]">Diseño (10%)</div>
+            <div class="space-y-4">
+                <div class="nb-card p-4 bg-white" data-section="moodboard">
+                    <h3 class="font-black text-xs uppercase mb-2">Moodboard (5%)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1 text-[9px] leading-tight mb-2 uppercase font-bold">
+                        <div class="p-1 border border-black bg-red-50">Imágenes aleatorias sin conexión.</div>
+                        <div class="p-1 border border-black bg-amber-50">Relacionado pero sin guía definida.</div>
+                        <div class="p-1 border border-black bg-emerald-50 italic">Identidad visual coherente.</div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 btn-10"></div>
+                </div>
+                <div class="nb-card p-4 bg-white" data-section="mockups">
+                    <h3 class="font-black text-xs uppercase mb-2">Mockups (5%)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1 text-[9px] leading-tight mb-2 uppercase font-bold">
+                        <div class="p-1 border border-black bg-red-50">Dibujos confusos, sin estructura.</div>
+                        <div class="p-1 border border-black bg-amber-50">Esquemas básicos, falta detalle.</div>
+                        <div class="p-1 border border-black bg-emerald-50 italic">Estructura detallada y lógica.</div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 btn-10"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANEL DE NOTAS -->
+        <footer class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl z-50">
+            <div class="nb-card bg-white p-4 border-[4px] flex flex-col md:flex-row items-center gap-4">
+                <div class="flex-1 grid grid-cols-3 md:grid-cols-6 gap-2 w-full text-[9px] font-black uppercase text-center leading-tight">
+                    <div class="bg-[#fbbf24] p-1 border-2 border-black">Cla (20%): <br><span id="v-tra">0</span></div>
+                    <div class="bg-[#ff60ff] p-1 border-2 border-black">Dos (20%): <br><span id="v-dos">0</span></div>
+                    <div class="bg-[#fb923c] p-1 border-2 border-black">Web (20%): <br><span id="v-web">0</span></div>
+                    <div class="bg-[#22d3ee] p-1 border-2 border-black">Ora (15%): <br><span id="v-aud">0</span></div>
+                    <div class="bg-[#a855f7] p-1 border-2 border-black text-white">Red (15%): <br><span id="v-red">0</span></div>
+                    <div class="bg-[#39ff14] p-1 border-2 border-black">Dis (10%): <br><span id="v-dis">0</span></div>
+                </div>
+
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div class="bg-black text-white p-3 border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,96,255,1)] flex-1 text-center min-w-[100px]">
+                        <p class="text-[8px] font-black uppercase text-[#ff60ff]">Nota Total</p>
+                        <p id="res-total" class="text-3xl font-black leading-none">0.0</p>
+                    </div>
+                    <button onclick="copyToClipboard()" class="nb-button bg-[#ff60ff] text-black px-6 py-4 uppercase text-xs">COPIAR</button>
+                </div>
+            </div>
+        </footer>
+
+        <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 border-2 border-white font-black opacity-0 transition-all pointer-events-none z-[60] uppercase tracking-widest italic">
+            REGISTRO_COPIADO
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            trabajo: 0,
+            auditoria: { html: 0, css: 0, rutas: 0, ia: 0 },
+            dossier: 0,
+            web: 0,
+            moodboard: 0,
+            mockups: 0,
+            redes: { r1: 0, r2: 0, r3: 0 }
+        };
+
+        function createButtons(container, max, step, callback) {
+            for (let i = 0; i <= max; i += step) {
+                const btn = document.createElement('button');
+                btn.innerText = i % 1 === 0 ? i : i.toFixed(1);
+                btn.className = "nb-button flex-1 min-w-[34px] h-9 bg-white text-black text-[10px]";
+                btn.onclick = () => {
+                    container.querySelectorAll('button').forEach(b => b.classList.remove('active-sel'));
+                    btn.classList.add('active-sel');
+                    callback(i);
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function init() {
+            document.querySelectorAll('.btn-10').forEach(container => {
+                const section = container.closest('[data-section]') ? container.closest('[data-section]').dataset.section : null;
+                if (!section) return;
+                createButtons(container, 10, 1, (v) => { state[section] = v; calc(); });
+            });
+            document.querySelectorAll('.btn-25').forEach(container => {
+                const crit = container.closest('[data-crit]').dataset.crit;
+                createButtons(container, 2.5, 0.5, (v) => { state.auditoria[crit] = v; calc(); });
+            });
+            document.querySelectorAll('.btn-5').forEach(container => {
+                const crit = container.closest('[data-crit]').dataset.crit;
+                createButtons(container, 5, 1, (v) => { state.redes[crit] = v; calc(); });
+            });
+        }
+
+        function calc() {
+            const sumAuditoria = Object.values(state.auditoria).reduce((a, b) => a + b, 0);
+            const sumDiseño = (state.moodboard + state.mockups) / 2;
+            const sumRedes = Object.values(state.redes).reduce((a, b) => a + b, 0); 
+            const redesNormalizada = (sumRedes / 15) * 10; 
+
+            document.getElementById('v-tra').innerText = state.trabajo;
+            document.getElementById('v-aud').innerText = sumAuditoria.toFixed(1);
+            document.getElementById('v-dos').innerText = state.dossier;
+            document.getElementById('v-red').innerText = redesNormalizada.toFixed(1);
+            document.getElementById('v-web').innerText = state.web;
+            document.getElementById('v-dis').innerText = sumDiseño.toFixed(1);
+
+            // PESOS FINALES (SUMA 100%):
+            // Clase (20%), Dossier (20%), Web (20%), Oral (15%), Redes (15%), Diseño (10%)
+            const final = 
+                (state.trabajo * 0.20) + 
+                (state.dossier * 0.20) + 
+                (state.web * 0.20) + 
+                (sumAuditoria * 0.15) + 
+                (redesNormalizada * 0.15) + 
+                (sumDiseño * 0.10);
+
+            const res = document.getElementById('res-total');
+            res.innerText = final.toFixed(1);
+            if (final >= 9) res.style.color = "#39ff14";
+            else if (final >= 5) res.style.color = "#ffbd2e";
+            else res.style.color = "#ff5c5c";
+        }
+
+        function copyToClipboard() {
+            const name = document.getElementById('student-name').value || "ANONIMO";
+            const total = document.getElementById('res-total').innerText;
+            const auditTotal = Object.values(state.auditoria).reduce((a,b)=>a+b,0);
+            const redesTotal = Object.values(state.redes).reduce((a,b)=>a+b,0);
+            
+            const text = `> AUTOEVALUACION_DIGITALIZACION: ${name.toUpperCase()}\n` +
+                         `> TRABAJO_CLASE: ${state.trabajo}/10 (20%)\n` +
+                         `> DOSSIER_HTML: ${state.dossier}/10 (20%)\n` +
+                         `> WEB_FINAL: ${state.web}/10 (20%)\n` +
+                         `> AUDITORIA_ORAL: ${auditTotal.toFixed(1)}/10 (15%)\n` +
+                         `> TAREAS_REDES: ${redesTotal}/15 (15%)\n` +
+                         `> DISENO_TOTAL: ${((state.moodboard + state.mockups)/2).toFixed(1)}/10 (10%)\n` +
+                         `> NOTA_GLOBAL: ${total}`;
+
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
