@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marimoligram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --clr-pink: #F976DD;
+            --clr-blue: #3b82f6;
+            --clr: var(--clr-pink); /* Color por defecto */
+            --bg-main: #f3f4f6;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); }
+        .brand-font { font-family: 'Pacifico', cursive; color: var(--clr); }
+        .login-brand-font { font-family: 'Pacifico', cursive; color: #F976DD; }
+        
+        /* --- ESTILOS DE NAVEGACIÓN CORREGIDOS --- */
+        .navigation { 
+            width: 100%;
+            height: 70px; 
+            background: var(--clr);
+            position: relative; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+        .navigation ul { display: flex; width: 350px; }
+        .navigation ul li { position: relative; list-style: none; width: 70px; height: 70px; z-index: 1; }
+        .navigation ul li a { position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; height: 100%; text-align: center; font-weight: 500; cursor: pointer; }
+        
+        .navigation ul li a .icon { 
+            position: relative; 
+            display: block; 
+            line-height: 75px; 
+            font-size: 1.8rem; 
+            text-align: center; 
+            transition: 0.5s; 
+            color: #ffffff;
+        }
+        .navigation ul li.active a .icon { 
+            transform: translateY(-32px); 
+            color: var(--clr);
+        }
+        
+        .indicator { 
+            position: absolute; 
+            top: -50%; 
+            width: 70px; 
+            height: 70px; 
+            background: var(--bg-main);
+            border-radius: 50%; 
+            transition: 0.5s; 
+        }
+
+        .navigation ul li:nth-child(1).active ~ .indicator { transform: translateX(calc(70px * 0)); }
+        .navigation ul li:nth-child(2).active ~ .indicator { transform: translateX(calc(70px * 1)); }
+        .navigation ul li:nth-child(3).active ~ .indicator { transform: translateX(calc(70px * 2)); }
+        .navigation ul li:nth-child(4).active ~ .indicator { transform: translateX(calc(70px * 3)); }
+        .navigation ul li:nth-child(5).active ~ .indicator { transform: translateX(calc(70px * 4)); }
+        /* --- FIN DE ESTILOS CORREGIDOS --- */
+
+        .notification-dot { 
+            position: absolute; 
+            top: 15px; 
+            right: 18px;
+            transition: 0.5s;
+        }
+        .navigation ul li.active a .notification-dot {
+            transform: translateY(-32px);
+        }
+
+        .modal-enter { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .cookie-banner-enter { animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* Estilos para la vista de detalle en escritorio */
+        #post-detail-desktop {
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0; /* Evita que el panel se encoja */
+        }
+        #post-detail-desktop.is-visible {
+            width: 60vw; /* Ocupa el 60% del ancho de la pantalla */
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Login Screen (Modal) -->
+    <div id="login-screen" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 modal-enter">
+        <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg relative">
+            <button id="close-login-btn" class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h1 class="login-brand-font text-4xl text-center">Marimoligram</h1>
+            <h2 class="text-center text-xl font-bold text-gray-700">Accede para ver</h2>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="username" class="text-sm font-medium text-gray-700">Usuario</label>
+                    <input type="text" id="username" name="username" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="@usuario">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" name="password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="••••••••">
+                </div>
+                <p id="error-message" class="text-sm text-red-600 hidden">Usuario o contraseña incorrectos.</p>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                    Entrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="main-app">
+        <div id="desktop-wrapper" class="lg:flex lg:justify-center lg:gap-6 lg:pt-4">
+            <main id="content-container" class="w-full max-w-xs mx-auto lg:max-w-none lg:w-[600px] min-h-screen bg-gray-100 pb-24 lg:transition-all lg:duration-500">
+                <!-- VISTA 1: HOME (Feed principal) -->
+                <div id="home-view" class="view p-2">
+                    <header class="p-2 sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 -m-2 mb-2 border-b">
+                        <h1 class="brand-font text-2xl text-center">Marimoligram</h1>
+                    </header>
+                    <div id="feed-content" class="space-y-2"></div>
+                </div>
+
+                <!-- VISTA 2: PERFIL (del usuario principal) -->
+                <div id="profile-view" class="view hidden bg-white"></div>
+                
+                <!-- VISTA 3: MENSAJES (Ahora con sub-vistas) -->
+                <div id="messages-view" class="view hidden"></div>
+
+                <!-- VISTA 4: BÚSQUEDA / EXPLORAR -->
+                <div id="search-view" class="view hidden p-1">
+                     <h1 class="text-xl font-bold text-center p-4">Explorar</h1>
+                     <div id="explore-grid" class="grid grid-cols-3 gap-1"></div>
+                </div>
+
+                <!-- VISTA 5: AJUSTES (INTERACTIVA) -->
+                <div id="settings-view" class="view hidden"></div>
+            </main>
+
+            <aside id="post-detail-desktop" class="h-[calc(100vh-2rem)] sticky top-4 lg:flex flex-col justify-center items-center"></aside>
+        </div>
+
+        <footer class="fixed bottom-0 left-0 right-0 z-20 navigation" id="navigation-menu">
+            <ul>
+                <li class="list active" data-view="home"><a><span class="icon"><ion-icon name="home-outline"></ion-icon></span></a></li>
+                <li class="list" data-view="profile"><a><span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span></a></li>
+                <li class="list" data-view="messages"><a><span class="icon"><ion-icon name="paper-plane-outline"></ion-icon></span><div class="notification-dot"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span></div></a></li>
+                <li class="list" data-view="search"><a><span class="icon"><ion-icon name="search-outline"></ion-icon></span></a></li>
+                <li class="list" data-view="settings"><a><span class="icon"><ion-icon name="settings-outline"></ion-icon></span></a></li>
+                <div class="indicator"></div>
+            </ul>
+        </footer>
+    </div>
+
+
+    <!-- MODALS (kept for mobile view) -->
+    <div id="modal-post" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-profile" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-terms" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-30 modal-enter"></div>
+    <div id="modal-cookies-config" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 modal-enter"></div>
+
+    <!-- BANNER DE COOKIES (DISEÑO ENGAÑOSO) -->
+    <div id="cookie-banner" class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 z-50 cookie-banner-enter">
+        <div class="max-w-sm mx-auto">
+            <p class="text-sm mb-3">
+                Usamos cookies para mejorar tu experiencia. Puedes 
+                <a href="#" id="config-cookies-btn" class="underline text-gray-400 hover:text-white text-xs font-normal">configurar tus preferencias</a>
+                o aceptar todas para continuar.
+            </p>
+            <div class="mt-4">
+                <button id="accept-cookies-btn" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg">Aceptar Todo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- ESTADO DE LA APLICACIÓN ---
+    let isLoggedIn = false;
+    let requestedView = null; // Para recordar qué vista se intentó abrir
+
+    // --- BASE DE DATOS COMPLETA Y AMPLIADA ---
+    const usersData = { 
+        '@Alexploramundo': { avatar: 'img/ALXPFP.webp', name: 'Alex Rojo Soshal', bio: 'Explorando el mundo, un destino a la vez. #TravelLife', followers: 5843, following: 210 },
+        '@LaurAventura': { avatar: 'img/LAU01.webp', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', followers: 3250, following: 340 },
+        '@OfertasDeVerano': { avatar: 'img/OFEPFP.webp', name: 'Ofertas de Verano', bio: 'Publicidad.', followers: 50200, following: 3 },
+        '@FoodieCarlos': { avatar: 'img/FOD01.webp', name: 'Carlos Foodie', bio: 'Probando cada plato de la ciudad. 🍔🍕🌮', followers: 12100, following: 500 },
+        '@TechieModerno': { avatar: 'img/TEC01.webp', name: 'David G.', bio: 'Unboxing the future. 💻📱🚀', followers: 15500, following: 250 },
+        '@CozyCouture': { avatar: 'img/COZPFP.webp', name: 'Moda Urbana & Co', bio: 'Publicidad.', followers: 125000, following: 12 },
+        '@MamaExploraMundo': { avatar: 'img/MAM01.webp', name: 'Marisa', bio: 'Orgullosa madre de un viajero.', followers: 150, following: 180 },
+        '@CyberMemes': { avatar: 'img/CYBPFP.webp', name: 'Memes de Ciberseguridad', bio: 'Aprendiendo a protegerte, un meme a la vez. 😉', followers: 25000, following: 100 },
+        '@kai_posting': { avatar: 'img/KAIPFP.webp', name: 'Kai', bio: 'brainrot daily dose ✨ | viviendo en tu fyp rent free', followers: 1200, following: 980 },
+        '@NoticiasAlMinuto24': { avatar: 'img/NOTPFP.webp', name: 'NoticiasAlMinuto24', bio: 'La verdad, al instante. ⚡', followers: 250000, following: 50 },
+        '@VerdadDigital': { avatar: 'img/VERPFP.webp', name: 'Verdad Digital', bio: 'Fact-checker. Desmintiendo bulos. <a href="verd-dig.html">\'VerdadDigital.com\'</a>', followers: 80000, following: 300 },
+        '@ElPregonero': { avatar: 'img/PREPFP.webp', name: 'El Pregonero Global', bio: 'Información contrastada para un mundo complejo.', followers: 150000, following: 120 },         
+        '@User12345': { avatar: 'img/USRPFP.webp', name: 'User12345', bio: '', followers: 12, following: 2500 },
+        '@FotografoUrbano': { avatar: 'img/FOTPFP.webp', name: 'Javier Ríos Foto', bio: 'Capturando la ciudad.', followers: 8000, following: 400 },
+        '@LaurAventúra': { avatar: 'img/LAU01.webp', name: 'Laura Montañez', bio: 'La vida es mejor en la montaña. ⛰️✨', followers: 50, following: 3500 },
+        '@Desconocido': { avatar: 'img/DESPFP.webp', name: 'Desconocido', bio: '', followers: 2, following: 1500 },
+        '@ViajeroIncansable': { avatar: 'img/VIAPFP.webp', name: 'Viajero Incansable', bio: 'Nómada digital.', followers: 22000, following: 600 },
+        '@SenderistaPro': { avatar: 'img/LAU02.webp', name: 'Pro Senderista', bio: 'Descubriendo rutas.', followers: 4500, following: 800 },
+        '@SolYMar': { avatar: 'img/ALX03.webp', name: 'Sol y Mar', bio: 'Viviendo en la playa.', followers: 6000, following: 300 },
+    };
+    
+    const postsData = [
+        { id: 'mision', type: 'mission', title: 'MISIÓN: Ciber-Detective', text: 'La cuenta de @Alexploramundo ha sido comprometida. Tu misión es investigar su perfil y el de sus amigos para descubrir todas las vulnerabilidades. Elabora un informe con tus hallazgos.' },
+        { id: 'ALX00', type: 'post', author: '@Alexploramundo', caption: 'Pues nada, me han robado la cuenta vieja. Supongo que alguien quería mis fotos de viajes más que yo. ¡Aquí empieza la versión 2.0! #VueltaAlRuedo #MeLaHanLiado', timestamp: 'Hace 3 meses', comments: [{ user: '@MamaExploraMundo', text: '¡Hijo, qué susto! ¿Estás bien? Ten más cuidado.' }] },
+        { id: 'ALX01', type: 'post', author: '@Alexploramundo', image: 'img/ALX04.webp', caption: 'Estrenando mi nuevo rincón de trabajo. ¡Creo que por fin he conseguido un setup productivo! #HomeOffice', timestamp: 'Hace 3 semanas', comments: [{ user: '@MamaExploraMundo', text: '¡Qué ordenado todo, hijo! Pero ten cuidado con lo que se ve en las fotos.' }, { user: '@TechieModerno', text: '¡Buen setup! ¿Qué monitor es?' }]},
+        { id: 'ALX02', type: 'post', author: '@Alexploramundo', caption: 'A veces me pregunto si no comparto demasiado por aquí. Es fácil olvidar cuánta gente puede ver tus publicaciones. Una reflexión nocturna nada más. 🤔', timestamp: 'Hace 2 semanas', comments: [{ user: '@MamaExploraMundo', text: 'Haces bien en pensarlo, hijo.' }]},
+        { id: 'ALX03', type: 'post', author: '@Alexploramundo', image: 'img/ALX03.webp', caption: '¡Despidiendo un verano increíble! El mejor remedio para el estrés. #Verano2025 #Playa #PuraVida', timestamp: 'Hace 1 semana', comments: [{ user: '@SolYMar', text: 'La mejor terapia que existe.' }, { user: '@kai_posting', text: 'vaya vibe, bro' }]},
+        { id: 'ALX04', type: 'post', author: '@Alexploramundo', image: 'img/ALX01.webp', caption: '¡Qué emoción! Con el pasaporte recién renovado, ya no hay excusas para el próximo gran viaje. ¡El mundo me espera! ✈️🌍 #TravelLife #NuevasAventuras', timestamp: 'Hace 2 días', comments: [{ user: '@LaurAventura', text: '¡Qué envidia! ¡A disfrutarlo mucho!' }, { user: '@ViajeroIncansable', text: '¡Esa es la actitud! ¿Próximo destino?' }] },
+        { id: 'CYB01', type: 'post', author: '@CyberMemes', image: 'img/CYB01.webp', caption: '¿A quién no le ha pasado? Ese botón es mi mejor amigo.', timestamp: 'Hace 4 semanas', comments: [{ user: '@Alexploramundo', text: 'jajaja total! Aunque a mí ya no me pasa. Tengo un truco: uso siempre mi plato favorito seguido de mi año de nacimiento. ¡Infalible ya no me olvido! 🤫' }]},
+        { id: 'CYB02', type: 'post', author: '@CyberMemes', image: 'img/CYB02.webp', caption: 'Jeje Bendito modo incógnito. #Ciberseguridad', timestamp: 'Hace 2 semanas', comments: [] },
+        { id: 'CYB03', type: 'post', author: '@CyberMemes', image: 'img/KAI03.webp', caption: "Yo: 😂 Mi padre después de enseñarle el meme: 🧐👓 Un clásico. Créditos al gran @kai_posting", timestamp: 'Hace 1 semana', comments: [{user: '@kai_posting', text: 'es mi meme, en la gran pantalla lol, gracias por mencionarme :D'}, {user: '@User12345', text: 'Cero gracia.'}] },
+        { id: 'FOD01', type: 'post', author: '@FoodieCarlos', image: 'img/FOD03.webp', caption: 'He encontrado el paraíso en forma de croqueta. ¡Tenéis que probar este sitio! #Croquetas #TapasMadrid #Foodie', timestamp: 'Hace 1 semana', comments: [{ user: '@Alexploramundo', text: '¡Vaya! ¡Me encantan las croquetas! ¡Son mi comida favorita sin duda!' }]},
+        { id: 'FOD02', type: 'post', author: '@FoodieCarlos', caption: 'Debate serio: ¿la tortilla de patatas con o sin cebolla? Abro melón. 🍈', timestamp: 'Hace 3 semanas', comments: [{user: '@Alexploramundo', text: '¡Con cebolla siempre! No hay debate posible.'}] },
+        { id: 'FOD03', type: 'post', author: '@FoodieCarlos', image: 'img/FOD01.webp', caption: 'Nada como una buena paella para celebrar el fin de semana. ¿Sois de marisco o de carne? #Paella #ComidaEspañola', timestamp: 'Hace 1 mes', comments: []},
+        { id: 'KAI01', type: 'post', author: '@kai_posting', caption: 'literalmente, mi cerebro a las 3 am pensando: TUNG TUNG TUNG SAHUR!!! Ballerina Capuccina', timestamp: 'Hace 4 días', comments: [{user: '@TechieModerno', text: 'No entiendo la mitad de lo que dices, pero me hace gracia.'}, {user: '@User12345', text: 'Otro post sin sentido, para no variar.'}] },
+        { id: 'KAI02', type: 'post', author: '@kai_posting', image: 'img/KAI05.webp', caption: 'new fit check ✨', timestamp: 'Hace 2 meses', comments: [{ user: '@User12345', text: 'Vaya pintas, no sé cómo te atreves a subir esto' }, { user: '@kai_posting', text: '@User12345 lol, ok boomer' }]},
+        { id: 'KAI03', type: 'post', author: '@kai_posting', caption: 'soy delulu pero al menos soy feliz', timestamp: 'Hace 1 semana', comments: [{user: '@User12345', text: '???'}]},
+        { id: 'KAI04', type: 'post', author: '@kai_posting', image: 'img/KAI03.webp', caption: 'Real. #meme #pov #fyp', timestamp: 'Hace 2 semanas', comments: [{user: '@LaurAventura', text: 'jajaja me pasa'}, {user: '@User12345', text: 'Deja de subir tonterías.'}, {user: '@CyberMemes', text: 'Buenisimo, te importa si lo resubimos? Te mencionaremos por supuesto!'}, {user: '@kai_posting', text: 'buah me encanta vuestra cuenta por supuesto usadla, jajaj'}] },
+        { id: 'KAI05', type: 'post', author: '@kai_posting', caption: 'hoy me he cruzado con 3 NPCs seguidos con el mismo bug, es que ni se esfuerzan los devs', timestamp: 'Hace 3 semanas', comments: [{user: '@User12345', text: 'Habla normal.'}]},
+        { id: 'KAI06', type: 'post', author: '@kai_posting', caption: "acabo de ver a un pavo en la calle con el corte del 7 y las TN... es que es canon, no puedo ser el único que lo ve.", timestamp: 'Hace 1 mes', comments: [{user: '@Alexploramundo', text: '¿Corte del 7? Me he perdido algo en mis viajes 😂'}, {user: '@User12345', text: 'Lástima de cuenta.'}] },
+        { id: 'LAU01', type: 'post', author: '@LaurAventura', image: 'img/LAU03.webp', caption: 'Un día increíble de senderismo con mi amigo @Alexploramundo. ¡Hay que repetir pronto! #Montaña #Amigos #Naturaleza', timestamp: 'Hace 3 días', comments: [{ user: '@Alexploramundo', text: '¡Fotón! ¡Qué bien lo pasamos!' }, { user: '@SenderistaPro', text: '¡Qué buena ruta! ¿Dónde es?' }] },
+        { id: 'LAU02', type: 'post', author: '@LaurAventura', image: 'img/LAU02.webp', caption: 'No hay dos atardeceres iguales. Agradecida por estos momentos. #Atardecer #Paz', timestamp: 'Hace 1 semana', comments: []},
+        { id: 'LAU03', type: 'post', author: '@LaurAventura', image: 'img/LAU01.webp', caption: 'Mañana de bici por la sierra. ¡Aire puro y a recargar pilas!', timestamp: 'Hace 3 semanas', comments: []},
+        { id: 'MAM01', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM04.webp', caption: 'Mis rosas están preciosas esta primavera. ¡Un pequeño paraíso en casa!', timestamp: 'Hace 5 días', comments: [{ user: '@LaurAventura', text: '¡Qué bonito, Marisa!' }] },
+        { id: 'MAM02', type: 'post', author: '@MamaExploraMundo', caption: '¡Qué orgullosa de mi @Alexploramundo! Siempre persiguiendo sus sueños por todo el mundo. ¡Aunque a veces me da cada susto con su confianza!', timestamp: 'Hace 2 semanas', comments: [] },
+        { id: 'MAM03', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM02.webp', caption: 'Tarde de domingo haciendo mi famosa tarta de manzana. ¡La casa huele de maravilla!', timestamp: 'Hace 3 semanas', comments: [{user: '@FoodieCarlos', text: '¡Necesito esa receta, Marisa!'}]},
+        { id: 'MAM04', type: 'post', author: '@MamaExploraMundo', image: 'img/MAM01.webp', caption: 'Comida familiar de domingo. ¡Qué alegría tener a @Alexploramundo en casa, aunque sea por poco tiempo!', timestamp: 'Hace 2 meses', comments: [{user: '@FoodieCarlos', text: '¡Qué pintaza tiene esa paella, Marisa!'}] },
+        { id: 'MOD03', type: 'post', isAd: true, author: '@CozyCouture', image: 'img/MOD02.webp', caption: 'El estilo está en las calles. Encuentra tu look con nosotros. #ModaUrbana', timestamp: 'Hace 5 días', comments: [{user: '@FotografoUrbano', text: 'Hola, esa foto es mía. Agradecería que me dieras crédito o la retiraras.'}, { user: '@kai_posting', text: 'bro WTF' }] },
+        { id: 'MOD02', type: 'post', isAd: true, author: '@CozyCouture', image: 'img/MOD01.webp', caption: 'Edición limitada. Consigue las tuyas antes de que se agoten. #Sneakers #Hype', timestamp: 'Hace 3 semanas', comments: [] },
+        { id: 'MOD01', type: 'post', isAd: true, author: '@CozyCouture', image: 'img/MOD03.webp', caption: 'Nuevas Hoodies, CozyCouture. Comfort. Style. YOU. #ModaUrbana', timestamp: 'Hace 1 semana', comments: [] },
+        { id: 'NOT01', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT01.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 3 semanas', comments: [{user: '@VerdadDigital', text: 'Esto es FALSO. No existe esa "Universidad" y el estudio es un bulo. Fuentes fiables aquí: <a href="verd-dig.html">\'VerdadDigital.com\'</a> No compartan.'}] },
+        { id: 'NOT02', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT01.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 2 meses', comments: [{user: '@MamaExploraMundo', text: '¡Qué barbaridad! ¡Con lo que usa mi hijo el móvil! Avisaré a la familia.'}, {user: '@User12345', text: 'Lo sabía... yo notaba algo raro.'}] },
+        { id: 'NOT03', type: 'post', author: '@NoticiasAlMinuto24', image: 'img/NOT01.webp', caption: '¡ÚLTIMA HORA! Un estudio de la Universidad Internacional revela que el uso del móvil por más de una hora al día activa propiedades magnéticas en el cuerpo. ¡Los objetos metálicos se nos pegan!', timestamp: 'Hace 4 días', comments: [{user: '@kai_posting', text: 'No se rick...'}] },
+        { id: 'NOTB01', type: 'post', author: '@NoticiasAlMinuto24', caption: "¡ESCÁNDALO! El Gobierno impone la 'Identidad Digital Unificada'. ¿El fin de la privacidad? Expertos alertan del control masivo y la vigilancia sin precedentes. #ControlTotal #BigBrother", timestamp: 'Hace 2 semanas', comments: [{user: '@User12345', text: 'Nos van a controlar hasta lo que pensamos.'}, {user: '@MamaExploraMundo', text: '¡Qué miedo! ¿Esto es seguro?'}] },
+        { id: 'NOTB02', type: 'post', author: '@VerdadDigital', caption: "Analizamos la nueva 'Identidad Digital Unificada'. Si bien la centralización de datos plantea serias dudas sobre privacidad que el Gobierno no ha aclarado, es FALSO que sea un 'chip implantado' como afirman algunos bulos. Te explicamos las claves y los riesgos reales. #FactCheck #IdentidadDigital", timestamp: 'Hace 3 semanas', comments: [{user: '@TechieModerno', text: 'Buen análisis. Hay que leer la letra pequeña.'}] },
+        { id: 'NOTB03', type: 'post', author: '@ElPregonero', caption: "Un paso hacia el futuro: el Gobierno presenta la 'Identidad Digital Unificada' para simplificar trámites y modernizar la administración. Una apuesta por la eficiencia y la seguridad que nos pone a la vanguardia de Europa. #Modernización #FuturoDigital", timestamp: 'Hace 3 semanas', comments: [{user: '@ViajeroIncansable', text: 'Ojalá simplifique el papeleo para viajar.'}] },
+        { id: 'NOTL01', type: 'post', author: '@NoticiasAlMinuto24', caption: "La 'Identidad Digital' suma 500.000 usuarios entre fallos y protestas. Mientras el Gobierno celebra la agilización de trámites, las asociaciones de derechos digitales denuncian la falta de transparencia y los riesgos para la privacidad. #IdentidadDigital #Polémica", timestamp: 'Hace 1 mes', comments: [{user: '@Alexploramundo', text: 'Pues si funciona para los trámites, bienvenido sea.'}] },
+        { id: 'NOTL02', type: 'post', author: '@VerdadDigital', caption: "VERIFICADO: El Gobierno califica de 'éxito' el primer mes de la 'Identidad Digital', pero es ENGAÑOSO. Se han ocultado 2 brechas de seguridad que, aunque 'solucionadas', demuestran la vulnerabilidad del sistema. Tus datos, ¿realmente seguros? El debate sobre la privacidad es más necesario que nunca. #Datos #Seguridad", timestamp: 'Hace 1 mes', comments: [{user: '@CyberMemes', text: '2 brechas menores... de momento 👀'}, {user: '@TechieModerno', text: 'Importante el matiz. Gracias por la info.'}] },
+        { id: 'NOTL03', type: 'post', author: '@ElPregonero', caption: "Un éxito rotundo: La 'Identidad Digital' conquista a la ciudadanía en su primer mes. La masiva adopción del sistema demuestra el apoyo popular a la modernización y la confianza en un gobierno que apuesta por la seguridad y la eficiencia. Las críticas minoritarias no pueden empañar este gran avance. #Éxito #Innovación", timestamp: 'Hace 1 mes', comments: [] },
+        { id: 'OFE01', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE01.webp', caption: '¿Ganas de una escapada? Vuelos a toda Europa desde 19.99€. ¡No dejes pasar la oportunidad!', timestamp: 'Hace 2 meses', comments: []},
+        { id: 'OFE02', type: 'post', isAd: true, author: '@OfertasDeVerano', image: 'img/OFE02.webp', caption: '¿Aún sin tus gafas de sol para este verano? ¡Aprovecha nuestro 50% de descuento! Link en la bio. #Verano #Ofertas', timestamp: 'Hace 3 semanas', comments: [] },
+        { id: 'TEC01', type: 'post', author: '@TechieModerno', image: 'img/TEC01.webp', caption: 'Día de mantenimiento en el centro de datos. Aquí es donde vive la magia (y vuestros datos). #SysAdmin #DataCenter', timestamp: 'Hace 1 mes', comments: [] },
+        { id: 'TEC02', type: 'post', author: '@TechieModerno', caption: 'Recordatorio amistoso: una VPN no te hace 100% anónimo, pero es una capa de seguridad esencial hoy en día. ¿Cuál usáis vosotros?', timestamp: 'Hace 4 semanas', comments: [] },
+        { id: 'TEC03', type: 'post', author: '@TechieModerno', image: 'img/TEC03.webp', caption: 'Probando esta nueva bestia. ¡La potencia es increíble! Review completa muy pronto en mi canal. #Tech #Review', timestamp: 'Hace 6 días', comments: [{ user: '@Alexploramundo', text: '¡Wow! ¡Tiene una pinta increíble!' }] },
+        { id: 'FTO01', type: 'post', author: '@FotografoUrbano', image: 'img/FTO01.webp', caption: 'Luces de la ciudad. #FotografiaUrbana #StreetPhotography', timestamp: 'Hace 2 meses', comments: [{ user: '@kai_posting', text: 'tremendo foton, gracias bro' }] }
+    ];
+    
+    const conversationsData = [ 
+        { id: 'Aerovuela', participantName: 'AeroVuela Max', participantAvatar: 'img/DESPFP.webp', lastMessage: 'No hay problema, ¡gracias a ti!', messages: [ { sender: 'them', text: '¡Felicidades @Alexploramundo! Eres el ganador de nuestro sorteo mensual. Para reclamar tu premio, necesitamos verificar tus datos. Por favor, inicia sesión en el siguiente portal seguro: <a href="aerovuelamax.html" class="text-blue-600 underline">bit.ly/vuelo-gratis-real</a>' }, { sender: 'me', text: '¡Qué buena noticia! Claro, mis datos son: Alex Rojo Soshal, con DNI XMP200309. ¡Muchas gracias!' }, { sender: 'them', text: 'Perfecto, Alex. Hemos recibido tus datos. En 24/48 horas recibirás la confirmación de tu vuelo. ¡Disfruta del viaje!' }, { sender: 'me', text: '¡Genial! Muchísimas gracias por todo.'} ] }, 
+        { id: 'Laura', participantName: '@LaurAventura', participantAvatar: usersData['@LaurAventura'].avatar.replace('80x80','40x40'), lastMessage: 'Uf, qué raro...', messages: [ { sender: 'them', text: 'Oye, ¡qué fotaza la que subiste el otro día en la montaña!' }, { sender: 'me', text: 'Verdad? Fue un día genial. A ver cuándo repetimos.' }, { sender: 'them', text: '¡Cuando quieras! Acabo de ver que has renovado el pasaporte... ¿próximo destino?' }, { sender: 'me', text: 'Jajaja, sí, ¡por fin! Pues me voy a Japón dos semanas.' }, { sender: 'them', text: '¡Qué pasada! Avísame cuando vuelvas y planeamos algo. ¡Y tráeme mochis! 😂' }, { sender: 'me', text: '¡Hecho! Los que quieras jajaja. ¿Hacemos una ruta por la Pedriza a la vuelta?'}, { sender: 'them', text: 'Uuuh, planazo. Me apunto de cabeza. ¡Perfecto! ¡Qué ganas!' }, { sender: 'me', text: 'Por cierto, ¿qué tal el otro día? ¿Te llegó mi bizum? ¿Está todo bien?'}, { sender: 'them', text: '¿Qué bizum? No, no me ha pasado nada. ¿De qué hablas?' }, { sender: 'me', text: 'Uf, qué raro... Juraría que me hablaste tú. Bueno, da igual, lo importante es que estés bien. ¡Hablamos a la vuelta!' } ] }, 
+        { id: 'DESC', participantName: '@Desconocido', participantAvatar: usersData['@Desconocido'].avatar, lastMessage: 'La cuenta atrás ha comenzado.', messages: [ { sender: 'them', text: 'Hola, Alex. Tengo las contraseñas de tu cuenta de Fortnite y de Roblox. O me pagas 200€ en criptomonedas o voy a vender todas tus skins exclusivas y borrar tu progreso de años. Tienes 24 horas.'}, { sender: 'me', text: '¿Qué dices? No sé de qué hablas... Por favor, no hagas nada. Me ha costado mucho tiempo y dinero conseguir esas cuentas.' }, { sender: 'them', text: 'No es una negociación. Tienes mi wallet. O pagas o te quedas sin nada. El tiempo corre.' }, { sender: 'me', text: 'Por favor, dame más tiempo. No sé cómo conseguir criptomonedas tan rápido.'}, { sender: 'them', text: 'La cuenta atrás ha comenzado.'} ] },
+        { id: 'LauraV', participantName: '@LaurAventúra', participantAvatar: usersData['@LaurAventúra'].avatar.replace('80x80','40x40'), lastMessage: '¡Hecho! Cuídate mucho.', messages: [ { sender: 'them', text: '¡Hola Álex! Soy Laura. He perdido el móvil y la cartera, estoy tirada. NecesITO que me hagas un Bizum urgente de 50€ a este número para poder coger un taxi a casa. ¡Es una emergencia! Ya te lo devolveré.'}, { sender: 'me', text: '¡Claro, Laura! Qué faena. No te preocupes, ¡ahora mismo te lo mando! ¿Estás bien?' }, { sender: 'them', text: 'Sí, sí, solo el susto. Muchísimas gracias, de verdad. Eres el mejor. Mañana te lo devuelvo sin falta.'}, { sender: 'me', text: 'No te preocupes por eso ahora. Lo importante es que llegues bien a casa. ¡Hecho! Cuídate mucho.'} ] },
+        { id: 'Mama', participantName: '@MamaExploraMundo', participantAvatar: usersData['@MamaExploraMundo'].avatar.replace('80x80','40x40'), lastMessage: '¡Que sí, mamá! Jajaja. Un beso enorme.', messages: [ { sender: 'them', text: 'Cariño, he visto la foto de tu nuevo despacho. ¡Qué ordenado! Pero ten cuidado con los papelitos que se ven por ahí, que nunca se sabe.' }, { sender: 'me', text: 'Gracias, mamá. No te preocupes, no es nada importante. Un beso.' }, { sender: 'them', text: 'Más vale prevenir, hijo. Que luego te llevas sustos. Por cierto, también vi la foto del pasaporte. ¡No pongas esas cosas en internet, que se ve tu nombre completo y la fecha de nacimiento!'}, { sender: 'me', text: 'Ay, es verdad... no me había dado cuenta. Ahora la borro. Gracias por el aviso.'}, { sender: 'them', text: 'Si es que vas a lo loco. Ten más cuidado, por favor.'}, { sender: 'me', text: 'Que sí mamá, de verdad, está todo controlado.' }, { sender: 'them', text: 'Bueno, tú avísame cuando llegues a Japón, ¿eh? Y no te olvides de la rebequita, que por las noches refresca.' }, { sender: 'me', text: '¡Que sí, mamá! Jajaja. Un beso enorme.' } ] },
+        { id: 'Carlos', participantName: '@FoodieCarlos', participantAvatar: usersData['@FoodieCarlos'].avatar.replace('80x80','40x40'), lastMessage: 'Jajaja, palabra de foodie. ¡Disfruta de Japón!', messages: [ { sender: 'them', text: '¡Hey, Alex! He visto que te molan las croquetas tanto como a mí.' }, { sender: 'me', text: '¡Hombre, Carlos! Jajaja, sí, son mi perdición. Las de tu foto tenían una pinta brutal.' }, { sender: 'them', text: 'Pues cuando te digo que son las mejores de Madrid, no exagero. Si quieres, cuando vuelvas de tus viajes, te llevo. ¡Invita la casa!' }, { sender: 'me', text: '¡Ostras, planazo! Vuelvo en un par de semanas de Japón. ¿Guardas el secreto del sitio hasta entonces?' }, { sender: 'them', text: '¡Trato hecho! Te escribo.' }, { sender: 'me', text: '¡Genial! No me falles, ¿eh? Que me muero por probar esas croquetas.' }, { sender: 'them', text: 'Jajaja, palabra de foodie. ¡Disfruta de Japón!' } ] },
+        { id: 'Tec', participantName: '@TechieModerno', participantAvatar: usersData['@TechieModerno'].avatar.replace('80x80','40x40'), lastMessage: '¡Sin problema! Que vaya genial el viaje.', messages: [ { sender: 'me', text: '¡David! ¡Qué pasada el portátil que enseñaste el otro día! Justo ando buscando algo así para los viajes, que el mío ya no da para más.' }, { sender: 'them', text: '¡Buenas, Alex! Pues es una bestia, la verdad. Para editar vídeo y fotos mientras viajas, es perfecto. La batería dura bastante para la potencia que tiene.' }, { sender: 'me', text: 'Suena genial. ¿Crees que es mejor que el nuevo Mac? Estoy en un mar de dudas.' }, { sender: 'them', text: 'Depende del uso que le des. Si quieres, cuando vuelvas por aquí, te pasas por la oficina y lo pruebas sin compromiso. Así sales de dudas.' }, { sender: 'me', text: '¡De lujo! Te tomo la palabra. En cuanto vuelva de Japón te doy un toque. ¡Mil gracias de nuevo!'}, { sender: 'them', text: '¡Sin problema! Que vaya genial el viaje.' } ] }
+    ];
+    
+    // --- REFERENCIAS AL DOM Y ESTADO ---
+    const contentContainer = document.getElementById('content-container');
+    const views = document.querySelectorAll('.view');
+    const listItems = document.querySelectorAll('.list');
+    const modalPostContainer = document.getElementById('modal-post');
+    const modalProfileContainer = document.getElementById('modal-profile');
+    const modalTermsContainer = document.getElementById('modal-terms');
+    const modalCookiesConfigContainer = document.getElementById('modal-cookies-config');
+    const cookieBanner = document.getElementById('cookie-banner');
+    const loginScreen = document.getElementById('login-screen');
+    let activeModal = null;
+
+    // --- FUNCIONES AUXILIARES ---
+    function formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        }
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        }
+        return num;
+    }
+
+    function parseTimestamp(timestamp) {
+        if (!timestamp || timestamp === 'Patrocinado') return Infinity;
+        const parts = timestamp.split(' ');
+        if (parts.length < 3) return Infinity;
+        const value = parseInt(parts[1]);
+        const unit = parts[2];
+        if (isNaN(value)) return Infinity;
+        if (unit.startsWith('día')) return value;
+        if (unit.startsWith('semana')) return value * 7;
+        if (unit.startsWith('mes')) return value * 30;
+        return Infinity;
+    }
+    
+    function showLoginScreen() {
+        loginScreen.classList.remove('hidden');
+    }
+
+    function hideLoginScreen() {
+        loginScreen.classList.add('hidden');
+    }
+
+    // --- LÓGICA DE NAVEGACIÓN Y VISTAS ---
+    function switchView(viewId) {
+        isLoggedIn = localStorage.getItem('sessionActive') === 'true';
+        
+        const protectedViews = ['profile', 'messages', 'settings'];
+        if (protectedViews.includes(viewId)) {
+            if (isLoggedIn) {
+                if (viewId === 'profile') renderProfile('@Alexploramundo');
+                if (viewId === 'messages') renderMessages();
+                if (viewId === 'settings') renderSettings();
+            } else {
+               // Esto no debería pasar gracias al check en el event listener, pero por si acaso.
+                return;
+            }
+        }
+
+        views.forEach(view => view.classList.add('hidden'));
+        const targetView = document.getElementById(viewId + '-view');
+        if (targetView) {
+            targetView.classList.remove('hidden');
+            contentContainer.scrollTop = 0;
+        }
+    }
+
+
+    listItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+            const viewId = this.dataset.view;
+            isLoggedIn = localStorage.getItem('sessionActive') === 'true';
+            
+            const protectedViews = ['profile', 'messages', 'settings'];
+            if (protectedViews.includes(viewId) && !isLoggedIn) {
+                event.stopPropagation(); // Prevenir que el evento se propague
+                requestedView = viewId; // Guardar la vista que el usuario quería ver
+                showLoginScreen();
+                return; // Detener la ejecución
+            }
+
+            listItems.forEach(li => li.classList.remove('active'));
+            this.classList.add('active');
+            
+            const allIcons = document.querySelectorAll('.navigation ul li a .icon ion-icon');
+            allIcons.forEach(icon => { icon.setAttribute('name', icon.getAttribute('name').replace('-outline', '') + '-outline'); });
+            const activeIcon = this.querySelector('.icon ion-icon');
+            activeIcon.setAttribute('name', activeIcon.getAttribute('name').replace('-outline', ''));
+            
+            switchView(viewId);
+        });
+    });
+    
+    // --- LÓGICA DE RENDERIZADO (FUNCIONES COMPLETAS) ---
+    function renderFeed() {
+        const feedContainer = document.getElementById('feed-content'); 
+        if (!feedContainer) return;
+
+        const sortedPosts = [...postsData].sort((a, b) => {
+            if (a.type === 'mission') return -1;
+            if (b.type === 'mission') return 1;
+            return parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp);
+        });
+        
+        let allPostsHTML = '';
+
+        sortedPosts.forEach(post => { 
+            let postHTML = ''; 
+            if (post.type === 'mission') { 
+                postHTML = `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-md" role="alert"><p class="font-bold">${post.title}</p><p class="text-sm">${post.text}</p></div>`; 
+            } else if (post.type === 'post') { 
+                const authorData = usersData[post.author];
+                if (!authorData) return;
+                const postFooter = `
+                                <div class="p-3 pt-1 flex justify-between items-center text-gray-400">
+                                    <div class="flex items-center space-x-1 cursor-pointer hover:text-pink-600" data-post-id="${post.id}">
+                                        <ion-icon name="chatbubble-outline" class="text-xl"></ion-icon>
+                                        <span class="text-xs font-semibold">${post.comments ? post.comments.length : 0}</span>
+                                    </div>
+                                    <p class="text-xs">${post.timestamp}</p>
+                                </div>`;
+
+                postHTML = `
+                                <div id="${post.id}" class="bg-white rounded-lg shadow-md overflow-hidden hover:ring-2 ring-pink-200 transition-all">
+                                    <div class="p-3 flex items-center justify-between">
+                                        <div class="flex items-center space-x-2 cursor-pointer" data-author-id="${post.author}">
+                                            <img src="${authorData.avatar.replace('80x80','32x32')}" class="w-8 h-8 rounded-full" onerror="this.src='https://placehold.co/32x32/cccccc/ffffff?text=X'">
+                                            <div>
+                                                <span class="font-semibold text-sm">${post.author}</span>
+                                                ${post.location ? `<p class="text-xs text-gray-500 flex items-center"><ion-icon name="location-sharp" class="mr-1"></ion-icon>${post.location}</p>` : ''}
+                                            </div>
+                                        </div>
+                                        ${post.isAd ? `<span class="text-xs text-gray-400 font-medium">Patrocinado</span>` : ''}
+                                    </div>
+                                    ${post.image ? `<img src="${post.image}" class="w-full h-auto cursor-pointer" data-post-id="${post.id}" onerror="this.style.display='none'">` : ''}
+                                    <div class="p-3 pb-1">
+                                        <p class="text-sm"><strong class="font-semibold cursor-pointer" data-author-id="${post.author}">${post.author}</strong> ${post.caption}</p>
+                                    </div>
+                                    ${postFooter}
+                                </div>`; 
+            } 
+            allPostsHTML += postHTML; 
+        }); 
+
+        feedContainer.innerHTML = allPostsHTML;
+    }
+    
+    function renderProfile(authorId) { 
+        const user = usersData[authorId]; 
+        const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); 
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
+        const profileContainer = document.getElementById('profile-view'); 
+        const postsGridHTML = userPosts.map(p => { 
+            if (p.image) { 
+                return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; 
+            } else { 
+                return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; 
+            } 
+        }).join(''); 
+        profileContainer.innerHTML = `<div class="p-4 flex flex-col items-center border-b bg-gray-50"><img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2"><h2 class="font-bold text-lg">${authorId}</h2><p class="text-sm text-gray-600 text-center">${user.bio}</p><div class="flex space-x-8 mt-4 text-center"><div><p class="font-bold">${userPosts.length}</p><p class="text-xs text-gray-500">Posts</p></div><div><p class="font-bold">${formatNumber(user.followers)}</p><p class="text-xs text-gray-500">Followers</p></div><div><p class="font-bold">${formatNumber(user.following)}</p><p class="text-xs text-gray-500">Following</p></div></div></div><div class="grid grid-cols-3 gap-1 p-1">${postsGridHTML}</div>`; 
+    }
+
+    function renderMessages() {
+        const messagesContainer = document.getElementById('messages-view');
+        messagesContainer.innerHTML = `
+            <div id="message-list-view" class="p-4 space-y-2">
+                <h1 class="text-xl font-bold text-center">Mensajes Directos</h1>
+            </div>
+            <div id="chat-detail-view" class="hidden"></div>
+        `;
+        const messageListView = messagesContainer.querySelector('#message-list-view');
+        conversationsData.forEach(convo => { 
+            const isPhishing = convo.id === 'phishing' || convo.id === 'impersonation' || convo.id === 'sextortion'; 
+            messageListView.innerHTML += `<div data-conversation-id="${convo.id}" class="flex items-center space-x-3 p-2 rounded-lg cursor-pointer ${isPhishing ? 'bg-red-100 hover:bg-red-200' : 'hover:bg-gray-200'}"><img src="${convo.participantAvatar}" class="w-12 h-12 rounded-full"><div><p class="font-bold">${convo.participantName}</p><p class="text-sm text-gray-600 truncate">${convo.lastMessage}</p></div></div>`; 
+        });
+    }
+
+    function renderSettings() {
+        const settingsContainer = document.getElementById('settings-view');
+        settingsContainer.innerHTML = `
+            <div id="settings-main-menu" class="p-4 space-y-3">
+                <h1 class="text-xl font-bold text-center mb-4">Ajustes</h1>
+                <div data-settings-target="privacy" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Privacidad y Seguridad</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-settings-target="activity" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Sesiones Abiertas / Accesos Recientes</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-settings-target="passwords" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Contraseñas guardadas</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div data-action="show-terms" class="bg-white rounded-lg p-4 font-semibold cursor-pointer hover:bg-gray-200 flex justify-between items-center"><span>Términos y Condiciones</span> <ion-icon name="chevron-forward-outline"></ion-icon></div>
+                <div id="logout-btn" class="bg-red-100 text-red-600 rounded-lg p-4 font-semibold cursor-pointer hover:bg-red-200">Cerrar Sesión</div>
+            </div>
+            <div id="settings-privacy-view" class="settings-detail-view hidden p-4 space-y-4"></div>
+            <div id="settings-activity-view" class="settings-detail-view hidden p-4 space-y-3"></div>
+            <div id="settings-passwords-view" class="settings-detail-view hidden p-4 space-y-3"></div>
+        `;
+        renderSettingsSubViews();
+        
+        settingsContainer.querySelectorAll('[data-settings-target]').forEach(el => {
+            el.addEventListener('click', () => {
+                const viewName = el.dataset.settingsTarget;
+                const wrapper = document.getElementById('desktop-wrapper');
+                const isDesktop = getComputedStyle(wrapper).display === 'flex';
+
+                if (isDesktop) {
+                    showDesktopSettingsDetail(viewName);
+                } else {
+                    showSettingsDetail(viewName);
+                }
+            });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('sessionActive');
+            isLoggedIn = false;
+            closeDesktopDetail(); // Cierra el panel derecho al cerrar sesión
+            // Vuelve a la vista de home al cerrar sesión
+            document.querySelector('.list[data-view="home"]').click();
+        });
+    }
+
+    function renderExploreGrid() { 
+        function parseTimestamp(timestamp) {
+            if (!timestamp || timestamp === 'Patrocinado') return Infinity; 
+            const parts = timestamp.split(' ');
+            if (parts.length < 3) return Infinity;
+            const value = parseInt(parts[1]);
+            const unit = parts[2];
+            if (unit.startsWith('día')) return value;
+            if (unit.startsWith('semana')) return value * 7;
+            if (unit.startsWith('mes')) return value * 30;
+            return 0;
+        }
+
+        const allPosts = postsData.filter(p => p.type === 'post');
+        const sortedPosts = [...allPosts].sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
+        
+        const exploreGrid = document.getElementById('explore-grid'); 
+        exploreGrid.innerHTML = sortedPosts.map(p => { 
+            if (p.image) { 
+                return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; 
+            } else { 
+                return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; 
+            } 
+        }).join(''); 
+    }
+
+    function getSettingsSubViewHTML(viewName) {
+        switch (viewName) {
+            case 'privacy':
+                return `<div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Perfil Privado</span><span class="font-bold text-red-600">Desactivado</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Etiquetado de Fotos</span><span class="font-bold text-yellow-600">Aprobación Automática</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Mostrar estado de actividad</span><span class="font-bold text-red-600">Activado</span></div><div class="bg-white p-3 rounded-lg flex justify-between items-center"><span class="font-medium">Autenticación en dos pasos</span><span class="font-bold text-red-600">Desactivada</span></div>`;
+            case 'activity':
+                return `<div class="bg-green-100 p-3 rounded-lg"><p class="font-medium">iPhone 15 - Kyoto, JP</p><p class="text-sm text-green-700">Activo ahora</p></div><div class="bg-red-100 border border-red-500 p-3 rounded-lg mt-2"><p class="font-medium text-red-800"><ion-icon name="warning-outline" class="mr-1 align-text-bottom"></ion-icon>Conexión sospechosa</p><p class="text-sm font-semibold">Windows PC - Hong Kong, HK</p><p class="text-sm text-red-700">Activo ahora (simultáneo)</p></div><div class="bg-white p-3 rounded-lg mt-2"><p class="font-medium">MacBook Pro - Madrid, ES</p><p class="text-sm text-gray-600">Hace 3 días</p></div>`;
+            case 'passwords':
+                return `<div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">WIFI-AEROPUERTO-GRATIS</p><p class="text-sm text-gray-600">WIFIAEROPUERTO</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Marimoligram</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Banco del Ahorro</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Correo Electrónico</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Tienda Ropa Online</p><p class="text-sm text-yellow-800">Croquetas2003</p></div><div class="bg-yellow-100 border border-yellow-400 p-3 rounded-lg"><p class="font-medium">Plataforma de Series</p><p class="text-sm text-yellow-800">Croquetas2003</p></div>`;
+            default:
+                return '';
+        }
+    }
+
+    function renderSettingsSubViews() { 
+        document.getElementById('settings-privacy-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Privacidad y Seguridad</h2></header>` + getSettingsSubViewHTML('privacy');
+        document.getElementById('settings-activity-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Sesiones Abiertas / Accesos Recientes</h2></header>` + getSettingsSubViewHTML('activity');
+        document.getElementById('settings-passwords-view').innerHTML = `<header class="flex items-center mb-6"><button data-action="back-to-settings" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><h2 class="text-xl font-bold">Contraseñas guardadas</h2></header>` + getSettingsSubViewHTML('passwords');
+    }
+    
+    // --- LÓGICA DE MODALES Y VISTAS ---
+    function openModal(modalContainer, contentHTML) { closeCurrentModal(); modalContainer.innerHTML = contentHTML; modalContainer.classList.remove('hidden'); activeModal = modalContainer; }
+    function closeCurrentModal() { if (activeModal) activeModal.classList.add('hidden'); activeModal = null; }
+    function showPostModal(postId) { const post = postsData.find(p => p.id === postId); if (!post) return; const authorData = usersData[post.author]; const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-3 flex items-center space-x-2 border-b"><img src="${authorData.avatar.replace('80x80','32x32')}" class="w-8 h-8 rounded-full"><span class="font-semibold text-sm">${post.author}</span></div><div class="overflow-y-auto">${post.image ? `<img src="${post.image}" class="w-full h-auto">` : ''}<div class="p-3"><p class="text-sm"><strong class="font-semibold">${post.author}</strong> ${post.caption}</p></div><div class="p-3 border-t space-y-2"><h3 class="font-bold text-sm mb-2">Comentarios</h3>${(post.comments && post.comments.length > 0) ? post.comments.map(c => `<div class="text-sm"><p><strong class="font-semibold cursor-pointer" data-author-id="${c.user}">${c.user}</strong> ${c.text}</p></div>`).join('') : '<p class="text-sm text-gray-500">No hay comentarios.</p>'}</div></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; openModal(modalPostContainer, modalHTML); }
+    
+    function showProfileModal(authorId) {
+        const wrapper = document.getElementById('desktop-wrapper');
+        const isDesktop = getComputedStyle(wrapper).display === 'flex';
+
+        if (isDesktop) {
+            showDesktopProfileDetail(authorId);
+            return;
+        }
+        
+        // Mobile fallback
+        const user = usersData[authorId]; 
+        const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post'); 
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
+        const postsGridHTML = userPosts.map(p => { if (p.image) { return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`; } else { return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`; } }).join(''); 
+        const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-4 flex flex-col items-center border-b"><img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2"><h2 class="font-bold text-lg">${authorId}</h2><p class="text-sm text-gray-600 text-center">${user.bio}</p><div class="flex space-x-8 mt-4 text-center"><div><p class="font-bold">${userPosts.length}</p><p class="text-xs text-gray-500">Posts</p></div><div><p class="font-bold">${formatNumber(user.followers)}</p><p class="text-xs text-gray-500">Followers</p></div><div><p class="font-bold">${formatNumber(user.following)}</p><p class="text-xs text-gray-500">Following</p></div></div></div><div class="overflow-y-auto p-1"><div class="grid grid-cols-3 gap-1">${postsGridHTML}</div></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; 
+        openModal(modalProfileContainer, modalHTML); 
+    }
+
+    function showTermsModal() { const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]"><div class="p-4 border-b"><h2 class="font-bold text-lg text-center">Términos y Condiciones</h2></div><div class="overflow-y-auto p-4 text-sm space-y-2"><p>Al usar Marimoligram, aceptas que:</p><p class="font-bold text-red-600">1. Nos cedes los derechos de propiedad intelectual de todas tus fotos y vídeos para nuestro uso comercial sin compensación.</p><p>2. Analizamos tus mensajes privados para mostrarte publicidad relevante.</p><p class="font-bold text-red-600">3. Nos reservamos el derecho de compartir tus datos de actividad con "terceros de confianza" para "mejorar el servicio".</p></div><div class="p-2 border-t mt-auto"><button onclick="closeCurrentModal()" class="w-full text-blue-600 font-semibold py-2">Cerrar</button></div></div>`; openModal(modalTermsContainer, modalHTML); }
+    function showCookiesConfigModal() { 
+        const modalHTML = `<div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90%]">
+            <div class="p-4 border-b"><h2 class="font-bold text-lg text-center">Configuración de Cookies</h2></div>
+            <div class="p-4 text-sm space-y-3">
+                <div class="flex justify-between items-center"><label for="c-essential">Esenciales</label><input type="checkbox" id="c-essential" checked disabled class="h-5 w-5"></div>
+                <div class="flex justify-between items-center"><label for="c-analytics" class="text-red-600 font-bold">Análisis y Rendimiento</label><input type="checkbox" id="c-analytics" checked class="h-5 w-5"></div>
+                <div class="flex justify-between items-center"><label for="c-ads" class="text-red-600 font-bold">Publicidad y Seguimiento</label><input type="checkbox" id="c-ads" checked class="h-5 w-5"></div>
+            </div>
+            <div class="p-4 border-t mt-auto text-center space-y-3">
+                <button id="close-config-and-return-btn" class="w-full bg-pink-600 text-white font-bold py-2 rounded-lg">Cerrar</button>
+                <a href="#" id="save-cookies-config-link" class="text-xs text-gray-500 underline">Guardar preferencias y continuar</a>
+            </div>
+        </div>`;
+        openModal(modalCookiesConfigContainer, modalHTML);
+    }
+
+    // --- LÓGICA VISTA DETALLE ESCRITORIO ---
+    function showDesktopPostDetail(postId) {
+        const post = postsData.find(p => p.id === postId);
+        if (!post) return;
+        const authorData = usersData[post.author];
+        const detailContainer = document.getElementById('post-detail-desktop');
+        const wrapper = document.getElementById('desktop-wrapper');
+
+        const postContentHTML = `
+            <div class="p-3 flex items-center justify-between border-b flex-shrink-0">
+                <div class="flex items-center space-x-2 cursor-pointer" data-author-id="${post.author}">
+                    <img src="${authorData.avatar.replace('80x80','32x32')}" class="w-8 h-8 rounded-full">
+                    <span class="font-semibold text-sm">${post.author}</span>
+                </div>
+                <button onclick="closeDesktopDetail()" class="text-2xl text-gray-500 hover:text-gray-800">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <div class="overflow-y-auto flex-grow pb-20"> ${post.image ? `<img src="${post.image}" class="w-full h-auto">` : ''}
+                <div class="p-3">
+                    <p class="text-sm"><strong class="font-semibold cursor-pointer" data-author-id="${post.author}">${post.author}</strong> ${post.caption}</p>
+                </div>
+                <div class="p-3 border-t space-y-2">
+                    <h3 class="font-bold text-sm mb-2">Comentarios</h3>
+                    ${(post.comments && post.comments.length > 0) ? post.comments.map(c => `<div class="text-sm"><p><strong class="font-semibold cursor-pointer" data-author-id="${c.user}">${c.user}</strong> ${c.text}</p></div>`).join('') : '<p class="text-sm text-gray-500">No hay comentarios.</p>'}
+                </div>
+            </div>`;
+        
+        const detailHTML = `
+            <div class="w-full max-w-[500px] h-full max-h-[95%] bg-white border border-gray-300 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                ${postContentHTML}
+            </div>
+        `;
+        
+        detailContainer.innerHTML = detailHTML;
+        
+        wrapper.classList.remove('lg:justify-center');
+        detailContainer.classList.add('is-visible');
+        
+        const postInFeed = document.getElementById(post.id);
+        if (postInFeed) {
+            postInFeed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function showDesktopChatDetail(conversationId) {
+        const conversation = conversationsData.find(c => c.id === conversationId);
+        if (!conversation) return;
+
+        const detailContainer = document.getElementById('post-detail-desktop');
+        const wrapper = document.getElementById('desktop-wrapper');
+
+        let messagesHTML = conversation.messages.map(msg => {
+            if (msg.sender === 'me') {
+                return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-md">${msg.text}</div></div>`;
+            } else {
+                return `<div class="flex justify-start"><div class="bg-gray-200 p-3 rounded-lg max-w-md">${msg.text}</div></div>`;
+            }
+        }).join('');
+
+        const chatContentHTML = `
+            <header class="p-3 flex items-center justify-between border-b flex-shrink-0 bg-white">
+                <div class="flex items-center space-x-2">
+                    <img src="${conversation.participantAvatar}" class="w-8 h-8 rounded-full">
+                    <span class="font-semibold text-sm">${conversation.participantName}</span>
+                </div>
+                <button onclick="closeDesktopDetail()" class="text-2xl text-gray-500 hover:text-gray-800">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </header>
+            <div class="p-4 flex-grow overflow-y-auto bg-gray-50 pb-20"> <div class="max-w-xl mx-auto space-y-4">
+                    ${messagesHTML}
+                </div>
+            </div>
+        `;
+
+        const detailHTML = `
+            <div class="w-full h-full max-h-[95%] bg-white border border-gray-300 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                ${chatContentHTML}
+            </div>
+        `;
+
+        detailContainer.innerHTML = detailHTML;
+
+        wrapper.classList.remove('lg:justify-center');
+        detailContainer.classList.add('is-visible');
+    }
+
+    function showDesktopProfileDetail(authorId) {
+        const user = usersData[authorId];
+        if (!user) return;
+        const userPosts = postsData.filter(p => p.author === authorId && p.type === 'post');
+        userPosts.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
+        const detailContainer = document.getElementById('post-detail-desktop');
+        const wrapper = document.getElementById('desktop-wrapper');
+
+        const postsGridHTML = userPosts.map(p => {
+            if (p.image) {
+                return `<div class="aspect-square bg-gray-200 cursor-pointer" data-post-id="${p.id}"><img src="${p.image}" class="w-full h-full object-cover"></div>`;
+            } else {
+                return `<div class="aspect-square bg-white border p-2 flex items-center justify-center cursor-pointer" data-post-id="${p.id}"><p class="text-xs text-center text-gray-600 overflow-hidden">${p.caption.substring(0, 50)}${p.caption.length > 50 ? '...' : ''}</p></div>`;
+            }
+        }).join('');
+
+        const profileContentHTML = `
+            <header class="p-3 flex items-center justify-between border-b flex-shrink-0 bg-white">
+                <h2 class="font-bold text-lg">${authorId}</h2>
+                <button onclick="closeDesktopDetail()" class="text-2xl text-gray-500 hover:text-gray-800">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </header>
+            <div class="overflow-y-auto flex-grow pb-20"> <div class="p-4 flex flex-col items-center border-b bg-gray-50">
+                    <img src="${user.avatar}" class="w-20 h-20 rounded-full mb-2">
+                    <p class="text-sm text-gray-600 text-center">${user.bio}</p>
+                    <div class="flex space-x-8 mt-4 text-center">
+                        <div><p class="font-bold">${userPosts.length}</p><p class="text-xs text-gray-500">Posts</p></div>
+                        <div><p class="font-bold">${formatNumber(user.followers)}</p><p class="text-xs text-gray-500">Followers</p></div>
+                        <div><p class="font-bold">${formatNumber(user.following)}</p><p class="text-xs text-gray-500">Following</p></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1 p-1">${postsGridHTML}</div>
+            </div>
+        `;
+
+        const detailHTML = `
+            <div class="w-full h-full max-h-[95%] bg-white border border-gray-300 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                ${profileContentHTML}
+            </div>
+        `;
+
+        detailContainer.innerHTML = detailHTML;
+
+        wrapper.classList.remove('lg:justify-center');
+        detailContainer.classList.add('is-visible');
+    }
+
+    function showDesktopSettingsDetail(viewName) {
+        const detailContainer = document.getElementById('post-detail-desktop');
+        const wrapper = document.getElementById('desktop-wrapper');
+        
+        let settingsContent = getSettingsSubViewHTML(viewName);
+        
+        const detailHTML = `
+            <div class="w-full max-w-[600px] h-full max-h-[95%] bg-white border border-gray-300 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                <header class="p-3 flex items-center justify-between border-b flex-shrink-0 bg-white">
+                    <h2 class="font-bold text-lg">${viewName === 'activity' ? 'Sesiones Abiertas / Accesos Recientes' : viewName === 'privacy' ? 'Privacidad y Seguridad' : viewName === 'passwords' ? 'Contraseñas guardadas' : viewName}</h2>
+                    <button onclick="closeDesktopDetail()" class="text-2xl text-gray-500 hover:text-gray-800">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
+                </header>
+                <div class="overflow-y-auto flex-grow p-4 space-y-3 pb-20"> ${settingsContent}
+                </div>
+            </div>
+        `;
+
+        detailContainer.innerHTML = detailHTML;
+
+        wrapper.classList.remove('lg:justify-center');
+        detailContainer.classList.add('is-visible');
+    }
+
+    function closeDesktopDetail() {
+        const detailContainer = document.getElementById('post-detail-desktop');
+        const wrapper = document.getElementById('desktop-wrapper');
+
+        wrapper.classList.add('lg:justify-center');
+        detailContainer.classList.remove('is-visible');
+
+        setTimeout(() => {
+            if (!detailContainer.classList.contains('is-visible')) {
+                detailContainer.innerHTML = '';
+            }
+        }, 500); // Coincide con la duración de la transición
+    }
+
+    // --- LÓGICA DE MENSAJES Y AJUSTES ---
+    function showMessagesMenu() { 
+        document.getElementById('chat-detail-view').classList.add('hidden'); 
+        document.getElementById('message-list-view').classList.remove('hidden'); 
+    }
+    
+    function showChatDetail(conversationId) { 
+        const wrapper = document.getElementById('desktop-wrapper');
+        const isDesktop = getComputedStyle(wrapper).display === 'flex';
+        if (isDesktop) {
+            showDesktopChatDetail(conversationId);
+            return;
+        }
+
+        // Mobile fallback
+        const conversation = conversationsData.find(c => c.id === conversationId); 
+        const chatContainer = document.getElementById('chat-detail-view'); 
+        let messagesHTML = conversation.messages.map(msg => { if (msg.sender === 'me') { return `<div class="flex justify-end"><div class="bg-blue-500 text-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } else { return `<div class="flex justify-start"><div class="bg-white p-3 rounded-lg max-w-xs">${msg.text}</div></div>`; } }).join(''); 
+        
+        // Se envuelven los mensajes en un contenedor centrado y se añade el espaciador invisible al final
+        chatContainer.innerHTML = `<header class="p-4 border-b bg-gray-50 flex items-center sticky top-0 z-10"><button data-action="back-to-messages" class="text-2xl mr-4"><ion-icon name="arrow-back-outline"></ion-icon></button><img src="${conversation.participantAvatar}" class="w-8 h-8 rounded-full mr-3"><h2 class="font-bold">${conversation.participantName}</h2></header><div class="w-full max-w-md mx-auto p-4 space-y-4">${messagesHTML}<div class="h-28" aria-hidden="true"></div></div>`; 
+        
+        document.getElementById('message-list-view').classList.add('hidden'); 
+        chatContainer.classList.remove('hidden'); 
+        // Se asegura que la vista principal se desplace al principio del chat
+        contentContainer.scrollTop = 0;
+    }
+
+    function showSettingsDetail(viewName) { 
+        document.getElementById('settings-main-menu').classList.add('hidden'); 
+        const detailView = document.getElementById(`settings-${viewName}-view`); 
+        if(detailView) detailView.classList.remove('hidden'); 
+    }
+    function showSettingsMenu() { 
+        document.querySelectorAll('.settings-detail-view').forEach(v => v.classList.add('hidden')); 
+        document.getElementById('settings-main-menu').classList.remove('hidden'); 
+    }
+
+    // --- LÓGICA DE COOKIES Y TEMA ---
+    function applyCookieTheme() {
+        const preference = localStorage.getItem('cookiePreference');
+        const root = document.documentElement;
+        if (preference === 'all') {
+            root.style.setProperty('--clr', 'var(--clr-blue)');
+        } else {
+            root.style.setProperty('--clr', 'var(--clr-pink)');
+        }
+    }
+    
+    function initializeAppContent() {
+        renderFeed();
+        renderExploreGrid();
+        
+        switchView('home'); // Carga la vista por defecto (home)
+        
+        const homeIcon = document.querySelector('.list.active .icon ion-icon');
+        if (homeIcon) homeIcon.setAttribute('name', 'home');
+    }
+
+
+    // --- DELEGACIÓN DE EVENTOS ---
+    document.addEventListener('click', (e) => { 
+        const target = e.target; 
+        
+        const postTarget = target.closest('[data-post-id]');
+        if (postTarget) {
+            const postId = postTarget.dataset.postId;
+            const wrapper = document.getElementById('desktop-wrapper');
+            const isDesktop = getComputedStyle(wrapper).display === 'flex';
+
+            if (isDesktop) {
+                showDesktopPostDetail(postId);
+            } else {
+                showPostModal(postId);
+            }
+        }
+        
+        const authorTarget = target.closest('[data-author-id]');
+        if(authorTarget) {
+            showProfileModal(authorTarget.dataset.authorId);
+        }
+        
+        if (target.closest('[data-action="back-to-settings"]')) showSettingsMenu(); 
+        if (target.closest('[data-action="show-terms"]')) showTermsModal(); 
+        const conversationTarget = target.closest('[data-conversation-id]'); 
+        if (conversationTarget) showChatDetail(conversationTarget.dataset.conversationId); 
+        if (target.closest('[data-action="back-to-messages"]')) showMessagesMenu();
+        if (target.closest('#close-config-and-return-btn')) {
+            closeCurrentModal();
+            cookieBanner.classList.remove('hidden');
+        }
+        if (target.closest('#save-cookies-config-link')) {
+            e.preventDefault();
+            const analyticsChecked = document.getElementById('c-analytics').checked;
+            const adsChecked = document.getElementById('c-ads').checked;
+            
+            localStorage.setItem('cookiesAccepted', 'true');
+            if (!analyticsChecked && !adsChecked) {
+                localStorage.setItem('cookiePreference', 'configured');
+            } else {
+                localStorage.setItem('cookiePreference', 'all');
+            }
+            applyCookieTheme();
+            closeCurrentModal();
+            cookieBanner.classList.add('hidden');
+        }
+    });
+
+    // --- INICIALIZACIÓN ---
+    document.addEventListener('DOMContentLoaded', () => {
+     
+        // Lógica de login
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (username === '@Alexploramundo' && password === 'Croquetas2003') {
+                localStorage.setItem('sessionActive', 'true');
+                errorMessage.classList.add('hidden');
+                isLoggedIn = true;
+                hideLoginScreen();
+
+                if (requestedView) {
+                    document.querySelector(`.list[data-view="${requestedView}"]`).click();
+                    requestedView = null;
+                }
+            } else {
+                errorMessage.classList.remove('hidden');
+            }
+        });
+        
+        document.getElementById('close-login-btn').addEventListener('click', () => {
+            hideLoginScreen();
+            const currentActive = document.querySelector('.list.active');
+            if (currentActive) {
+                currentActive.classList.remove('active');
+            }
+            document.querySelector('.list[data-view="home"]').classList.add('active');
+        });
+        
+        // Carga el contenido público inicial
+        document.getElementById('main-app').classList.remove('hidden');
+        initializeAppContent();
+
+
+        // Lógica de Cookies
+        applyCookieTheme();
+        const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+        if (!cookiesAccepted) {
+            cookieBanner.classList.remove('hidden');
+        }
+        document.getElementById('accept-cookies-btn').addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            localStorage.setItem('cookiePreference', 'all');
+            applyCookieTheme();
+            cookieBanner.classList.add('hidden');
+        });
+        document.getElementById('config-cookies-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showCookiesConfigModal();
+            cookieBanner.classList.add('hidden');
+        });
+    });
+</script>
+
+</body>
+</html>
