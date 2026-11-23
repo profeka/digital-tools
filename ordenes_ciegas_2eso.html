@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Órdenes a ciegas · 2º ESO</title>
+<!-- Autocontenida: sin librerías, sin CDN, sin fuentes externas. Base neobrutalista del departamento. -->
+<style id="neo-base">
+:root{
+  --ink:#111; --paper:#fff7e0; --white:#fff; --yellow:#ffe14d; --orange:#ff8a3d; --cyan:#6ee7f9;
+  --lime:#a3e635; --pink:#ff7ab8; --violet:#c4b5fd; --muted:#555; --bw:3px;
+  --shadow:6px 6px 0 var(--ink); --shadow-sm:4px 4px 0 var(--ink);
+  --font:'Trebuchet MS','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:ui-monospace,'Cascadia Code','SFMono-Regular',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(#11111122 1px,transparent 1px);background-size:18px 18px;line-height:1.5;min-height:100vh}
+h1,h2,h3,h4{font-weight:900;text-transform:uppercase;letter-spacing:-.4px;line-height:1.15}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem)} h2{font-size:clamp(1.05rem,2.5vw,1.3rem)} h3{font-size:1rem}
+p{margin:.4em 0}
+code,.mono{font-family:var(--mono)}
+code{background:var(--white);border:2px solid var(--ink);padding:0 5px;font-size:.9em}
+:focus-visible{outline:4px solid var(--violet);outline-offset:2px}
+.hidden{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.topbar{background:var(--yellow);border-bottom:4px solid var(--ink);padding:12px 20px}
+.topbar .inner{max-width:1180px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:48px;height:48px;background:var(--pink);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;font-size:1.6rem}
+.topbar .sub{font-size:.82rem;font-weight:700}
+.card{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow);padding:18px}
+.card>h2,.card>h3{margin-bottom:10px}
+.card.yellow{background:var(--yellow)} .card.cyan{background:var(--cyan)} .card.pink{background:var(--pink)}
+.card.lime{background:var(--lime)} .card.violet{background:var(--violet)}
+.cols{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)} .cols>*{min-width:0}
+@media(min-width:960px){.cols.a{grid-template-columns:7fr 5fr}.cols.b{grid-template-columns:5fr 7fr}}
+.stack{display:flex;flex-direction:column;gap:18px}
+.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;background:var(--white);color:var(--ink);
+  border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:9px 14px;transition:transform .08s,box-shadow .08s;
+  display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem}
+.btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn:active:not(:disabled){transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{background:#ddd;color:#777;box-shadow:none;cursor:not-allowed}
+.btn.primary{background:var(--orange)} .btn.cyan{background:var(--cyan)} .btn.success{background:var(--lime)}
+.btn.danger{background:var(--pink)} .btn.yellow{background:var(--yellow)} .btn.violet{background:var(--violet)}
+.btn.sm{padding:5px 10px;font-size:.75rem} .btn.block{width:100%} .btn.lg{padding:13px 20px;font-size:1rem}
+.pill{display:inline-flex;gap:6px;align-items:center;background:var(--white);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:2px 10px;font-weight:800;font-size:.8rem}
+.pill.yellow{background:var(--yellow)} .pill.lime{background:var(--lime)} .pill.pink{background:var(--pink)} .pill.cyan{background:var(--cyan)}
+.pill.violet{background:var(--violet)} .pill.orange{background:var(--orange)}
+.tag{display:inline-block;background:var(--ink);color:var(--lime);border:var(--bw) solid var(--ink);padding:1px 9px;font-weight:900;font-size:.72rem;text-transform:uppercase}
+.num{display:inline-grid;place-items:center;width:28px;height:28px;background:var(--yellow);border:var(--bw) solid var(--ink);font-weight:900;margin-right:8px}
+label{display:block;font-weight:800;margin-bottom:4px;font-size:.85rem}
+.input{font:inherit;width:100%;background:var(--white);color:var(--ink);border:var(--bw) solid var(--ink);padding:8px 11px;border-radius:0}
+.input:focus{outline:none;box-shadow:4px 4px 0 var(--orange);background:#fffbe6}
+textarea.input{font-family:var(--mono);font-weight:700;line-height:1.55;min-height:230px;resize:vertical;font-size:.95rem}
+select.input{cursor:pointer}
+.note{border:var(--bw) solid var(--ink);padding:9px 12px;font-weight:700;font-size:.85rem;background:var(--cyan);box-shadow:3px 3px 0 var(--ink)}
+.note.ok{background:var(--lime)} .note.warn{background:var(--yellow)} .note.error{background:var(--pink)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:900;text-transform:uppercase;background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:7px 14px;cursor:pointer;font-size:.85rem}
+.tab:disabled{opacity:.45;cursor:not-allowed}
+.tab[aria-selected=true]{background:var(--lime);transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(--bw) solid var(--ink);font-size:.82rem}
+.t th{background:var(--yellow);text-transform:uppercase;text-align:left;font-weight:900}
+.t th,.t td{border:2px solid var(--ink);padding:7px 9px;vertical-align:top}
+.t tr:nth-child(even) td{background:#fffaf0}
+.scroll-x{overflow-x:auto}
+.modal-back{position:fixed;inset:0;background:rgba(17,17,17,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);max-width:760px;width:100%;max-height:90vh;overflow:auto}
+.modal .head{background:var(--yellow);border-bottom:4px solid var(--ink);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal .body{padding:18px}
+#toast{position:fixed;right:16px;bottom:16px;background:var(--lime);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:10px 16px;font-weight:900;z-index:60;max-width:90vw}
+.board{width:100%;max-width:470px;margin:6px auto;aspect-ratio:1;user-select:none}
+.board svg{width:100%;height:100%;display:block;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);background:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;font-weight:800;margin-top:8px}
+.sw{display:inline-block;width:14px;height:14px;border:2px solid var(--ink);vertical-align:-2px;margin-right:4px}
+.orders{background:var(--yellow);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:12px 14px;font-family:var(--mono);font-weight:700;font-size:.92rem;white-space:pre-wrap;min-height:150px;max-height:280px;overflow:auto;line-height:1.55}
+.tape{background:#fff8c9;border:var(--bw) solid var(--ink);padding:6px 8px;min-height:38px;display:flex;gap:4px;flex-wrap:wrap;font-family:var(--mono);font-size:.9rem}
+.tape span{border:2px solid var(--ink);background:#fff;padding:0 5px;font-weight:900}
+.tape span.bad{background:var(--pink)} .tape span.ghost{background:var(--violet)} .tape span.ok{background:var(--lime)} .tape span.trap{background:var(--orange)}
+.actbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.actbar .btn{flex-direction:column;padding:12px 6px;gap:2px;font-size:.78rem}
+.actbar .btn b{font-size:1.5rem;line-height:1}
+.actbar .btn small{font-family:var(--mono);font-size:.62rem;font-weight:700;text-transform:none}
+.list{display:flex;flex-direction:column;gap:6px;max-height:170px;overflow:auto;margin-top:8px}
+.item{border:2px solid var(--ink);background:var(--white);padding:4px 8px;font-size:.82rem;font-weight:700;display:flex;gap:8px;align-items:center}
+.item.bad{background:#ffd3e6}
+@media (max-width:600px){.card{padding:14px}.actbar .btn small{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="logo">🧭</div>
+    <div>
+      <h1>Órdenes a ciegas</h1>
+      <div class="sub">Tecnología y Digitalización · 2º ESO · Algoritmos <span class="tag">crit. 5.1</span></div>
+    </div>
+    <div class="spacer"></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-programador" aria-selected="true" onclick="switchMode('programador')">✍️ 1. Programador/a</button>
+      <button class="tab" role="tab" id="tab-ejecutor" aria-selected="false" onclick="switchMode('ejecutor')">🎮 2. Ejecutor/a</button>
+    </nav>
+    <div class="row">
+      <select id="skin-select" class="input" style="width:auto" onchange="changeSkin(this.value)" aria-label="Tema">
+        <option value="mazmorra">🏰 Mazmorra</option>
+        <option value="cocina">🍳 Cocina</option>
+        <option value="panda">🐼 Panda y bambú</option>
+      </select>
+      <span class="pill violet" id="who">👤 —</span>
+      <button class="btn cyan sm" id="btn-save" onclick="saveProgress()" title="Guardar mi progreso en un archivo">💾 Guardar</button>
+      <label class="btn cyan sm" id="btn-load" style="cursor:pointer" title="Continuar con un archivo de progreso">📂 Cargar<input type="file" accept=".json" class="hidden" onchange="loadProgress(event)"></label>
+      <button class="btn sm" id="btn-change" onclick="changeStudent()" title="Otro alumno/a en este ordenador">Cambiar</button>
+      <button class="btn yellow sm" onclick="openModal('modal-reglas')">📖 Reglas y rúbrica</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= PROGRAMADOR ================= -->
+<section id="view-programador" class="cols a">
+  <div class="stack">
+    <div class="card">
+      <h2><span class="num">1</span>Tu mundo</h2>
+      <div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div><label for="prog-level">Nivel</label>
+          <select id="prog-level" class="input" onchange="levelChanged()">
+            <option value="1">Nivel 1 · Secuencia</option>
+            <option value="2">Nivel 2 · Camino largo</option>
+            <option value="3">Nivel 3 · Llave y puerta</option>
+          </select></div>
+      </div>
+      <p class="row" style="margin-top:10px"><span class="pill cyan" id="skin-info">—</span><span class="pill" id="seed-info">Semilla —</span><span class="pill lime" id="dir-info">Empiezas mirando al —</span></p>
+      <div class="board" id="prog-board"></div>
+      <div class="legend">
+        <span><i class="sw" style="background:#fff3b0"></i>Camino</span>
+        <span><i class="sw" id="sw-wall" style="background:#3b3b4f"></i>Muro real</span>
+        <span><i class="sw" style="background:var(--lime)"></i>Meta</span>
+        <span><i class="sw" style="background:#ffd3d3"></i>🕳️ Trampa (vuelve a la salida)</span>
+        <span id="legend-obj" class="hidden">🔑 Llave · 🚪 Puerta</span>
+      </div>
+    </div>
+
+    <div class="card hidden" id="debug-card">
+      <h2><span class="num">3</span>Depuración: ¿qué pasó?</h2>
+      <p id="debug-summary" style="font-weight:700"></p>
+      <div class="row" style="margin:8px 0">
+        <button class="btn sm" onclick="debugStep(-9999)">⏮</button>
+        <button class="btn sm" onclick="debugStep(-1)">◀ Ant</button>
+        <span class="pill mono" id="debug-ind">Paso 0/0</span>
+        <button class="btn sm" onclick="debugStep(1)">Sig ▶</button>
+        <button class="btn sm success" id="debug-play" onclick="debugPlay()">▶ Reproducir</button>
+      </div>
+      <div class="list" id="debug-list"></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:var(--bw) solid var(--ink)">
+        <label for="refl">✍️ ¿Qué crees que salió mal? ¿Te explicaste mal o diste órdenes confusas?</label>
+        <textarea id="refl" class="input" style="min-height:90px;font-family:var(--font)" placeholder="Ej.: dije «sigue recto» sin decir cuántas casillas…" oninput="saveRefl()"></textarea>
+        <button class="btn cyan sm" style="margin-top:8px" onclick="downloadDebug()">📥 Descargar resultado y reflexión (.json)</button>
+      </div>
+      <p style="font-size:.82rem;font-weight:700;margin-top:10px">Corrige tus órdenes (a la derecha) y pasa el turno otra vez: <strong>mejorar tras probarlo</strong> es parte de la nota.</p>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2><span class="num">2</span>Escribe tus órdenes</h2>
+      <p style="font-size:.85rem;font-weight:700">Explica con tus palabras cómo llegar desde la salida hasta la meta. Tu compañero/a <strong>no verá la meta ni los muros reales</strong>: solo tendrá tu texto. El personaje avanza casilla a casilla y gira 90°.</p>
+      <textarea id="prog-text" class="input" oninput="updateLines()" placeholder="Escribe aquí las órdenes para tu compañero/a…"></textarea>
+      <p class="row" style="margin-top:8px"><span class="pill" id="line-count">0 líneas</span></p>
+      <div class="note warn" style="margin-top:10px" id="tips"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary lg block" onclick="passTurn()">🤝 Pasar turno a mi compañero/a ➔</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EJECUTOR ================= -->
+<section id="view-ejecutor" class="cols b hidden">
+  <div class="stack">
+    <div class="card">
+      <h2><span class="num">1</span>Órdenes recibidas</h2>
+      <div class="row" style="margin-bottom:10px">
+        <div style="flex:1;min-width:180px"><label for="exec-name">Tu nombre (ejecutor/a)</label>
+          <input id="exec-name" class="input" readonly placeholder="Se pedirá al pasar turno"></div>
+        <span class="pill" id="exec-from">Sin partida</span>
+      </div>
+      <div class="orders" id="exec-orders">Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.</div>
+      <div class="note ok" style="margin-top:12px"><strong>El texto manda.</strong> Hay <strong>muros falsos</strong> que parecen reales: si las órdenes te mandan atravesar uno, hazlo. La <strong>llave y la puerta</strong> no se ven hasta tenerlas al lado. Y hay <strong>trampas 🕳️ ocultas</strong>: si caes, vuelves a la salida y empiezas de cero. No improvises: sigue el texto al pie de la letra.</div>
+      <div style="margin-top:14px;padding-top:12px;border-top:var(--bw) solid var(--ink)">
+        <label for="doubt-input">❓ ¿Una orden es confusa? Anótala:</label>
+        <div class="row" style="flex-wrap:nowrap"><input id="doubt-input" class="input" placeholder="Ej.: no sé si «baja» es girar a la derecha" onkeydown="if(event.key==='Enter')addDoubt()">
+          <button class="btn yellow" onclick="addDoubt()">+ Duda</button></div>
+        <div class="list" id="doubt-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="num">3</span>Entregar</h2>
+      <div class="row">
+        <button class="btn yellow" onclick="openFail()" id="btn-finish">🚫 Terminar sin llegar a la meta</button>
+        <button class="btn danger" onclick="resetRun()">⟲ Reiniciar intento</button>
+        <button class="btn violet" onclick="askBack()">🔒 Volver al programador/a</button>
+      </div>
+      <div id="result-box" class="hidden" style="margin-top:12px">
+        <div class="note" id="result-note"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn cyan" onclick="downloadResult()">📥 Descargar resultado (.json)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>Ejecuta las órdenes</h2>
+    <div class="row" style="margin-bottom:8px">
+      <span class="pill yellow" id="exec-status">En espera</span>
+      <span class="pill cyan mono" id="exec-dir">Mirando al —</span>
+      <span class="pill hidden" id="exec-key">🔑 Llave: no</span>
+      <span class="pill">Pasos: <span class="mono" id="exec-steps">0</span></span>
+      <span class="pill violet">👻 <span class="mono" id="exec-ghosts">0</span></span>
+      <span class="pill pink">💥 <span class="mono" id="exec-crashes">0</span></span>
+      <span class="pill orange">🕳️ <span class="mono" id="exec-traps">0</span></span>
+    </div>
+    <div class="note" id="exec-banner" style="margin-bottom:8px;text-align:center;height:70px;overflow:hidden;display:flex;align-items:center;justify-content:center;visibility:hidden">&nbsp;</div>
+    <div class="board" id="exec-board"></div>
+    <div class="actbar" style="margin-top:14px">
+      <button class="btn pink" onclick="execAct('I')"><b>↺</b>Gira izq.<small>[← / A]</small></button>
+      <button class="btn success" onclick="execAct('A')"><b>⬆</b>Avanza 1<small>[↑ / W]</small></button>
+      <button class="btn cyan" onclick="execAct('D')"><b>↻</b>Gira der.<small>[→ / D]</small></button>
+      <button class="btn yellow" onclick="execAct('E')"><b>✋</b>Interactuar<small>[E]</small></button>
+    </div>
+    <div style="margin-top:14px"><label>Secuencia registrada</label><div class="tape" id="exec-tape"></div></div>
+    <p style="font-size:.78rem;font-weight:700;margin-top:6px">👻 = muro falso atravesado · 💥 = choques reales · 🕳️ = trampas (empiezas de cero)</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= MODAL REGLAS ================= -->
+<div id="modal-reglas" class="modal-back hidden" onclick="if(event.target===this)closeModal('modal-reglas')">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="head"><h3>📖 Reglas y rúbrica (criterio 5.1)</h3><button class="btn danger sm" onclick="closeModal('modal-reglas')">✕</button></div>
+    <div class="body">
+      <h4>1. El secreto de los muros falsos</h4>
+      <p style="font-size:.88rem">El <strong>programador/a</strong> ve el mapa real: camino, muros de verdad y meta. El <strong>ejecutor/a</strong> ve un mapa <strong>lleno de muros</strong>, muchos de ellos falsos, y no ve la meta. Solo puede fiarse del texto: <strong>el texto manda</strong>. Si una orden es ambigua, se anota como duda y se ejecuta de la forma más literal.</p>
+      <h4 style="margin-top:14px">2. Los tres niveles</h4>
+      <ul style="font-size:.88rem;padding-left:20px">
+        <li><strong>Nivel 1 · Secuencia:</strong> órdenes en el orden exacto.</li>
+        <li><strong>Nivel 2 · Camino largo:</strong> más casillas, más giros y una dirección inicial al azar. Pide más precisión al contar y al girar.</li>
+        <li><strong>Nivel 3 · Llave y puerta:</strong> una condición: la puerta cierra el único paso y solo se abre <em>si</em> ya tienes la llave. El ejecutor/a no ve la llave ni la puerta hasta tenerlas al lado. Para coger o abrir hay que estar delante, mirando al objeto, y pulsar Interactuar.</li>
+      </ul>
+      <h4 style="margin-top:14px">3. Trampas 🕳️</h4>
+      <p style="font-size:.88rem">Son casillas ocultas pegadas al camino (3 en el nivel 1 y 4 en los niveles 2 y 3). El programador/a las ve en rosa; el ejecutor/a no. Si caes en una, <strong>vuelves a la salida mirando como al principio, sin llave y con la puerta cerrada</strong> (los muros falsos ya descubiertos siguen descubiertos). Avisar de ellas en las órdenes es parte de la precisión.</p>
+      <h4 style="margin-top:14px">4. Rúbrica</h4>
+      <p style="font-size:.82rem;font-weight:700">La nota no depende de ganar a la primera, sino de mejorar tras probar.</p>
+      <div class="scroll-x"><table class="t">
+        <thead><tr><th>Criterio</th><th>1 · No logrado</th><th>2 · En proceso</th><th>3 · Logrado</th><th>4 · Destacado</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Precisión</strong></td><td>Muchas órdenes ambiguas o con huecos.</td><td>Casi todo claro, con alguna orden ambigua.</td><td>Una sola lectura posible; giros y distancias exactos.</td><td>Además, prevé el error del compañero/a y lo evita.</td></tr>
+          <tr><td><strong>Estructura</strong></td><td>Texto sin orden.</td><td>Orden correcto pero repetitivo.</td><td>Pasos ordenados y tramos claros.</td><td>Usa repeticiones o condiciones para acortar sin perder claridad.</td></tr>
+          <tr><td><strong>Funciona</strong></td><td>No se acerca a la meta.</td><td>Llega con varios choques o dudas.</td><td>Llega a la meta.</td><td>Llega a la primera o falla por un paso bien identificado.</td></tr>
+          <tr><td><strong>Depuración</strong></td><td>No corrige tras el resultado.</td><td>Corrige algo sin explicar la causa.</td><td>Corrige y explica qué falló.</td><td>Vuelve a probar y mejora el algoritmo (más corto o más claro).</td></tr>
+          <tr><td><strong>Rol de ejecutor/a</strong></td><td>Improvisa o ignora el texto.</td><td>Sigue el texto pero anota pocas dudas.</td><td>Sigue el texto al pie de la letra.</td><td>Además anota dudas útiles que mejoran el texto.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+<!-- ================= MODAL CONTRASEÑA ================= -->
+<div id="modal-pass" class="modal-back hidden" style="z-index:75" onclick="if(event.target===this)closeModal('modal-pass')">
+  <div class="modal" style="max-width:440px">
+    <div class="head"><h3>🔒 Contraseña del profe</h3><button class="btn danger sm" onclick="closeModal('modal-pass')">✕</button></div>
+    <div class="body">
+      <p style="font-size:.9rem;font-weight:700">Para devolver el ordenador al programador/a hace falta la contraseña de este nivel. Te la dirá el profe en voz alta cuando hayáis terminado.</p>
+      <input id="pass-input" class="input" autocomplete="off" style="margin-top:10px" placeholder="Contraseña" onkeydown="if(event.key==='Enter')submitPass()">
+      <div class="note error hidden" id="pass-err" style="margin-top:10px">Contraseña incorrecta.</div>
+      <button class="btn primary lg block" style="margin-top:14px" onclick="submitPass()">Desbloquear</button>
+    </div>
+  </div>
+</div>
+<!-- ================= MODAL NO LLEGO ================= -->
+<div id="modal-fail" class="modal-back hidden" style="z-index:72" onclick="if(event.target===this)closeModal('modal-fail')">
+  <div class="modal" style="max-width:500px">
+    <div class="head"><h3>🚫 No llego a la meta</h3><button class="btn danger sm" onclick="closeModal('modal-fail')">✕</button></div>
+    <div class="body">
+      <p style="font-size:.9rem;font-weight:700">Cuéntale a tu compañero/a por qué no has podido seguir: ¿qué orden no se entiende, qué falta o qué está confuso?</p>
+      <textarea id="fail-text" class="input" style="min-height:110px;font-family:var(--font)" placeholder="Ej.: no dice cuántas casillas avanzar después de girar…"></textarea>
+      <div class="note error hidden" id="fail-err" style="margin-top:10px">Explica brevemente qué no se entiende (mínimo 5 letras).</div>
+      <button class="btn primary lg block" style="margin-top:14px" onclick="submitFail()">Terminar</button>
+    </div>
+  </div>
+</div>
+<!-- ================= MODAL META ================= -->
+<div id="modal-meta" class="modal-back hidden" style="z-index:70" onclick="if(event.target===this)closeModal('modal-meta')">
+  <div class="modal" style="max-width:460px;text-align:center" role="dialog" aria-modal="true">
+    <div class="head" style="background:var(--lime)"><h3>🎉 ¡Meta conseguida!</h3><button class="btn danger sm" onclick="closeModal('modal-meta')">✕</button></div>
+    <div class="body">
+      <p id="meta-text" style="font-weight:800;font-size:1.05rem"></p>
+      <p id="meta-stats" style="font-weight:700;font-size:.88rem;margin-top:8px"></p>
+      <div class="stack" style="margin-top:16px;gap:10px">
+        <button class="btn primary lg block" onclick="closeModal('modal-meta');askBack()">🔒 Volver al programador/a</button>
+        <button class="btn cyan block" onclick="downloadResult()">📥 Descargar resultado (.json)</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ================= MODAL NOMBRE (bloqueante) ================= -->
+<div id="modal-name" class="modal-back hidden" style="z-index:80" role="dialog" aria-modal="true" aria-labelledby="name-title">
+  <div class="modal" style="max-width:480px">
+    <div class="head"><h3 id="name-title">Nombre</h3></div>
+    <div class="body">
+      <p id="name-sub" style="font-size:.9rem;font-weight:700"></p>
+      <label for="name-input" style="margin-top:10px">Nombre y apellido</label>
+      <input id="name-input" class="input" autocomplete="off" maxlength="40" placeholder="Ej.: Ana Ruiz" onkeydown="if(event.key==='Enter')submitName()">
+      <div class="note error hidden" id="name-err" style="margin-top:10px"></div>
+      <button class="btn primary lg block" style="margin-top:14px" onclick="submitName()">Empezar ➔</button>
+      <label class="btn cyan block" id="name-load" style="margin-top:10px;cursor:pointer">📂 Continuar con mi archivo de progreso<input type="file" accept=".json" class="hidden" onchange="loadProgress(event)"></label>
+    </div>
+  </div>
+</div>
+<div id="toast" class="hidden"></div>
+
+<!-- ============ CARNET JSON COMÚN (base neobrutalista) ============ -->
+<script id="neo-carnet">
+function carnetBase(o){
+  return Object.assign({carnet:"nombre_herramienta",version:1,alumno:"",grupo:"",fecha:new Date().toISOString(),completado:false,
+    nivel_alcanzado:0,tiempo_segundos:0,intentos:0,errores:[],criterios:[],detalle:{},codigo_control:""},o);
+}
+function codigoControl(c){
+  const s=[c.alumno,c.nivel_alcanzado,c.tiempo_segundos,c.intentos,c.errores.length,c.completado].join("|");
+  let h=2166136261>>>0; for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}
+  return "NEO-"+h.toString(36).toUpperCase().padStart(7,"0");
+}
+function descargarCarnet(c){
+  c.codigo_control=codigoControl(c);
+  const nombre=(c.alumno||"alumno").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"_").toLowerCase();
+  const blob=new Blob([JSON.stringify(c,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=c.carnet+"_"+nombre+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function semillaDeNombre(n){
+  n=n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\s+/g," ").trim();
+  let h=2166136261>>>0; for(const ch of n){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}
+  return 100000+(h%900000);
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+</script>
+
+<script>
+/* ===================== DATOS ===================== */
+const CARNET_ID = 'ordenes_a_ciegas_2eso';
+const SKINS = {
+  mazmorra:{nombre:'Mazmorra',personaje:'Aventurero',meta:'Tesoro',goal:'💎',player:'#c4b5fd',wall:'#3b3b4f',wallIn:'#55556e'},
+  cocina:{nombre:'Cocina',personaje:'Cocinero',meta:'Plato listo',goal:'🍲',player:'#ff7ab8',wall:'#a8561a',wallIn:'#c9722f'},
+  panda:{nombre:'Panda y bambú',personaje:'Panda',meta:'Bambú',goal:'🎋',player:'#ffffff',wall:'#1f6b3a',wallIn:'#2f8a50'}
+};
+const ORI=['norte','este','sur','oeste'];
+const VEC={norte:[0,-1],este:[1,0],sur:[0,1],oeste:[-1,0]};
+const ANG={norte:0,este:90,sur:180,oeste:270};
+const ARROW={norte:'↑',este:'→',sur:'↓',oeste:'←'};
+const GLYPH={A:'⬆',I:'↺',D:'↻',E:'✋'};
+const $=id=>document.getElementById(id);
+const key=(x,y)=>x+','+y;
+
+/* CONTRASEÑAS DEL PROFE para volver al puesto de programador/a (cámbialas aquí si quieres) */
+const CLAVES={1:'brujula',2:'sendero',3:'faro'};   // nivel 1, nivel 2 (camino largo), nivel 3 (llave y puerta)
+let lockedExec=false;
+let progress={textos:{},resultados:{}};
+const TRAPS_BY_LEVEL={1:3,2:4,3:4};
+const norm=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+let skin='mazmorra', mode='programador';
+let world=null;              // mundo del programador actual
+let prog={name:'',level:1,seed:0,text:'',rondas:0};
+let execName='';
+function blankExec(){return {loaded:false,world:null,st:null,acciones:[],dudas:[],intentos:1,startedAt:0,finished:false,locked:false,result:null,progName:'',level:1,seed:0,text:'',lineas:0,rondas:0};}
+let exec=blankExec();
+let dbg={frames:[],idx:0,timer:null,res:null};
+let teacher=[];
+
+/* ===================== GENERADOR ===================== */
+function prep(w){ w.wallSet=new Set(w.walls.map(c=>key(c[0],c[1]))); w.ghostSet=new Set(w.ghosts.map(c=>key(c[0],c[1]))); w.traps=w.traps||[]; w.trapSet=new Set(w.traps.map(c=>key(c[0],c[1]))); return w; }
+
+function generateWorld(seed, nivel){
+  const N = nivel===1?6:7;
+  const minLen = nivel===1?8:(nivel===2?14:12), maxLen = nivel===1?13:(nivel===2?22:20);
+  for(let attempt=0; attempt<600; attempt++){
+    const rng=mulberry32(seed*1307+attempt*53);
+    const sx=Math.floor(rng()*N), sy=Math.floor(rng()*N);
+    const path=[[sx,sy]], used=new Set([key(sx,sy)]);
+    let horiz=rng()<.5, ok=true;
+    const segs = nivel===1?3:(nivel===2?4:4);
+    let cx=sx, cy=sy;
+    for(let s=0;s<segs&&ok;s++){
+      const maxL = nivel===2?5:4, minL = nivel===2?3:2;
+      let placed=false;
+      for(let t=0;t<12&&!placed;t++){
+        const L=minL+Math.floor(rng()*(maxL-minL+1)), sign=rng()<.5?-1:1;
+        const dx=horiz?sign:0, dy=horiz?0:sign;
+        const cells=[]; let x=cx,y=cy, good=true;
+        for(let i=0;i<L;i++){ x+=dx; y+=dy; if(x<0||y<0||x>=N||y>=N||used.has(key(x,y))){good=false;break;} cells.push([x,y]); }
+        if(good&&cells.length){ cells.forEach(c=>{path.push(c);used.add(key(c[0],c[1]));}); cx=x;cy=y; placed=true; }
+      }
+      if(!placed) ok=false;
+      horiz=!horiz;
+    }
+    if(!ok||path.length<minLen||path.length>maxLen) continue;
+    const goal=path[path.length-1], start=path[0];
+    const first=[path[1][0]-start[0],path[1][1]-start[1]];
+    const firstDir=ORI.find(o=>VEC[o][0]===first[0]&&VEC[o][1]===first[1]);
+    const initDir = nivel===1?firstDir:ORI[Math.floor(rng()*4)];
+    // objetos (nivel 3)
+    let door=null,key_=null,doorIdx=-1,keyIdx=-1;
+    if(nivel===3){
+      if(path.length<8) continue;
+      doorIdx=3+Math.floor(rng()*(path.length-5)); // 3 .. len-3
+      door=path[doorIdx];
+      const cands=[];
+      for(let i=0;i<doorIdx;i++){
+        for(const o of ORI){ const nx=path[i][0]+VEC[o][0], ny=path[i][1]+VEC[o][1];
+          if(nx<0||ny<0||nx>=N||ny>=N||used.has(key(nx,ny))) continue; cands.push({i,cell:[nx,ny]}); }
+      }
+      if(!cands.length) continue;
+      const pick=cands[Math.floor(rng()*cands.length)]; key_=pick.cell; keyIdx=pick.i;
+    }
+    // muros reales
+    const walls=[]; const keyKeys=new Set(); if(key_) keyKeys.add(key(key_[0],key_[1]));
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){ const k=key(x,y); if(used.has(k)||keyKeys.has(k)) continue; if(rng()<(nivel===1?.5:.58)) walls.push([x,y]); }
+    // la puerta debe ser un cuello de botella: sin pasar por ella no se llega a la meta
+    if(door){
+      const wl=new Set(walls.map(c=>key(c[0],c[1]))); let fine=false;
+      for(let it=0;it<80;it++){
+        const par=new Map([[key(start[0],start[1]),null]]), q=[start];
+        while(q.length){ const c=q.shift(); if(c[0]===goal[0]&&c[1]===goal[1])break;
+          for(const o of ORI){ const nx=c[0]+VEC[o][0], ny=c[1]+VEC[o][1], kk=key(nx,ny);
+            if(nx<0||ny<0||nx>=N||ny>=N||wl.has(kk)||par.has(kk)||(nx===door[0]&&ny===door[1])) continue; par.set(kk,c); q.push([nx,ny]); } }
+        if(!par.has(key(goal[0],goal[1]))){ fine=true; break; }
+        let c=goal, cand=null; while(c){ const kk=key(c[0],c[1]); if(!used.has(kk)&&!keyKeys.has(kk)){cand=c;break;} c=par.get(kk); }
+        if(!cand) break; walls.push(cand); wl.add(key(cand[0],cand[1]));
+      }
+      if(!fine) continue;
+    }
+    // muros falsos
+    const ghosts=[], gset=new Set(), wset=new Set(walls.map(c=>key(c[0],c[1])));
+    for(let i=1;i<path.length-1;i++){
+      if(i===doorIdx) continue;
+      if(rng()<.5){ ghosts.push(path[i]); gset.add(key(path[i][0],path[i][1])); }
+    }
+    if(!ghosts.length){ let m=Math.floor(path.length/2); if(m===doorIdx) m--; ghosts.push(path[m]); gset.add(key(path[m][0],path[m][1])); }
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){ const k=key(x,y);
+      if(wset.has(k)||gset.has(k)||keyKeys.has(k)||used.has(k)) continue;
+      if(rng()<.3){ ghosts.push([x,y]); gset.add(k); } }
+    // trampas: casillas libres pegadas al camino (nunca sobre el camino ni la llave)
+    const trapN=TRAPS_BY_LEVEL[nivel], tc=[], seenT=new Set();
+    for(const p of path) for(const o of ORI){ const nx=p[0]+VEC[o][0], ny=p[1]+VEC[o][1], kk=key(nx,ny);
+      if(nx<0||ny<0||nx>=N||ny>=N||used.has(kk)||keyKeys.has(kk)||seenT.has(kk)||wset.has(kk)) continue; seenT.add(kk); tc.push([nx,ny]); }
+    if(tc.length<trapN) continue;
+    for(let i=tc.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [tc[i],tc[j]]=[tc[j],tc[i]]; }
+    const traps=tc.slice(0,trapN), trapK=new Set(traps.map(c=>key(c[0],c[1])));
+    return prep({N,start,initDir,goal,walls:walls.filter(c=>!trapK.has(key(c[0],c[1]))),ghosts:ghosts.filter(c=>!trapK.has(key(c[0],c[1]))),traps,key:key_,door,path,doorIdx,keyIdx,nivel});
+  }
+  // mundo de reserva fijo y sencillo
+  const path=[[0,0],[1,0],[2,0],[3,0],[3,1],[3,2],[3,3],[4,3],[5,3]];
+  return prep({N:6,start:[0,0],initDir:'este',goal:[5,3],walls:[[1,1],[2,1],[4,1],[4,2],[1,3],[2,3]],ghosts:[[3,1],[2,2]],traps:[[4,4]],key:null,door:null,path,doorIdx:-1,keyIdx:-1,nivel:1});
+}
+
+/* solución de referencia (para pruebas y para el profe) */
+function solutionActions(w){
+  let dir=w.initDir; const acts=[];
+  const face=t=>{const d=(ORI.indexOf(t)-ORI.indexOf(dir)+4)%4; if(d===1)acts.push('D'); else if(d===3)acts.push('I'); else if(d===2)acts.push('D','D'); dir=t;};
+  const dirTo=(a,b)=>ORI.find(o=>VEC[o][0]===b[0]-a[0]&&VEC[o][1]===b[1]-a[1]);
+  for(let i=0;i<w.path.length;i++){
+    if(w.key&&i===w.keyIdx){ face(dirTo(w.path[i],w.key)); acts.push('E'); }
+    if(w.door&&i===w.doorIdx-1){ face(dirTo(w.path[i],w.door)); acts.push('E'); }
+    if(i<w.path.length-1){ face(dirTo(w.path[i],w.path[i+1])); acts.push('A'); }
+  }
+  return acts;
+}
+
+/* ===================== SIMULACIÓN ===================== */
+function newState(w){ return {pos:[...w.start],dir:w.initDir,hasKey:false,doorOpen:false,keyTaken:false,revealed:new Set(),revealedTraps:new Set(),seenKey:false,seenDoor:false,crashes:0,ghosts:0,traps:0,lastTrap:null,arrived:false}; }
+function stepAction(w,st,act){ const ev=stepCore(w,st,act);
+  if(w.key&&Math.abs(st.pos[0]-w.key[0])+Math.abs(st.pos[1]-w.key[1])<=1) st.seenKey=true;
+  if(w.door&&Math.abs(st.pos[0]-w.door[0])+Math.abs(st.pos[1]-w.door[1])<=1) st.seenDoor=true;
+  return ev; }
+function stepCore(w,st,act){
+  if(act==='I'){st.dir=ORI[(ORI.indexOf(st.dir)+3)%4];return 'giro';}
+  if(act==='D'){st.dir=ORI[(ORI.indexOf(st.dir)+1)%4];return 'giro';}
+  const [dx,dy]=VEC[st.dir], tx=st.pos[0]+dx, ty=st.pos[1]+dy, k=key(tx,ty);
+  const isDoor=w.door&&tx===w.door[0]&&ty===w.door[1], isKey=w.key&&tx===w.key[0]&&ty===w.key[1];
+  if(act==='A'){
+    if(tx<0||ty<0||tx>=w.N||ty>=w.N){st.crashes++;return 'choque';}
+    if(w.wallSet.has(k)){st.crashes++;return 'choque';}
+    if(isDoor&&!st.doorOpen){st.crashes++;return 'choque_puerta';}
+    if(w.trapSet.has(k)){ // trampa: todo a cero (los fantasmas descubiertos se quedan descubiertos)
+      st.traps++; st.revealedTraps.add(k); st.lastTrap=[tx,ty];
+      st.pos=[...w.start]; st.dir=w.initDir; st.hasKey=false; st.keyTaken=false; st.doorOpen=false;
+      return 'trampa';
+    }
+    st.pos=[tx,ty]; let ev='avance';
+    if(w.ghostSet.has(k)&&!st.revealed.has(k)){st.revealed.add(k);st.ghosts++;ev='fantasma';}
+    if(tx===w.goal[0]&&ty===w.goal[1]){st.arrived=true;return 'meta';}
+    return ev;
+  }
+  if(act==='E'){
+    if(isKey&&!st.hasKey){st.hasKey=true;st.keyTaken=true;return 'llave';}
+    if(isDoor){ if(st.hasKey&&!st.doorOpen){st.doorOpen=true;return 'puerta';} if(!st.hasKey) return 'puerta_cerrada'; }
+    return 'nada';
+  }
+  return 'nada';
+}
+/* frames: pos/dir = lo que se dibuja (en la trampa, la casilla de la trampa); cell = casilla del choque */
+function simulate(w,acts){
+  const st=newState(w), frames=[{pos:[...st.pos],dir:st.dir,ev:'inicio',keyTaken:false,doorOpen:false}];
+  for(const a of acts){ if(st.arrived)break;
+    const bd=st.dir, v=VEC[bd], cell=[st.pos[0]+v[0],st.pos[1]+v[1]];
+    const ev=stepAction(w,st,a);
+    frames.push({pos:ev==='trampa'?[...st.lastTrap]:[...st.pos],dir:ev==='trampa'?bd:st.dir,ev,act:a,cell,keyTaken:st.keyTaken,doorOpen:st.doorOpen}); }
+  return {frames,st};
+}
+
+/* ===================== TABLERO SVG ===================== */
+const REDUCED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+const memo={};
+function renderBoard(containerId,w,o={}){
+  const C=60,S=SKINS[skin],n=w.N,size=n*C, prog_=o.view==='prog';
+  const pathSet=new Set(w.path.map(c=>key(c[0],c[1])));
+  let s=`<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tablero">`;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    const k=key(x,y),px=x*C,py=y*C,mx=px+C/2,my=py+C/2;
+    const real=w.wallSet.has(k), ghost=w.ghostSet.has(k), isGoal=x===w.goal[0]&&y===w.goal[1];
+    const ghostShown=!prog_&&ghost&&o.revealed&&o.revealed.has(k);
+    const trapShown=w.trapSet.has(k)&&(prog_||(o.revealedTraps&&o.revealedTraps.has(k)));
+    const wallLook=real||(ghost&&!prog_&&!ghostShown);
+    let fill='#fff';
+    if(prog_&&pathSet.has(k)) fill='#fff3b0';
+    if(prog_&&isGoal) fill='#a3e635';
+    if(trapShown) fill='#ffd3d3';
+    s+=`<rect x="${px}" y="${py}" width="${C}" height="${C}" fill="${wallLook?S.wall:fill}" stroke="#11111133" stroke-width="1"/>`;
+    if(wallLook) s+=`<rect x="${px+9}" y="${py+9}" width="${C-18}" height="${C-18}" fill="${S.wallIn}" stroke="#111" stroke-width="2"/>`;
+    if(ghostShown) s+=`<g data-cell="${k}" style="transform-origin:${mx}px ${my}px"><text x="${mx}" y="${my+9}" font-size="26" text-anchor="middle">👻</text></g>`;
+    if(trapShown) s+=`<g data-cell="${k}" style="transform-origin:${mx}px ${my}px"><text x="${mx}" y="${my+9}" font-size="26" text-anchor="middle">🕳️</text></g>`;
+    if(prog_&&isGoal) s+=`<text x="${mx}" y="${my+10}" font-size="30" text-anchor="middle">${S.goal}</text>`;
+  }
+  if(w.door&&(prog_||o.seenDoor)){ const [dx,dy]=w.door, open=o.doorOpen;
+    s+=`<rect x="${dx*C+4}" y="${dy*C+4}" width="${C-8}" height="${C-8}" fill="${open?'#fff':'#ff8a3d'}" stroke="#111" stroke-width="3" ${open?'stroke-dasharray="6 4"':''}/>`;
+    s+=`<text x="${dx*C+C/2}" y="${dy*C+C/2+9}" font-size="26" text-anchor="middle" opacity="${open?.35:1}">🚪</text>`; }
+  if(w.key&&!o.keyTaken&&(prog_||o.seenKey)){ const [kx,ky]=w.key;
+    s+=`<rect x="${kx*C+6}" y="${ky*C+6}" width="${C-12}" height="${C-12}" fill="#ffe14d" stroke="#111" stroke-width="3"/>`;
+    s+=`<text x="${kx*C+C/2}" y="${ky*C+C/2+9}" font-size="26" text-anchor="middle">🔑</text>`; }
+  (o.trail||[]).forEach(seg=>{ if(seg.length>1) s+=`<polyline points="${seg.map(p=>`${p[0]*C+C/2},${p[1]*C+C/2}`).join(' ')}" fill="none" stroke="#7c3aed" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity=".75"/>`; });
+  (o.crashes||[]).forEach(c=>{ s+=`<text x="${c[0]*C+C/2}" y="${c[1]*C+C/2+10}" font-size="30" text-anchor="middle">💥</text>`; });
+  const pos=o.pos||w.start, dir=o.dir||w.initDir, cx=pos[0]*C+C/2, cy=pos[1]*C+C/2;
+  s+=`<g class="tk-move"><circle cx="${cx}" cy="${cy}" r="21" fill="${S.player}" stroke="#111" stroke-width="3.5"/>`;
+  s+=`<g class="tk-turn" style="transform-origin:${cx}px ${cy}px"><polygon points="${cx},${cy-13} ${cx+9},${cy+8} ${cx-9},${cy+8}" fill="#111" transform="rotate(${ANG[dir]} ${cx} ${cy})"/></g></g>`;
+  if(prog_&&!o.noStart) s+=`<text x="${w.start[0]*C+5}" y="${w.start[1]*C+14}" font-size="12" font-weight="900" fill="#111">S</text>`;
+  s+='</svg>';
+  $(containerId).innerHTML=s;
+  const prev=memo[containerId], cur={pos:[...pos],dir,wid:w.seedKey||''};
+  memo[containerId]=cur;
+  if(o.animate&&!REDUCED&&prev&&prev.wid===cur.wid) playFx(containerId,prev,cur,o,C);
+}
+/* animaciones: deslizar, girar, sacudida al chocar, "pop" al descubrir fantasma/trampa, aparecer tras caer */
+function playFx(cid,prev,cur,o,C){
+  const root=$(cid), mv=root.querySelector('.tk-move'), tn=root.querySelector('.tk-turn');
+  if(!mv||!tn||!mv.animate)return;
+  const dur=o.dur||240, dx=(prev.pos[0]-cur.pos[0])*C, dy=(prev.pos[1]-cur.pos[1])*C, dist=Math.abs(dx)+Math.abs(dy);
+  const cx=cur.pos[0]*C+C/2, cy=cur.pos[1]*C+C/2;
+  if(o.reset||dist>C){ mv.style.transformOrigin=cx+'px '+cy+'px';
+    if(dist) mv.animate([{opacity:0,transform:'scale(.3)'},{opacity:1,transform:'scale(1.15)',offset:.7},{opacity:1,transform:'scale(1)'}],{duration:dur*2,easing:'ease-out'}); }
+  else if(dist>0) mv.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:`translate(${dx/2}px,${dy/2-7}px)`,offset:.5},{transform:'translate(0,0)'}],{duration:dur,easing:'ease-in-out'});
+  const delta=((ANG[cur.dir]-ANG[prev.dir]+540)%360)-180;
+  if(delta) tn.animate([{transform:`rotate(${-delta}deg)`},{transform:'rotate(0deg)'}],{duration:dur,easing:'ease-out'});
+  const fx=o.fx;
+  if(fx==='choque'||fx==='choque_puerta'){ const v=VEC[cur.dir];
+    mv.animate([{transform:'translate(0,0)'},{transform:`translate(${v[0]*10}px,${v[1]*10}px)`,offset:.25},{transform:`translate(${-v[0]*5}px,${-v[1]*5}px)`,offset:.6},{transform:'translate(0,0)'}],{duration:320,easing:'ease-out'}); }
+  const popCell=fx==='fantasma'?cur.pos:(fx==='trampa'?o.trapCell:null);
+  if(popCell){ const g=root.querySelector('[data-cell="'+key(popCell[0],popCell[1])+'"]');
+    if(g) g.animate([{transform:'scale(2.4)',opacity:0},{transform:'scale(.85)',opacity:1,offset:.6},{transform:'scale(1)',opacity:1}],{duration:420,easing:'ease-out'}); }
+}
+
+/* ===================== PROGRAMADOR ===================== */
+function tipText(n){
+  return n===1?'💡 Una orden por línea. No des nada por supuesto: tu compañero/a no ve la meta. Indica cuántas casillas avanzar y hacia qué lado girar.'
+   :n===2?'💡 Camino más largo y con más giros, y ahora empiezas mirando a una dirección al azar: indica primero hacia dónde girar. Cuenta bien las casillas de cada tramo.'
+   :'💡 Hay una llave junto al camino y una puerta que cierra el único paso. Tu compañero/a NO los ve hasta tenerlos al lado. Para coger o abrir hay que estar delante, mirando al objeto, y usar Interactuar. Explica el orden: primero la llave, luego la puerta.';
+}
+function levelChanged(){ if(prog.name) progress.textos[prog.level]=$('prog-text').value; $('prog-text').value=''; prog.text=''; exec=blankExec(); $('exec-board').innerHTML=''; $('result-box').classList.add('hidden'); hideBanner(); $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.'; $('exec-from').textContent='Sin partida'; generateFromInputs(true); $('prog-text').value=progress.textos[prog.level]||''; updateLines(); }
+function generateFromInputs(announce){
+  if(!prog.name)return;
+  const level=parseInt($('prog-level').value,10), seed=semillaDeNombre(prog.name+'|'+level);
+  prog.level=level; prog.seed=seed; world=generateWorld(seed,level); world.seedKey=seed+'|'+level;
+  prog.rondas=0; clearDebug(); renderProgrammer();
+  if(announce) toast('Mundo creado a partir de tu nombre ✓');
+}
+function renderProgrammer(){
+  const S=SKINS[skin];
+  $('skin-info').textContent=`Personaje: ${S.personaje} · Meta: ${S.meta}`;
+  $('seed-info').textContent='Semilla '+prog.seed;
+  $('dir-info').textContent='Empiezas mirando al '+world.initDir.toUpperCase()+' '+ARROW[world.initDir];
+  $('legend-obj').classList.toggle('hidden',!world.key);
+  $('sw-wall').style.background=S.wall;
+  $('tips').textContent=tipText(prog.level)+' ⚠️ Las casillas rosas 🕳️ son trampas: tu compañero/a no las ve y, si cae en una, vuelve a empezar de cero. ¡Avísale!';
+  
+  updateLines();
+  renderBoard('prog-board',world,{view:'prog'});
+}
+function countLines(t){return t.split('\n').map(l=>l.trim()).filter(Boolean).length;}
+function updateLines(){
+  const n=countLines($('prog-text').value); $('line-count').textContent=n+(n===1?' línea':' líneas');
+}
+function passTurn(){
+  const text=$('prog-text').value.trim();
+  if(!prog.name){askNameProg();return;}
+  if(!text){toast('Escribe tus órdenes antes de pasar el turno');$('prog-text').focus();return;}
+  prog.text=text; lockedExec=true; updateLock();
+  exec=blankExec(); $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML=''; delete memo['exec-board'];
+  $('exec-orders').textContent='… esperando al ejecutor/a …'; $('exec-name').value=''; $('exec-from').textContent='Órdenes de '+prog.name;
+  switchMode('ejecutor');
+  askName('🎮 Ejecutor/a: ¿cómo te llamas?','Te han pasado el ordenador. Escribe tu nombre y ejecuta las órdenes. Tiene que ser otra persona.',
+    n=>{execName=n;doPass(text);}, n=>norm(n)===norm(prog.name)?'Tiene que ser otra persona distinta del programador/a.':null);
+}
+function updateLock(){ $('tab-programador').disabled=lockedExec; $('btn-change').disabled=lockedExec; $('btn-save').disabled=lockedExec; $('btn-load').style.opacity=lockedExec?.45:1; }
+function askBack(){
+  if(!lockedExec){ if(exec.result)sendToDebug(); else switchMode('programador'); return; }
+  $('pass-input').value=''; $('pass-err').classList.add('hidden'); openModal('modal-pass'); setTimeout(()=>$('pass-input').focus(),30);
+}
+function submitPass(){
+  const lv=exec.loaded?exec.level:prog.level;
+  if(norm($('pass-input').value)!==norm(CLAVES[lv]||CLAVES[1])){ $('pass-err').classList.remove('hidden'); $('pass-input').focus(); return; }
+  closeModal('modal-pass'); lockedExec=false; updateLock();
+  if(exec.result)sendToDebug(); else switchMode('programador');
+}
+function doPass(text){
+  prog.text=text; prog.rondas++;
+  exec=Object.assign(blankExec(),{loaded:true,world:world,st:newState(world),startedAt:Date.now(),progName:prog.name,level:prog.level,seed:prog.seed,text,lineas:countLines(text),rondas:prog.rondas});
+  $('exec-name').value=execName;
+  $('result-box').classList.add('hidden'); hideBanner();
+  $('exec-orders').textContent=text;
+  $('exec-from').textContent='Órdenes de '+prog.name;
+  switchMode('ejecutor'); renderExec();
+  toast('Turno pasado: ahora ejecuta '+execName+' 🎮');
+}
+function swapRoles(){
+  if(!execName)return;
+  const np=execName; execName=prog.name; prog={name:np,level:prog.level,seed:0,text:'',rondas:0};
+  exec=blankExec(); clearDebug(); $('prog-text').value=''; $('result-box').classList.add('hidden'); hideBanner();
+  $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.';
+  $('exec-from').textContent='Sin partida'; $('exec-name').value=execName; $('exec-board').innerHTML=''; delete memo['exec-board'];
+  setWho(); switchMode('programador'); generateFromInputs(true); toast('Roles intercambiados: programa '+np+' ✍️');
+}
+
+/* ----- nombre obligatorio (ventana bloqueante) ----- */
+let nameCb=null, nameReject=null;
+function setWho(){ $('who').textContent='👤 '+(prog.name||'—'); }
+function askName(title,sub,cb,reject,prefill){
+  nameCb=cb; nameReject=reject||null;
+  $('name-title').textContent=title; $('name-sub').textContent=sub; $('name-input').value=prefill||''; $('name-err').classList.add('hidden');
+  $('modal-name').classList.remove('hidden'); document.querySelector('header').inert=true; document.querySelector('main').inert=true;
+  setTimeout(()=>$('name-input').focus(),30);
+}
+function submitName(){
+  const n=$('name-input').value.replace(/\s+/g,' ').trim(); let err=null;
+  if(n.length<3||!/[a-zA-Z\u00C0-\u017F]/.test(n)) err='Escribe tu nombre (mínimo 3 letras).'; else if(nameReject) err=nameReject(n);
+  if(err){ $('name-err').textContent=err; $('name-err').classList.remove('hidden'); $('name-input').focus(); return; }
+  $('modal-name').classList.add('hidden'); document.querySelector('header').inert=false; document.querySelector('main').inert=false;
+  const cb=nameCb; nameCb=null; if(cb)cb(n);
+}
+function askNameProg(){
+  world=null; prog.name=''; setWho(); $('prog-board').innerHTML=''; delete memo['prog-board'];
+  askName('👋 ¿Cómo te llamas?','Escribe tu nombre y apellido. Tu mundo se genera a partir de él: nadie más tendrá el mismo.',
+    n=>{ prog.name=n; setWho(); switchMode('programador'); generateFromInputs(true); });
+}
+function changeStudent(){
+  if(lockedExec){toast('🔒 Hace falta la contraseña del profe');return;}
+  if(prog.name&&($('prog-text').value.trim()||exec.loaded)&&!confirm('Se borrará lo escrito y la partida. ¿Cambiar de alumno/a?'))return;
+  execName=''; progress={textos:{},resultados:{}}; prog={name:'',level:prog.level,seed:0,text:'',rondas:0}; exec=blankExec(); clearDebug();
+  $('prog-text').value=''; $('exec-name').value=''; $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML='';
+  $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.'; $('exec-from').textContent='Sin partida';
+  askNameProg();
+}
+
+/* ===================== EJECUTOR ===================== */
+function renderExec(o={}){
+  if(!exec.loaded){ $('exec-board').innerHTML=''; return; }
+  const st=exec.st;
+  if(!o.noBoard) renderBoard('exec-board',exec.world,{view:'exec',pos:o.pos||st.pos,dir:o.dir||st.dir,revealed:st.revealed,revealedTraps:st.revealedTraps,seenKey:st.seenKey,seenDoor:st.seenDoor,keyTaken:st.keyTaken,doorOpen:st.doorOpen,
+    animate:o.animate,reset:o.reset,fx:o.ev,trapCell:o.trapCell});
+  $('exec-dir').textContent='Mirando al '+st.dir.toUpperCase()+' '+ARROW[st.dir];
+  $('exec-steps').textContent=exec.acciones.length; $('exec-ghosts').textContent=st.ghosts; $('exec-crashes').textContent=st.crashes; $('exec-traps').textContent=st.traps;
+  const kp=$('exec-key'); kp.classList.toggle('hidden',!exec.world.key); kp.textContent='🔑 Llave: '+(st.hasKey?'sí':'no');
+  const stt=$('exec-status'); stt.textContent=exec.finished?(st.arrived?'¡Meta!':'Terminado'):'Jugando'; stt.className='pill '+(exec.finished?(st.arrived?'lime':'orange'):'yellow');
+  const tape=$('exec-tape'); tape.innerHTML='';
+  if(!exec.acciones.length){ const e=document.createElement('em'); e.textContent='Ninguna acción todavía…'; e.style.color='#777'; tape.appendChild(e); }
+  exec.acciones.slice(-70).forEach(a=>{ const sp=document.createElement('span'); sp.textContent=GLYPH[a.a]; if(a.ev.startsWith('choque'))sp.className='bad'; else if(a.ev==='fantasma')sp.className='ghost'; else if(a.ev==='trampa')sp.className='trap'; else if(a.ev==='meta')sp.className='ok'; tape.appendChild(sp); });
+  renderDoubts();
+}
+function banner(msg,cls){const b=$('exec-banner');b.className='note '+cls;b.textContent=msg;b.style.visibility='visible';}
+function hideBanner(){const b=$('exec-banner');b.style.visibility='hidden';b.textContent='\u00a0';}
+function execAct(a){
+  if(!exec.loaded){toast('Aún no hay partida: pasa el turno desde el programador');return;}
+  if(exec.finished||exec.locked)return;
+  const prevDir=exec.st.dir;
+  const ev=stepAction(exec.world,exec.st,a);
+  exec.acciones.push({a,ev});
+  if(ev==='fantasma')banner('👻 ¡Era un muro falso! Sigue el texto.','warn');
+  else if(ev==='choque')banner('💥 ¡Choque con un muro real o el borde! Anótalo como duda si no lo entiendes.','error');
+  else if(ev==='choque_puerta')banner('💥 La puerta está cerrada.','error');
+  else if(ev==='trampa')banner('🕳️ ¡Trampa! Vuelves a la salida y empiezas de cero: sin llave y con la puerta cerrada.','error');
+  else if(ev==='llave')banner('🔑 ¡Has cogido la llave!','ok');
+  else if(ev==='puerta')banner('🚪 ¡Puerta abierta!','ok');
+  else if(ev==='puerta_cerrada')banner('🚪 La puerta no se abre: te falta la llave.','warn');
+  else if(ev==='meta')banner('🎉 ¡Has llegado a la meta!','ok');
+  else if(ev==='nada'&&a==='E')banner('✋ No hay nada delante con lo que interactuar.','warn');
+  else hideBanner();
+  if(ev==='trampa'){
+    const tc=[...exec.st.lastTrap]; exec.locked=true;
+    renderExec({ev,animate:true,pos:tc,dir:prevDir,trapCell:tc});
+    setTimeout(()=>{ if(!exec.locked)return; exec.locked=false; renderExec({animate:true,reset:true}); },REDUCED?200:750);
+    return;
+  }
+  renderExec({ev,animate:true});
+  if(ev==='meta') finishRun(true);
+}
+function resetRun(){
+  if(!exec.loaded)return;
+  exec.st=newState(exec.world); exec.acciones=[]; exec.finished=false; exec.result=null; exec.locked=false; exec.intentos++;
+  exec.startedAt=Date.now(); $('result-box').classList.add('hidden'); hideBanner(); renderExec();
+}
+function addDoubt(){
+  const v=$('doubt-input').value.trim(); if(!v||!exec.loaded)return;
+  exec.dudas.push({paso:exec.acciones.length,texto:v}); $('doubt-input').value=''; renderDoubts();
+}
+function renderDoubts(){
+  const l=$('doubt-list'); l.innerHTML='';
+  exec.dudas.forEach((d,i)=>{ const it=document.createElement('div'); it.className='item';
+    const b=document.createElement('b'); b.className='mono'; b.textContent='P'+d.paso; const t=document.createElement('span'); t.textContent=d.texto; t.style.flex='1';
+    const x=document.createElement('button'); x.className='btn danger sm'; x.textContent='✕'; x.onclick=()=>{exec.dudas.splice(i,1);renderDoubts();};
+    it.append(b,t,x); l.appendChild(it); });
+}
+function buildResult(){
+  const st=exec.st, errores=[];
+  const sim=simulate(exec.world,exec.acciones.map(x=>x.a));
+  sim.frames.forEach((f,i)=>{ if(i>0&&f.ev.startsWith('choque')) errores.push({tipo:'choque',donde:'paso '+i,detalle:f.ev}); else if(i>0&&f.ev==='trampa') errores.push({tipo:'trampa',donde:'paso '+i,detalle:'trampa'}); });
+  return carnetBase({
+    carnet:CARNET_ID, alumno:execName||'Sin nombre', completado:st.arrived, nivel_alcanzado:exec.level,
+    tiempo_segundos:Math.round((Date.now()-exec.startedAt)/1000), intentos:exec.intentos, errores, criterios:['5.1'],
+    detalle:{programador:exec.progName,semilla:exec.seed,skin,rondas:exec.rondas,lineas:exec.lineas,texto:exec.text,
+             acciones:exec.acciones.map(x=>x.a).join(''),n_acciones:exec.acciones.length,fantasmas:st.ghosts,trampas:st.traps,dudas:exec.dudas,motivo_fallo:st.arrived?'':(exec.motivo||''),reflexion:''}
+  });
+}
+const nChoques=c=>c.errores.filter(e=>e.tipo==='choque').length;
+function openFail(){
+  if(!exec.loaded||exec.finished){toast(exec.loaded?'Ya has terminado: pulsa «Volver al programador/a»':'Aún no hay partida');return;}
+  $('fail-text').value=''; $('fail-err').classList.add('hidden'); openModal('modal-fail'); setTimeout(()=>$('fail-text').focus(),30);
+}
+function submitFail(){
+  const t=$('fail-text').value.trim();
+  if(t.length<5){ $('fail-err').classList.remove('hidden'); $('fail-text').focus(); return; }
+  closeModal('modal-fail'); exec.motivo=t; finishRun(false);
+}
+function finishRun(auto){
+  if(!exec.loaded||exec.finished&&!auto)return;
+  exec.finished=true; exec.result=buildResult();
+  const r=exec.result, d=r.detalle;
+  $('result-box').classList.remove('hidden');
+  $('result-note').className='note '+(r.completado?'ok':'warn');
+  $('result-note').textContent=(r.completado?'🎉 ¡Llegó a la meta! ':'Terminado sin llegar a la meta. ')+`Acciones: ${d.n_acciones} · Choques: ${nChoques(r)} · Trampas: ${d.trampas} · Muros falsos: ${d.fantasmas} · Dudas: ${d.dudas.length}`;
+  renderExec({noBoard:true});
+  if(auto&&r.completado) setTimeout(()=>{
+    $('meta-text').textContent=`${r.alumno} ha llegado a la meta siguiendo las órdenes de ${d.programador}.`;
+    $('meta-stats').textContent=`Acciones: ${d.n_acciones} · Choques: ${nChoques(r)} · Trampas: ${d.trampas} · Muros falsos: ${d.fantasmas} · Dudas: ${d.dudas.length}`;
+    openModal('modal-meta'); },REDUCED?0:650);
+}
+function downloadResult(){ if(exec.result){ descargarCarnet(exec.result); toast('Resultado descargado ✓'); } }
+function sendToDebug(){
+  if(!exec.result)return;
+  dbg.res=exec.result; progress.textos[exec.level]=exec.text; { const d0=exec.result.detalle; progress.resultados[exec.level]={ejecutor:exec.result.alumno,completado:exec.result.completado,acciones:d0.n_acciones,choques:nChoques(exec.result),trampas:d0.trampas,motivo_fallo:d0.motivo_fallo,reflexion:''}; }
+  const sim=simulate(exec.world,exec.acciones.map(x=>x.a)); dbg.frames=sim.frames; dbg.idx=0;
+  world=exec.world; // el programador sigue con el mismo mundo
+  delete memo['prog-board'];
+  switchMode('programador'); $('debug-card').classList.remove('hidden');
+  const r=dbg.res,d=r.detalle;
+  $('debug-summary').textContent=`${r.alumno} ${r.completado?'llegó a la meta':'no llegó a la meta'} con ${d.n_acciones} acciones, ${nChoques(r)} choque(s), ${d.trampas} trampa(s) y ${d.dudas.length} duda(s).`;
+  $('refl').value=''; renderDebugList(); updateDebug(false);
+  $('debug-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderDebugList(){
+  const l=$('debug-list'); l.innerHTML=''; const r=dbg.res; let any=false;
+  dbg.frames.forEach((f,i)=>{ if(i===0)return;
+    if(f.ev.startsWith('choque')){ any=true; mk('bad','💥 Choque en el paso '+i+' ('+(f.ev==='choque_puerta'?'puerta cerrada':'muro real')+')',i); }
+    else if(f.ev==='trampa'){ any=true; mk('bad','🕳️ Trampa en el paso '+i+': vuelve a empezar de cero',i); } });
+  if(r.detalle.motivo_fallo){ any=true; mk('bad','🚫 Por qué no llegó: '+r.detalle.motivo_fallo,0); }
+  r.detalle.dudas.forEach(d=>{ any=true; mk('', '❓ Duda en el paso '+d.paso+': '+d.texto, d.paso); });
+  if(!any){ const e=document.createElement('div'); e.className='item'; e.textContent='Sin choques, trampas ni dudas. ¡Órdenes limpias!'; l.appendChild(e); }
+  function mk(cls,txt,step){ const it=document.createElement('div'); it.className='item '+cls; it.style.cursor='pointer'; it.textContent=txt; it.onclick=()=>{dbg.idx=Math.min(step,dbg.frames.length-1);updateDebug(false);}; l.appendChild(it); }
+}
+function updateDebug(anim){
+  if(!dbg.frames.length)return;
+  const i=dbg.idx, f=dbg.frames[i], segs=[[]], crashes=[];
+  for(let k=0;k<=i;k++){ const fr=dbg.frames[k]; segs[segs.length-1].push(fr.pos);
+    if(fr.ev==='trampa') segs.push([world.start]);
+    if(fr.ev.startsWith('choque')) crashes.push(fr.cell); }
+  renderBoard('prog-board',world,{view:'prog',pos:f.pos,dir:f.dir,trail:segs,crashes,keyTaken:f.keyTaken,doorOpen:f.doorOpen,noStart:false,
+    animate:!!anim,fx:anim==='fwd'?f.ev:null,trapCell:f.pos,dur:dbg.timer?380:240});
+  $('debug-ind').textContent='Paso '+i+'/'+(dbg.frames.length-1);
+}
+function debugStep(d){ const old=dbg.idx; dbg.idx=Math.max(0,Math.min(dbg.frames.length-1,dbg.idx+d)); updateDebug(Math.abs(d)===1&&dbg.idx!==old?(d>0?'fwd':'back'):false); }
+function debugPlay(){
+  if(dbg.timer){clearInterval(dbg.timer);dbg.timer=null;$('debug-play').textContent='▶ Reproducir';return;}
+  if(dbg.idx>=dbg.frames.length-1){dbg.idx=0;updateDebug(false);}
+  $('debug-play').textContent='⏸ Pausa';
+  dbg.timer=setInterval(()=>{ if(dbg.idx>=dbg.frames.length-1){clearInterval(dbg.timer);dbg.timer=null;$('debug-play').textContent='▶ Reproducir';return;} dbg.idx++; updateDebug('fwd'); },560);
+}
+function saveRefl(){ if(!dbg.res)return; dbg.res.detalle.reflexion=$('refl').value; if(progress.resultados[dbg.res.nivel_alcanzado]) progress.resultados[dbg.res.nivel_alcanzado].reflexion=$('refl').value; }
+function downloadDebug(){ if(dbg.res){ saveRefl(); descargarCarnet(dbg.res); toast('Descargado ✓'); } }
+function fileSafe(n){return (n||'alumno').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').toLowerCase();}
+function saveProgress(){
+  if(!prog.name){toast('Escribe tu nombre primero');return;}
+  progress.textos[prog.level]=$('prog-text').value;
+  const o={carnet:CARNET_ID+'_progreso',version:1,alumno:prog.name,fecha:new Date().toISOString(),nivel_actual:prog.level,skin,textos:progress.textos,resultados:progress.resultados};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));
+  a.download='progreso_ordenes_ciegas_'+fileSafe(prog.name)+'.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('Progreso guardado ✓ Guarda el archivo para continuar otro día');
+}
+function loadProgress(ev){
+  const f=ev.target.files&&ev.target.files[0]; ev.target.value=''; if(!f)return;
+  if(lockedExec){toast('🔒 Hace falta la contraseña del profe');return;}
+  const r=new FileReader(); r.onload=()=>{ try{
+    const o=JSON.parse(r.result); if(!o||o.carnet!==CARNET_ID+'_progreso'||!o.alumno) throw 0;
+    $('modal-name').classList.add('hidden'); document.querySelector('header').inert=false; document.querySelector('main').inert=false; nameCb=null;
+    execName=''; exec=blankExec(); clearDebug(); $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML='';
+    progress={textos:o.textos||{},resultados:o.resultados||{}};
+    prog={name:o.alumno,level:parseInt(o.nivel_actual,10)||1,seed:0,text:'',rondas:0}; setWho();
+    if(o.skin&&SKINS[o.skin]){ skin=o.skin; $('skin-select').value=skin; }
+    $('prog-level').value=String(prog.level); switchMode('programador'); generateFromInputs(false);
+    $('prog-text').value=progress.textos[prog.level]||''; updateLines();
+    toast('Progreso cargado: '+o.alumno+' ✓');
+  }catch(e){ toast('Ese archivo no es un progreso válido'); } }; r.readAsText(f);
+}
+function clearDebug(){ if(dbg.timer){clearInterval(dbg.timer);dbg.timer=null;} dbg.frames=[]; $('debug-card').classList.add('hidden'); $('debug-play').textContent='▶ Reproducir'; }
+
+/* ===================== INTERFAZ ===================== */
+function switchMode(m){
+  if(lockedExec&&m!=='ejecutor'){toast('🔒 Hace falta la contraseña del profe');return;}
+  mode=m;
+  ['programador','ejecutor'].forEach(v=>{ $('view-'+v).classList.toggle('hidden',v!==m); $('tab-'+v).setAttribute('aria-selected',v===m?'true':'false'); });
+  if(m==='ejecutor')renderExec();
+  if(m==='programador'&&world){ if(dbg.frames.length)updateDebug(false); else renderProgrammer(); }
+}
+function changeSkin(s){ skin=s; if(world){ if(dbg.frames.length)updateDebug(false); else renderProgrammer(); } renderExec(); }
+function openModal(id){$(id).classList.remove('hidden');}
+function closeModal(id){$(id).classList.add('hidden');}
+let toastT=null;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add('hidden'),2600);}
+document.addEventListener('keydown',e=>{
+  if(!$('modal-pass').classList.contains('hidden'))return;
+  if(!$('modal-name').classList.contains('hidden')){ if(e.key==='Escape')e.preventDefault(); return; }
+  if(mode!=='ejecutor')return; const tg=e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+  const k=e.key.toLowerCase(); const map={arrowup:'A',w:'A',arrowleft:'I',a:'I',arrowright:'D',d:'D',e:'E'};
+  if(map[k]){e.preventDefault();execAct(map[k]);}
+});
+askNameProg();
+</script>
+</body>
+</html>
