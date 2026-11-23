@@ -175,9 +175,10 @@ var TYPES={
  tele:{e:"📺",n:"Tele",cable:true,infra:false,ip:true,info:"Una smart TV puede ir por cable o por Wi-Fi."},
  impresora:{e:"🖨️",n:"Impresora",cable:true,infra:false,ip:true,info:"Puede ir por cable o por Wi-Fi."},
  bombilla:{e:"💡",n:"Bombilla",cable:false,infra:false,ip:true,info:"Aparato IoT (internet de las cosas): solo Wi-Fi."},
- altavoz:{e:"🔊",n:"Altavoz",cable:false,infra:false,ip:true,info:"Aparato IoT (internet de las cosas): solo Wi-Fi."}
+ altavoz:{e:"🔊",n:"Altavoz",cable:false,infra:false,ip:true,info:"Aparato IoT (internet de las cosas): solo Wi-Fi."},
+ asistente:{e:"🗣️",n:"Asistente",cable:false,infra:false,ip:true,info:"Altavoz inteligente (Alexa, Google Home): solo Wi-Fi. Necesita internet para entender lo que le dices."}
 };
-var ORDER=["router","switch","ap","pc","movil","consola","tele","impresora","bombilla","altavoz"];
+var ORDER=["router","switch","ap","pc","movil","consola","tele","impresora","bombilla","altavoz","asistente"];
 var CARDS=[
  ["🌐 Router","Conecta tu casa con internet y reparte una IP a cada aparato. Es la puerta de la casa."],
  ["🔀 Switch","Reparte la red por cable entre varios aparatos. Es como una regleta, pero de datos."],
@@ -190,7 +191,7 @@ var CARDS=[
  ["🚪 Puerta de enlace","La IP del router: la puerta por la que sales a internet. Suele acabar en .1"],
  ["📖 DNS","La agenda que traduce google.com en una IP."],
  ["🎟️ DHCP","Reparte las IP solo, sin que tú las escribas. Lo hace el router."],
- ["💡 IoT","Aparatos de internet de las cosas: bombillas, altavoces, relojes... Casi siempre solo Wi-Fi."]
+ ["💡 IoT","Aparatos de internet de las cosas: bombillas, altavoces, asistentes como Alexa o Google Home... Casi siempre solo Wi-Fi."]
 ];
 var KEY="plano_red_v1";
 var DK=["ip","mask","router","switch","dns"];
