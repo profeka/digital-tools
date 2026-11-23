@@ -171,7 +171,7 @@ table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(-
     <div class="card">
       <h2><span class="num">2</span>Escribe tus órdenes</h2>
       <p style="font-size:.85rem;font-weight:700">Explica con tus palabras cómo llegar desde la salida hasta la meta. Tu compañero/a <strong>no verá la meta ni los muros reales</strong>: solo tendrá tu texto. El personaje avanza casilla a casilla y gira 90°.</p>
-      <textarea id="prog-text" class="input" oninput="updateLines()" placeholder="Escribe aquí las órdenes para tu compañero/a…"></textarea>
+      <textarea id="prog-text" class="input" oninput="onType()" placeholder="Escribe aquí las órdenes para tu compañero/a…"></textarea>
       <p class="row" style="margin-top:8px"><span class="pill" id="line-count">0 líneas</span></p>
       <div class="note warn" style="margin-top:10px" id="tips"></div>
       <div class="row" style="margin-top:14px">
@@ -273,9 +273,9 @@ table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(-
   </div>
 </div>
 <!-- ================= MODAL CONTRASEÑA ================= -->
-<div id="modal-pass" class="modal-back hidden" style="z-index:75" onclick="if(event.target===this)closeModal('modal-pass')">
+<div id="modal-pass" class="modal-back hidden" style="z-index:75" onclick="if(event.target===this)cancelPass()">
   <div class="modal" style="max-width:440px">
-    <div class="head"><h3>🔒 Contraseña del profe</h3><button class="btn danger sm" onclick="closeModal('modal-pass')">✕</button></div>
+    <div class="head"><h3>🔒 Contraseña del profe</h3><button class="btn danger sm" onclick="cancelPass()">✕</button></div>
     <div class="body">
       <p style="font-size:.9rem;font-weight:700">Para devolver el ordenador al programador/a hace falta la contraseña de este nivel. Te la dirá el profe en voz alta cuando hayáis terminado.</p>
       <input id="pass-input" class="input" autocomplete="off" style="margin-top:10px" placeholder="Contraseña" onkeydown="if(event.key==='Enter')submitPass()">
@@ -320,6 +320,7 @@ table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(-
       <input id="name-input" class="input" autocomplete="off" maxlength="40" placeholder="Ej.: Ana Ruiz" onkeydown="if(event.key==='Enter')submitName()">
       <div class="note error hidden" id="name-err" style="margin-top:10px"></div>
       <button class="btn primary lg block" style="margin-top:14px" onclick="submitName()">Empezar ➔</button>
+      <button class="btn lime block hidden" id="name-resume" style="margin-top:10px" onclick="resumeSaved()"></button>
       <label class="btn cyan block" id="name-load" style="margin-top:10px;cursor:pointer">📂 Continuar con mi archivo de progreso<input type="file" accept=".json" class="hidden" onchange="loadProgress(event)"></label>
     </div>
   </div>
@@ -592,7 +593,7 @@ function tipText(n){
    :n===2?'💡 Camino más largo y con más giros, y ahora empiezas mirando a una dirección al azar: indica primero hacia dónde girar. Cuenta bien las casillas de cada tramo.'
    :'💡 Hay una llave junto al camino y una puerta que cierra el único paso. Tu compañero/a NO los ve hasta tenerlos al lado. Para coger o abrir hay que estar delante, mirando al objeto, y usar Interactuar. Explica el orden: primero la llave, luego la puerta.';
 }
-function levelChanged(){ if(prog.name) progress.textos[prog.level]=$('prog-text').value; $('prog-text').value=''; prog.text=''; exec=blankExec(); $('exec-board').innerHTML=''; $('result-box').classList.add('hidden'); hideBanner(); $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.'; $('exec-from').textContent='Sin partida'; generateFromInputs(true); $('prog-text').value=progress.textos[prog.level]||''; updateLines(); }
+function levelChanged(){ if(prog.name) progress.textos[prog.level]=$('prog-text').value; $('prog-text').value=''; prog.text=''; exec=blankExec(); $('exec-board').innerHTML=''; $('result-box').classList.add('hidden'); hideBanner(); $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.'; $('exec-from').textContent='Sin partida'; generateFromInputs(true); $('prog-text').value=progress.textos[prog.level]||''; updateLines(); saveLocal(); }
 function generateFromInputs(announce){
   if(!prog.name)return;
   const level=parseInt($('prog-level').value,10), seed=semillaDeNombre(prog.name+'|'+level);
@@ -613,6 +614,7 @@ function renderProgrammer(){
   renderBoard('prog-board',world,{view:'prog'});
 }
 function countLines(t){return t.split('\n').map(l=>l.trim()).filter(Boolean).length;}
+function onType(){ updateLines(); if(prog.name){ progress.textos[prog.level]=$('prog-text').value; saveLocal(); } }
 function updateLines(){
   const n=countLines($('prog-text').value); $('line-count').textContent=n+(n===1?' línea':' líneas');
 }
@@ -620,7 +622,7 @@ function passTurn(){
   const text=$('prog-text').value.trim();
   if(!prog.name){askNameProg();return;}
   if(!text){toast('Escribe tus órdenes antes de pasar el turno');$('prog-text').focus();return;}
-  prog.text=text; lockedExec=true; updateLock();
+  prog.text=text; progress.textos[prog.level]=text; lockedExec=true; updateLock(); saveLocal();
   exec=blankExec(); $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML=''; delete memo['exec-board'];
   $('exec-orders').textContent='… esperando al ejecutor/a …'; $('exec-name').value=''; $('exec-from').textContent='Órdenes de '+prog.name;
   switchMode('ejecutor');
@@ -633,9 +635,11 @@ function askBack(){
   $('pass-input').value=''; $('pass-err').classList.add('hidden'); openModal('modal-pass'); setTimeout(()=>$('pass-input').focus(),30);
 }
 function submitPass(){
-  const lv=exec.loaded?exec.level:prog.level;
+  const lv=pendingResume?pendingResume.nivel_actual:(exec.loaded?exec.level:prog.level);
   if(norm($('pass-input').value)!==norm(CLAVES[lv]||CLAVES[1])){ $('pass-err').classList.remove('hidden'); $('pass-input').focus(); return; }
-  closeModal('modal-pass'); lockedExec=false; updateLock();
+  closeModal('modal-pass');
+  if(pendingResume){ const o=pendingResume; pendingResume=null; applyProgress(o); return; }
+  lockedExec=false; updateLock(); saveLocal();
   if(exec.result)sendToDebug(); else switchMode('programador');
 }
 function doPass(text){
@@ -661,6 +665,7 @@ function swapRoles(){
 let nameCb=null, nameReject=null;
 function setWho(){ $('who').textContent='👤 '+(prog.name||'—'); }
 function askName(title,sub,cb,reject,prefill){
+  $('name-resume').classList.add('hidden'); $('name-load').classList.add('hidden');
   nameCb=cb; nameReject=reject||null;
   $('name-title').textContent=title; $('name-sub').textContent=sub; $('name-input').value=prefill||''; $('name-err').classList.add('hidden');
   $('modal-name').classList.remove('hidden'); document.querySelector('header').inert=true; document.querySelector('main').inert=true;
@@ -675,13 +680,27 @@ function submitName(){
 }
 function askNameProg(){
   world=null; prog.name=''; setWho(); $('prog-board').innerHTML=''; delete memo['prog-board'];
+  setTimeout(offerResume,0);
   askName('👋 ¿Cómo te llamas?','Escribe tu nombre y apellido. Tu mundo se genera a partir de él: nadie más tendrá el mismo.',
-    n=>{ prog.name=n; setWho(); switchMode('programador'); generateFromInputs(true); });
+    n=>{ prog.name=n; progress={textos:{},resultados:{}}; setWho(); switchMode('programador'); generateFromInputs(true); saveLocal(); });
 }
+/* ----- autoguardado en el navegador (por si cierran la ventana) ----- */
+const LS_KEY='ocProgreso_v1';
+function saveLocal(){ if(!prog.name)return; try{ localStorage.setItem(LS_KEY,JSON.stringify({alumno:prog.name,nivel_actual:prog.level,skin,textos:progress.textos,resultados:progress.resultados,locked:lockedExec,fecha:Date.now()})); }catch(e){} }
+function readLocal(){ try{ const o=JSON.parse(localStorage.getItem(LS_KEY)||'null'); return o&&o.alumno?o:null; }catch(e){ return null; } }
+function clearLocal(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
+function offerResume(){ const o=readLocal(); $('name-load').classList.remove('hidden'); const b=$('name-resume');
+  if(o){ b.textContent='↩️ Continuar como '+o.alumno+' (nivel '+o.nivel_actual+')'+(o.locked?' 🔒':''); b.classList.remove('hidden'); } else b.classList.add('hidden'); }
+let pendingResume=null;
+function resumeSaved(){ const o=readLocal(); if(!o)return;
+  $('modal-name').classList.add('hidden'); document.querySelector('header').inert=false; document.querySelector('main').inert=false; nameCb=null;
+  if(o.locked){ pendingResume=o; $('pass-input').value=''; $('pass-err').classList.add('hidden'); openModal('modal-pass'); setTimeout(()=>$('pass-input').focus(),30); }
+  else applyProgress(o); }
+function cancelPass(){ closeModal('modal-pass'); if(pendingResume){ pendingResume=null; askNameProg(); } }
 function changeStudent(){
   if(lockedExec){toast('🔒 Hace falta la contraseña del profe');return;}
   if(prog.name&&($('prog-text').value.trim()||exec.loaded)&&!confirm('Se borrará lo escrito y la partida. ¿Cambiar de alumno/a?'))return;
-  execName=''; progress={textos:{},resultados:{}}; prog={name:'',level:prog.level,seed:0,text:'',rondas:0}; exec=blankExec(); clearDebug();
+  clearLocal(); execName=''; progress={textos:{},resultados:{}}; prog={name:'',level:prog.level,seed:0,text:'',rondas:0}; exec=blankExec(); clearDebug();
   $('prog-text').value=''; $('exec-name').value=''; $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML='';
   $('exec-orders').textContent='Pide a tu compañero/a que escriba sus órdenes y pulse «Pasar turno» en la pestaña Programador.'; $('exec-from').textContent='Sin partida';
   askNameProg();
@@ -789,7 +808,7 @@ function sendToDebug(){
   switchMode('programador'); $('debug-card').classList.remove('hidden');
   const r=dbg.res,d=r.detalle;
   $('debug-summary').textContent=`${r.alumno} ${r.completado?'llegó a la meta':'no llegó a la meta'} con ${d.n_acciones} acciones, ${nChoques(r)} choque(s), ${d.trampas} trampa(s) y ${d.dudas.length} duda(s).`;
-  $('refl').value=''; renderDebugList(); updateDebug(false);
+  $('refl').value=''; saveLocal(); renderDebugList(); updateDebug(false);
   $('debug-card').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderDebugList(){
@@ -819,7 +838,7 @@ function debugPlay(){
   $('debug-play').textContent='⏸ Pausa';
   dbg.timer=setInterval(()=>{ if(dbg.idx>=dbg.frames.length-1){clearInterval(dbg.timer);dbg.timer=null;$('debug-play').textContent='▶ Reproducir';return;} dbg.idx++; updateDebug('fwd'); },560);
 }
-function saveRefl(){ if(!dbg.res)return; dbg.res.detalle.reflexion=$('refl').value; if(progress.resultados[dbg.res.nivel_alcanzado]) progress.resultados[dbg.res.nivel_alcanzado].reflexion=$('refl').value; }
+function saveRefl(){ if(!dbg.res)return; dbg.res.detalle.reflexion=$('refl').value; if(progress.resultados[dbg.res.nivel_alcanzado]) progress.resultados[dbg.res.nivel_alcanzado].reflexion=$('refl').value; saveLocal(); }
 function downloadDebug(){ if(dbg.res){ saveRefl(); descargarCarnet(dbg.res); toast('Descargado ✓'); } }
 function fileSafe(n){return (n||'alumno').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').toLowerCase();}
 function saveProgress(){
@@ -830,19 +849,22 @@ function saveProgress(){
   a.download='progreso_ordenes_ciegas_'+fileSafe(prog.name)+'.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
   toast('Progreso guardado ✓ Guarda el archivo para continuar otro día');
 }
+function applyProgress(o){
+  $('modal-name').classList.add('hidden'); document.querySelector('header').inert=false; document.querySelector('main').inert=false; nameCb=null;
+  lockedExec=false; updateLock(); execName=''; exec=blankExec(); clearDebug(); $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML='';
+  progress={textos:o.textos||{},resultados:o.resultados||{}};
+  prog={name:o.alumno,level:parseInt(o.nivel_actual,10)||1,seed:0,text:'',rondas:0}; setWho();
+  if(o.skin&&SKINS[o.skin]){ skin=o.skin; $('skin-select').value=skin; }
+  $('prog-level').value=String(prog.level); switchMode('programador'); generateFromInputs(false);
+  $('prog-text').value=progress.textos[prog.level]||''; updateLines(); saveLocal();
+  toast('Progreso recuperado: '+o.alumno+' ✓');
+}
 function loadProgress(ev){
   const f=ev.target.files&&ev.target.files[0]; ev.target.value=''; if(!f)return;
   if(lockedExec){toast('🔒 Hace falta la contraseña del profe');return;}
   const r=new FileReader(); r.onload=()=>{ try{
     const o=JSON.parse(r.result); if(!o||o.carnet!==CARNET_ID+'_progreso'||!o.alumno) throw 0;
-    $('modal-name').classList.add('hidden'); document.querySelector('header').inert=false; document.querySelector('main').inert=false; nameCb=null;
-    execName=''; exec=blankExec(); clearDebug(); $('result-box').classList.add('hidden'); hideBanner(); $('exec-board').innerHTML='';
-    progress={textos:o.textos||{},resultados:o.resultados||{}};
-    prog={name:o.alumno,level:parseInt(o.nivel_actual,10)||1,seed:0,text:'',rondas:0}; setWho();
-    if(o.skin&&SKINS[o.skin]){ skin=o.skin; $('skin-select').value=skin; }
-    $('prog-level').value=String(prog.level); switchMode('programador'); generateFromInputs(false);
-    $('prog-text').value=progress.textos[prog.level]||''; updateLines();
-    toast('Progreso cargado: '+o.alumno+' ✓');
+    applyProgress(o);
   }catch(e){ toast('Ese archivo no es un progreso válido'); } }; r.readAsText(f);
 }
 function clearDebug(){ if(dbg.timer){clearInterval(dbg.timer);dbg.timer=null;} dbg.frames=[]; $('debug-card').classList.add('hidden'); $('debug-play').textContent='▶ Reproducir'; }
