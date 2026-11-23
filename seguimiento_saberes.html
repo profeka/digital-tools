@@ -1,819 +1,2290 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador Anual de Saberes</title>
-    <!-- Cargamos la fuente Neubrutalista -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family:Inter:wght@400;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- ESTILOS GENERALES (Neubrutalismo) --- */
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.5;
-            background-color: #f1f1f1;
-            color: #000000;
-            margin: 0;
-            padding: 20px;
-            /* Evitar scroll vertical por defecto */
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        h1, h2, h3, h4 {
-            color: #000000;
-            font-weight: 800;
-        }
-        h1 {
-            text-align: center;
-            border-bottom: 3px solid #000000;
-            padding-bottom: 10px;
-            font-size: 2.5em;
-            margin-top: 0;
-            flex-shrink: 0; /* No se encoge */
-        }
-        
-        /* --- BANCO DE SABERES (Superior) --- */
-        #saberes-bank-container {
-            background-color: #ffffff;
-            border: 3px solid #000000;
-            border-radius: 0;
-            padding: 15px;
-            box-shadow: 8px 8px 0px #000000;
-            margin-bottom: 20px;
-            flex-shrink: 0; /* No se encoge */
-            height: 25vh; /* 25% de la altura de la pantalla */
-            overflow-y: auto; /* Scroll vertical si hay muchos saberes */
-        }
-        /* FIX: Anular el 'display: grid' de .drop-zone para el banco */
-        #saberes-bank-container.drop-zone {
-            display: block; 
-        }
-
-        #saberes-bank-container h2 {
-            margin-top: 0;
-            border-bottom: 3px solid #000;
-            padding-bottom: 8px;
-            position: sticky;
-            top: -15px;
-            background-color: #ffffff;
-            z-index: 10;
-        }
-        #saberes-bank {
-            display: flex;
-            flex-wrap: wrap; /* Los saberes fluyen a la siguiente línea */
-            gap: 10px;
-        }
-
-        /* --- ESTILO DE CADA SABER (Arrastrable) --- */
-        .saber-item {
-            border: 2px solid #000;
-            padding: 8px 12px;
-            border-radius: 0;
-            cursor: grab;
-            font-size: 1em;
-            font-weight: 700;
-            box-shadow: 2px 2px 0px #000;
-            transition: all 0.2s ease-in-out;
-            opacity: 1;
-            /* FIX: Asegurar que los items en grid no se estiren */
-            width: fit-content; 
-        }
-        .saber-item:active {
-            cursor: grabbing;
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000;
-        }
-        /* Colores por Bloque */
-        .saber-a { background-color: #fffba5; } /* Amarillo pastel */
-        .saber-b { background-color: #ffb3c1; } /* Rosa pastel */
-        .saber-c { background-color: #c1fba4; } /* Menta pastel */
-        .saber-d { background-color: #ffdcb8; } /* Melocotón pastel */
-        .saber-e { background-color: #e0cffc; } /* Lila pastel */
-
-        /* --- Estilo de Saber "Cubierto" en el Banco --- */
-        #saberes-bank .saber-item.covered {
-            opacity: 0.5;
-            background-color: #eee;
-            box-shadow: none;
-            border-color: #aaa;
-        }
-        #saberes-bank .saber-item.uncovered {
-            opacity: 1;
-            border: 2px solid #000;
-            box-shadow: 2px 2px 0px #000;
-        }
-        /* Restaurar colores en estado "uncovered" */
-        #saberes-bank .saber-item.uncovered.saber-a { background-color: #fffba5; }
-        #saberes-bank .saber-item.uncovered.saber-b { background-color: #ffb3c1; }
-        #saberes-bank .saber-item.uncovered.saber-c { background-color: #c1fba4; }
-        #saberes-bank .saber-item.uncovered.saber-d { background-color: #ffdcb8; }
-        #saberes-bank .saber-item.uncovered.saber-e { background-color: #e0cffc; }
-
-
-        /* --- CONTROLES (Botón de Añadir) --- */
-        .neo-button {
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 16px;
-            color: #000;
-            border: 3px solid #000;
-            border-radius: 0;
-            padding: 10px 15px;
-            cursor: pointer;
-            box-shadow: 4px 4px 0px #000;
-            transition: all 0.1s ease-in-out;
-            background-color: #007bff;
-            width: 100%; /* El botón ocupa todo el ancho del grupo */
-        }
-        .neo-button:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        /* --- Contenedor para botones Import/Export --- */
-        #json-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-shrink: 0;
-        }
-        #json-controls .neo-button {
-            width: auto; /* Ancho automático para estos botones */
-            flex-grow: 1; /* Ocupan espacio por igual */
-        }
-        #export-btn { background-color: #28a745; } /* Verde */
-        #import-btn { background-color: #dc3545; } /* Rojo */
-
-
-        /* --- TABLERO DE COLUMNAS (Principal) --- */
-        #board-container {
-            display: flex;
-            gap: 20px;
-            /* Permite scroll horizontal */
-            overflow-x: auto;
-            /* Ocupa el resto del espacio vertical */
-            flex-grow: 1;
-            padding-bottom: 20px; /* Espacio para la barra de scroll */
-        }
-
-        /* --- Grupo de Trimestre --- */
-        .trimestre-group {
-            flex-shrink: 0; /* No se encoge */
-            background-color: #f9f9f9;
-            border: 3px solid #000;
-            box-shadow: 8px 8px 0px #000;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            /* FIX: Aumentado el ancho para dar espacio al título/botón */
-            min-width: 370px; 
-            height: 100%;
-        }
-        .trimestre-group > h3 {
-            margin: 0;
-            padding: 10px 15px;
-            border: 3px solid #000;
-            background-color: #fff;
-            box-shadow: 6px 6px 0px #000;
-            text-align: center;
-            font-size: 1.5em;
-        }
-        
-        /* Colores de Título de Trimestre */
-        #trim-1-group > h3 { background-color: #ffd6a5; } /* Naranja */
-        #trim-2-group > h3 { background-color: #caffbf; } /* Verde */
-        #trim-3-group > h3 { background-color: #a0c4ff; } /* Azul */
-        
-        /* --- Contenedor de Columnas de Tema (dentro del trimestre) --- */
-        .tema-columns-container {
-            display: flex;
-            gap: 20px;
-            flex-grow: 1;
-            min-height: 200px; /* Altura mínima para ver la zona */
-            overflow-x: auto; 
-            overflow-y: hidden;
-            padding-bottom: 5px;
-        }
-
-        /* --- Estilo de Columna de Tema (Ahora vive dentro de un grupo) --- */
-        .column {
-            flex: 0 0 320px; /* No crecen, no se encogen, base de 320px */
-            /* SOLUCIÓN AL BUG DE ANCHURA (Flexbox): */
-            min-width: 0;
-            height: 100%; /* Ocupan toda la altura disponible */
-            display: flex;
-            flex-direction: column;
-        }
-        .column h3 {
-            margin-top: 0;
-            padding: 10px 15px;
-            border: 3px solid #000;
-            background-color: #fff;
-            box-shadow: 6px 6px 0px #000;
-            position: sticky; /* Título de columna se pega arriba */
-            top: 0;
-            z-index: 5;
-            background-color: #e0e0e0;
-            
-            /* para el botón de borrar */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px; /* Espacio entre título y botón */
-        }
-        
-        /* Estilos para el título editable y el botón de borrar */
-        .column h3 > span[contenteditable] {
-            flex-grow: 1; /* El texto ocupa el espacio */
-            outline: none; /* Quitar borde al editar */
-            min-width: 0; /* Evitar que el span crezca la cabecera */
-        }
-        .delete-tema-btn {
-            cursor: pointer;
-            font-size: 0.9em;
-            padding: 4px;
-            border-radius: 4px;
-            line-height: 1;
-            flex-shrink: 0; /* No se encoge */
-        }
-        .delete-tema-btn:hover {
-            background-color: #ffb3c1; /* Rosa pastel */
-        }
-
-        
-        /* --- Zona de Drop (dentro de la columna) --- */
-        .drop-zone {
-            border: 3px dashed #888;
-            padding: 10px;
-            background-color: #f9f9f9;
-            flex-grow: 1;
-            overflow-y: auto;
-            min-height: 200px;
-            transition: all 0.2s;
-            
-            /* SOLUCIÓN AL BUG DE ANCHURA: Cambiado a CSS Grid */
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 columnas */
-            gap: 10px;
-            align-content: flex-start; /* Alinea los items al inicio */
-            min-width: 0; /* Sigue siendo importante */
-        }
-
-        /* --- Feedback visual al arrastrar --- */
-        .drag-over {
-            background-color: #ffff00; /* Amarillo brillante */
-            border-color: #000;
-        }
-
-        /* --- Estilo del Tooltip --- */
-        #tooltip {
-            position: absolute;
-            display: none;
-            background-color: #000;
-            color: #fff;
-            padding: 10px;
-            border-radius: 0;
-            font-size: 0.9em;
-            max-width: 400px;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        /* --- ESTILOS DEL MODAL DE CONFIRMACIÓN --- */
-        #modal-backdrop {
-            display: none; /* Oculto por defecto */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        #modal-box {
-            background-color: #fff;
-            border: 3px solid #000;
-            box-shadow: 8px 8px 0px #000;
-            padding: 25px;
-            width: 90%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        #modal-box p {
-            font-size: 1.1em;
-            font-weight: 700;
-            margin: 0;
-            text-align: center;
-        }
-        #modal-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        #modal-buttons .neo-button {
-            width: 100%; /* Ocupan el 50% cada uno */
-            font-size: 1em;
-        }
-        #modal-btn-confirm {
-            background-color: #dc3545; /* Rojo */
-        }
-        #modal-btn-cancel {
-            background-color: #6c757d; /* Gris */
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planificador de saberes y criterios</title>
+<style id="neo-base">
+/* ================= TOKENS ================= */
+:root{
+  --ink:#111;            /* texto y bordes */
+  --paper:#fff7e0;       /* fondo de página */
+  --white:#fff;
+  --yellow:#ffe14d;      /* acento principal / cabeceras */
+  --orange:#ff8a3d;      /* acción principal */
+  --cyan:#6ee7f9;        /* acción secundaria / info */
+  --lime:#a3e635;        /* correcto / éxito */
+  --pink:#ff7ab8;        /* error / peligro */
+  --violet:#c4b5fd;      /* extra / reto */
+  --muted:#555;
+  --bw:3px;              /* grosor de borde */
+  --shadow:6px 6px 0 var(--ink);
+  --shadow-sm:4px 4px 0 var(--ink);
+  --font:'Trebuchet MS','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:ui-monospace,'Cascadia Code','SFMono-Regular',Consolas,'Courier New',monospace;
+}
+/* ================= BASE ================= */
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(#11111122 1px,transparent 1px);background-size:18px 18px;
+  line-height:1.5;min-height:100vh}
+h1,h2,h3,h4{font-weight:900;text-transform:uppercase;letter-spacing:-.4px;line-height:1.15}
+h1{font-size:clamp(1.5rem,4vw,2.2rem)} h2{font-size:clamp(1.25rem,3vw,1.6rem)} h3{font-size:1.1rem}
+p{margin:.5em 0} a{color:var(--ink);font-weight:800;text-decoration-thickness:3px;text-underline-offset:3px}
+a:hover{background:var(--yellow)}
+code,.mono{font-family:var(--mono)}
+code{overflow-wrap:anywhere;background:var(--white);border:2px solid var(--ink);padding:0 5px;font-size:.9em}
+:focus-visible{outline:4px solid var(--violet);outline-offset:2px}
+.hidden{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+.grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)} .grid>*{min-width:0} .g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+/* ================= CABECERA ================= */
+.topbar{background:var(--yellow);border-bottom:4px solid var(--ink);padding:14px 20px}
+.topbar .inner{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:48px;height:48px;background:var(--white);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;font-size:1.6rem}
+.topbar .sub{font-size:.85rem;font-weight:700}
+/* ================= TARJETAS ================= */
+.card{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow);padding:18px}
+.card>h2,.card>h3{margin-bottom:10px}
+.card.yellow{background:var(--yellow)} .card.cyan{background:var(--cyan)} .card.pink{background:var(--pink)}
+.card.lime{background:var(--lime)} .card.violet{background:var(--violet)} .card.ink{background:var(--ink);color:var(--white)}
+.card.flat{box-shadow:none}
+.card.ink code{color:var(--ink)}
+/* ================= BOTONES ================= */
+.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;
+  background:var(--white);color:var(--ink);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);
+  padding:10px 18px;transition:transform .08s,box-shadow .08s;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn:active:not(:disabled){transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{background:#ddd;color:#777;box-shadow:none;cursor:not-allowed}
+.btn.primary{background:var(--orange)} .btn.secondary{background:var(--cyan)}
+.btn.success{background:var(--lime)} .btn.danger{background:var(--pink)} .btn.yellow{background:var(--yellow)}
+.btn.sm{padding:5px 10px;font-size:.8rem} .btn.lg{padding:14px 26px;font-size:1.1rem} .btn.block{width:100%}
+/* ================= ETIQUETAS / PÍLDORAS ================= */
+.pill{display:inline-flex;gap:6px;align-items:center;background:var(--white);border:var(--bw) solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);padding:3px 10px;font-weight:800;font-size:.85rem}
+.pill.yellow{background:var(--yellow)} .pill.lime{background:var(--lime)} .pill.pink{background:var(--pink)}
+.pill.cyan{background:var(--cyan)} .pill.violet{background:var(--violet)} .pill.orange{background:var(--orange)}
+.tag{display:inline-block;background:var(--yellow);border:var(--bw) solid var(--ink);padding:2px 10px;font-weight:900;font-size:.78rem;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink)}
+/* ================= FORMULARIOS ================= */
+label{display:block;font-weight:800;margin-bottom:4px}
+.input,select.input,textarea.input{font:inherit;width:100%;background:var(--white);color:var(--ink);
+  border:var(--bw) solid var(--ink);padding:9px 12px;border-radius:0}
+.input:focus{outline:none;box-shadow:4px 4px 0 var(--orange)}
+textarea.input{min-height:90px;resize:vertical}
+.check{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
+.check input{appearance:none;width:24px;height:24px;border:var(--bw) solid var(--ink);background:var(--white);display:grid;place-content:center;cursor:pointer;flex:none}
+.check input:checked{background:var(--lime)} .check input:checked::after{content:"✓";font-weight:900;line-height:1}
+input[type=range]{width:100%;accent-color:var(--orange)}
+/* ================= PROGRESO ================= */
+.bar{height:24px;background:var(--white);border:var(--bw) solid var(--ink);position:relative;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--orange);border-right:var(--bw) solid var(--ink);width:0;transition:width .3s}
+/* ================= AVISOS ================= */
+.note{border:var(--bw) solid var(--ink);padding:10px 14px;font-weight:700;background:var(--cyan)}
+.note.ok{background:var(--lime)} .note.warn{background:var(--yellow)} .note.error{background:var(--pink)} .note.info{background:var(--cyan)}
+/* ================= PASOS (stepper) ================= */
+.steps{display:flex;gap:6px;flex-wrap:wrap;background:var(--white);border-bottom:4px solid var(--ink);padding:10px 20px}
+.step{display:flex;gap:8px;align-items:center;padding:4px 10px;font-weight:800;font-size:.9rem;color:var(--muted)}
+.step b{display:grid;place-items:center;width:28px;height:28px;border:var(--bw) solid var(--ink);background:var(--white);color:var(--ink)}
+.step.active{color:var(--ink);background:#fff3cc} .step.active b{background:var(--orange);box-shadow:3px 3px 0 var(--ink)}
+.step.done b{background:var(--lime)}
+/* ================= PESTAÑAS ================= */
+.tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:var(--bw) solid var(--ink)}
+.tab{font:inherit;font-weight:900;text-transform:uppercase;background:var(--white);border:var(--bw) solid var(--ink);border-bottom:0;margin-right:-3px;padding:8px 16px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--yellow)}
+.tabpanel{background:var(--white);border:var(--bw) solid var(--ink);border-top:0;padding:16px}
+/* ================= OPCIONES (tipo test) ================= */
+.opt{display:block;width:100%;text-align:left;font:inherit;font-weight:600;background:var(--white);color:var(--ink);
+  border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){background:var(--yellow)} .opt.good{background:var(--lime)} .opt.bad{background:var(--pink)}
+.opt:disabled{cursor:default}
+/* ================= TABLA ================= */
+table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(--bw) solid var(--ink)}
+.t th{background:var(--yellow);text-transform:uppercase;text-align:left;font-weight:900}
+.t th,.t td{border:2px solid var(--ink);padding:8px 10px}
+.t tr:nth-child(even) td{background:#fffaf0}
+.scroll-x{overflow-x:auto}
+/* ================= TERMINAL / CÓDIGO ================= */
+.term{background:#0b0b0b;color:#e5e5e5;font-family:var(--mono);font-size:.9rem;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:12px 14px;white-space:pre-wrap;overflow-x:auto}
+.term .p{color:var(--lime)} .term .e{color:var(--pink)}
+/* ================= VENTANA FALSA (para simulaciones) ================= */
+.win{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow)}
+.win>.bar-title{background:var(--ink);color:var(--white);padding:5px 10px;font-weight:800;font-size:.85rem;display:flex;gap:6px;align-items:center}
+.win>.bar-title i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid var(--white)}
+.win>.body{padding:14px}
+/* ================= MODAL ================= */
+.modal-back{position:fixed;inset:0;background:rgba(17,17,17,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:22px;max-width:620px;width:100%;max-height:92vh;overflow:auto}
+/* ================= TÉRMINO (glosario) ================= */
+.term-w{background:var(--yellow);border-bottom:2px solid var(--ink);cursor:help;font-weight:700}
+/* ================= TOAST ================= */
+#toast{position:fixed;right:16px;bottom:16px;background:var(--lime);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:10px 16px;font-weight:900;z-index:60}
+/* ================= IMPRESIÓN ================= */
+@media print{body{background:#fff}.topbar,.steps,.btn,.no-print{display:none!important}.card{box-shadow:none}}
+@media (max-width:600px){.card{padding:14px}.topbar{padding:12px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="planner">
+.layout{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:1000px){.layout{grid-template-columns:380px minmax(0,1fr)}.bank{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}}
+.bank .tabs{margin-bottom:0}
+.grp{margin:14px 0 6px;font-weight:900;font-size:.8rem;text-transform:uppercase;display:flex;gap:6px;align-items:flex-start}
+.grp small{font-weight:700;text-transform:none;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-weight:900;font-size:.82rem;border:var(--bw) solid var(--ink);box-shadow:2px 2px 0 var(--ink);padding:3px 9px;cursor:grab;background:var(--white);display:inline-flex;gap:6px;align-items:center;user-select:none}
+.chip:active{cursor:grabbing}
+.chip .n{background:var(--ink);color:var(--white);font-size:.7rem;padding:0 5px;min-width:18px;text-align:center}
+.chip.unused{opacity:1} .chip.used{opacity:.55}
+.chip.crit{border-style:solid;border-radius:999px}
+.chip .x{border:0;background:none;font:inherit;font-weight:900;cursor:pointer;padding:0 0 0 2px}
+.c0{background:var(--yellow)} .c1{background:var(--pink)} .c2{background:var(--lime)} .c3{background:var(--orange)} .c4{background:var(--violet)} .c5{background:var(--cyan)} .c6{background:#ffd6a5}
+.trim{margin-bottom:22px}
+.trim>.row h2{flex:1}
+.temas{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));margin-top:12px}
+.tema{padding:0;display:flex;flex-direction:column}
+.tema .th{background:var(--yellow);border-bottom:var(--bw) solid var(--ink);padding:8px 10px;display:flex;gap:6px;align-items:center}
+.tema .th input{font:inherit;font-weight:900;text-transform:uppercase;border:0;background:transparent;flex:1;min-width:0;padding:2px}
+.tema .th input:focus{outline:2px solid var(--ink);background:var(--white)}
+.zone{padding:10px;min-height:64px;border-bottom:2px dashed var(--ink)}
+.zone:last-child{border-bottom:0}
+.zone>b{display:block;font-size:.72rem;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
+.zone.over,.tema.over{background:#fff3cc}
+.empty-z{font-size:.8rem;color:var(--muted);font-style:italic}
+.cov{display:flex;gap:10px;flex-wrap:wrap}
+table.t td.ok{background:var(--lime)!important;text-align:center;font-weight:900}
+table.t td.no{text-align:center;color:#bbb}
+table.t th.rot{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;font-size:.75rem}
+.t td:first-child{font-weight:800;white-space:nowrap}
+.detail{white-space:normal}
+.assign{display:grid;gap:8px;margin-top:12px}
+.assign .check{border:var(--bw) solid var(--ink);padding:8px 10px;background:var(--white)}
+.legend{font-size:.85rem;color:var(--muted);font-weight:700}
+@media print{.bank,.no-print{display:none!important}.layout{display:block}}
+</style>
 </head>
 <body>
 
-    <h1>Planificador Anual de Saberes Básicos</h1>
-
-    <!-- ============================================= -->
-    <!-- ====== BANCO DE SABERES (Superior) ====== -->
-    <!-- ============================================= -->
-    <div id="saberes-bank-container" class="drop-zone"> <!-- Es zona de drop para borrar -->
-        <h2>Banco de Saberes Básicos (Arrastra aquí para borrar)</h2>
-        <div id="saberes-bank">
-            <!-- Bloque A -->
-            <div class="saber-item saber-a" draggable="true" id="s-a-1" data-full-text="A.1. Introducción a las estrategias, técnicas y marcos de resolución de problemas en diferentes contextos y sus fases." data-bloque="a">A.1</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-2" data-full-text="A.2. Introducción a la búsqueda crítica de información durante la investigación y definición de problemas planteados." data-bloque="a">A.2</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-3" data-full-text="A.3. Estructuras para la construcción de modelos: Resistencia, estabilidad y rigidez de estructuras. Esfuerzos estructurales: compresión, tracción, flexión, torsión y cortante." data-bloque="a">A.3</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-4" data-full-text="A.4. Materiales técnicos en estructuras industriales y arquitectónicas. Diseño de elementos de soporte y estructuras de apoyo. Estructuras de barras, triangulación." data-bloque="a">A.4</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-5" data-full-text="A.5. Sistemas mecánicos básicos: Montajes físicos o uso de simuladores. Palancas de primer, segundo y tercer grado. Ley de la palanca. Análisis cualitativo de sistemas poleas y engranajes." data-bloque="a">A.5</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-6" data-full-text="A.6. Electricidad básica para el montaje de esquemas y circuitos físicos o simulados: Elementos de un circuito eléctrico básico. Magnitudes fundamentales eléctricas: concepto y unidades de medida. Simbología normalizada de circuitos. Interpretación." data-bloque="a">A.6</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-7" data-full-text="A.7. Materiales tecnológicos y su impacto ambiental." data-bloque="a">A.7</div>
-            <div class="saber-item saber-a" draggable="true" id="s-a-8" data-full-text="A.8. Herramientas y técnicas de manipulación y mecanizado básicas de materiales en la construcción de objetos y prototipos. Respeto de las normas de seguridad e higiene." data-bloque="a">A.8</div>
-            <!-- Bloque B -->
-            <div class="saber-item saber-b" draggable="true" id="s-b-1" data-full-text="B.1. Habilidades básicas de comunicación interpersonal. Pautas de conducta propias del entorno virtual (etiqueta digital)." data-bloque="b">B.1</div>
-            <div class="saber-item saber-b" draggable="true" id="s-b-2" data-full-text="B.2. Técnicas de representación gráfica: Boceto y croquis. Proyección cilíndrica ortogonal para la representación de objetos: vistas normalizadas de una pieza. Acotación normalizada de piezas sencillas." data-bloque="b">B.2</div>
-            <div class="saber-item saber-b" draggable="true" id="s-b-3" data-full-text="B.3. Introducción al software de diseño gráfico en dos dimensiones." data-bloque="b">B.3</div>
-            <div class="saber-item saber-b" draggable="true" id="s-b-4" data-full-text="B.4. Herramientas digitales para la elaboración y presentación de documentación técnica e información multimedia relativa a proyectos." data-bloque="b">B.4</div>
-            <!-- Bloque C -->
-            <div class="saber-item saber-c" draggable="true" id="s-c-1" data-full-text="C.1. Algorítmia y diagramas de flujo." data-bloque="c">C.1</div>
-            <div class="saber-item saber-c" draggable="true" id="s-c-2" data-full-text="C.2. Aplicaciones informáticas sencillas para ordenador y dispositivos móviles." data-bloque="c">C.2</div>
-            <div class="saber-item saber-c" draggable="true" id="s-c-3" data-full-text="C.3. Uso de herramientas de programación por bloques." data-bloque="c">C.3</div>
-            <div class="saber-item saber-c" draggable="true" id="s-c-4" data-full-text="C.4. Autoconfianza e iniciativa: el error, la reevaluación y la depuración de errores como parte del proceso de aprendizaje." data-bloque="c">C.4</div>
-            <!-- Bloque D -->
-            <div class="saber-item saber-d" draggable="true" id="s-d-1" data-full-text="D.1. DispositIVOS digitales: Elementos del hardware y del software. Identificación y resolución de problemas técnicos sencillos." data-bloque="d">D.1</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-2" data-full-text="D.2. Sistemas de comunicación digital de uso común." data-bloque="d">D.2</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-3" data-full-text="D.3. Uso seguro y responsable de internet: búsqueda de información, correo electrónico, mensajería instantánea, redes sociales." data-bloque="d">D.3</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-4" data-full-text="D.4. Herramientas y plataformas de aprendizaje: configuración, mantenimiento y uso crítico." data-bloque="d">D.4</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-5" data-full-text="D.5. Técnicas de tratamiento, organización y almacenamiento seguro de la información. Formatos de ficheros. Copias de seguridad." data-bloque="d">D.5</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-6" data-full-text="D.6. Seguridad en la red: Riesgos, amenazas y ataques. Medidas de protección de datos y de información: antivirus, cortafuegos, servidores proxy, entre otros." data-bloque="d">D.6</div>
-            <div class="saber-item saber-d" draggable="true" id="s-d-7" data-full-text="D.7. Buen uso digital: prácticas seguras y riesgos (ciberacoso, sextorsión, vulneración de la propia imagen y de la intimidad, acceso a contenidos inadecuados, adicciones, etc.)." data-bloque="d">D.7</div>
-            <!-- Bloque E -->
-            <div class="saber-item saber-e" draggable="true" id="s-e-1" data-full-text="E.1. Desarrollo tecnológico: creatividad, innovación, investigación, obsolescencia e impacto." data-bloque="e">E.1</div>
-        </div>
+<header class="topbar">
+  <div class="inner">
+    <div class="logo">🗓️</div>
+    <div>
+      <h1>Planificador de saberes y criterios</h1>
+      <div class="sub" id="sub">Currículo de la Comunidad de Madrid</div>
     </div>
+    <div class="spacer"></div>
+    <select id="materia" class="input" style="width:auto;max-width:100%;font-weight:800" aria-label="Materia y curso"></select>
+  </div>
+</header>
 
-    <!-- ============================================= -->
-    <!-- ====== CONTROLES JSON (Import/Export) ====== -->
-    <!-- ============================================= -->
-    <div id="json-controls">
-        <button id="export-btn" class="neo-button">Exportar JSON</button>
-        <button id="import-btn" class="neo-button">Importar JSON</button>
-        <input type="file" id="import-file" accept="application/json" style="display: none;">
+<main class="wrap">
+  <div class="row no-print" style="margin-bottom:18px">
+    <div class="tabs" role="tablist" style="border-bottom:0">
+      <button class="tab" role="tab" aria-selected="true" data-view="plan">🧩 Planificación</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="matriz">📊 Matriz y cobertura</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="curr">📖 Currículo</button>
     </div>
+    <span class="spacer"></span>
+    <button class="btn sm success" id="export">📥 Exportar JSON</button>
+    <button class="btn sm secondary" id="import">📂 Importar JSON</button>
+    <button class="btn sm danger" id="reset">↺ Vaciar</button>
+    <input type="file" id="file" accept="application/json,.json" class="hidden">
+  </div>
 
+  <!-- VISTA PLANIFICACIÓN -->
+  <section id="v-plan" class="layout">
+    <aside class="card bank" aria-label="Banco">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-bank="saberes">Saberes</button>
+        <button class="tab" role="tab" aria-selected="false" data-bank="criterios">Criterios</button>
+      </div>
+      <p class="legend" style="margin-top:10px">Arrastra a un tema o pulsa para ver el texto y asignarlo. El número indica en cuántos temas está.</p>
+      <div id="bank"></div>
+    </aside>
+    <div id="board"></div>
+  </section>
 
-    <!-- ============================================= -->
-    <!-- ====== TABLERO DE COLUMNAS (Trimestres y Temas) ====== -->
-    <!-- ============================================= -->
-    <div id="board-container">
-        
-        <!-- Grupo Trimestre 1 -->
-        <div class="trimestre-group" id="trim-1-group">
-            <h3>Trimestre 1</h3>
-            <!-- Contenedor para las columnas de TEMA de este trimestre -->
-            <div class="tema-columns-container">
-                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
+  <!-- VISTA MATRIZ -->
+  <section id="v-matriz" class="hidden grid"></section>
+
+  <!-- VISTA CURRÍCULO -->
+  <section id="v-curr" class="hidden grid"></section>
+</main>
+
+<div id="modal" class="modal-back hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true" id="modal-body"></div>
+</div>
+<div id="toast" class="hidden"></div>
+
+<script id="curriculo-data">
+/* Currículo extraído de los Decretos 65/2022 (ESO) y 64/2022 (Bachillerato) de la Comunidad de Madrid.
+   Estructura: [{id, materia, curso, decreto, notas?, competencias:[{id, texto, criterios:[{id, texto}]}], bloques:[{id, titulo, items:[{id, texto}]}]}] */
+const CURRICULO = [
+ {
+  "id": "cc-1eso",
+  "materia": "Ciencias de la Computación",
+  "curso": "1º ESO",
+  "decreto": "Decreto 65/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Entender y utilizar algoritmos que lleven a la resolución de problemas concretos, aplicando los principios del pensamiento computacional y el razonamiento lógico.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Comprender qué es un algoritmo, hacer uso de ellos para la resolución de problemas simples y representarlos mediante diagramas de flujo."
+     },
+     {
+      "id": "1.2",
+      "texto": "Utilizar el razonamiento lógico para explicar cómo funcionan algunos algoritmos básicos y también para detectar y corregir errores en ellos."
+     },
+     {
+      "id": "1.3",
+      "texto": "Usar secuencias, selecciones y repeticiones en algoritmos que lleven a la resolución de problemas."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Diseñar, escribir y depurar aplicaciones informáticas, en entornos de programación gráfica y textual, que den solución a problemas concretos, incluyendo el control de sistemas físicos y robóticos.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Diseñar e implementar mediante un lenguaje de programación por bloques, programas que realicen tareas diversas como animaciones, historias, juegos de preguntas y respuestas o videojuegos simples, que incluyan interacción con el usuario."
+     },
+     {
+      "id": "2.2",
+      "texto": "Usar las secuencias, la selección y la repetición en programas, trabajando con objetos, variables, y diversas formas de entrada y salida."
+     },
+     {
+      "id": "2.3",
+      "texto": "Coordinar la ejecución de tareas diferentes en un programa mediante eventos y mensajes a objetos."
+     },
+     {
+      "id": "2.4",
+      "texto": "Elaborar aplicaciones para dispositivos móviles haciendo uso de la programación por bloques y utilizando las posibilidades que ofrecen en cuanto a comunicaciones y al uso de los sensores que incorporan, valorando especialmente el diseño de la interfaz de usuario para lograr una experiencia accesible y segura."
+     },
+     {
+      "id": "2.5",
+      "texto": "Integrar gráficos, sonidos y otros elementos multimedia en los programas."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Conocer los elementos componentes, tanto hardware como software, de los distintos sistemas informáticos, valorando la importancia de su mantenimiento y actualización, así como la manera en la que la información es tratada y almacenada en ellos.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Describir la función de los principales elementos componentes de un ordenador, valorando la importancia de una correcta elección de los mismos en función del uso que se les vaya a dar."
+     },
+     {
+      "id": "3.2",
+      "texto": "Comprender cómo se conectan los componentes de un ordenador y cómo se procesa y almacena la información."
+     },
+     {
+      "id": "3.3",
+      "texto": "Describir las funciones principales de los sistemas operativos, así como valorar la elección del mismo entre las diferentes opciones disponibles, prestando especial atención a factores como su facilidad de instalación, su mantenimiento y su uso seguro, protegiendo la privacidad de las personas y datos."
+     },
+     {
+      "id": "3.4",
+      "texto": "Organizar la información de manera segura dentro de dispositivos de almacenamiento y en la nube, haciendo un uso adecuado de operaciones como mover, copiar o cortar archivos, así como guardándola en el formato más adecuado para cada tipo de documento."
+     },
+     {
+      "id": "3.5",
+      "texto": "Conocer la existencia de diferentes tipos de software para la realización de tareas tales como el tratamiento de imágenes, ofimáticas, entretenimiento y comunicaciones."
+     },
+     {
+      "id": "3.6",
+      "texto": "Utilizar software de edición de imágenes para crear y modificar gráficos vectoriales y de mapas de bits."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Comprender cómo los equipos informáticos se comunican entre sí formando redes, desde las más pequeñas hasta internet, para compartir información, servicios y recursos, siendo conscientes de las amenazas que esto conlleva y de la importancia de la ciberseguridad.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Reconocer los elementos y componentes de las redes informáticas, incluido los de Internet."
+     },
+     {
+      "id": "4.2",
+      "texto": "Conectar equipos informáticos a todo tipo de redes."
+     },
+     {
+      "id": "4.3",
+      "texto": "Conocer y utilizar de forma segura los diferentes servicios que ofrecen las redes, así como las oportunidades que ofrecen para la comunicación y el trabajo colaborativo."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Pensamiento computacional",
+    "items": [
+     {
+      "texto": "Algoritmos: Definición y ejemplos sencillos. · Análisis de problemas simples y diseño de algoritmos para su resolución. · Representación de algoritmos mediante diagramas de flujo.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Detección y corrección de errores en algoritmos haciendo uso del razonamiento lógico.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Pensamiento computacional: Concepto y fundamentos. · Técnicas de resolución de problemas: descomposición de problemas complejos en otros más pequeños, identificación de patrones repetitivos y secuenciación de operaciones.",
+      "id": "A.3"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Programación",
+    "items": [
+     {
+      "texto": "Lenguajes de programación: definición.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Tipos de lenguajes de programación. Características.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Fundamentos de la programación por bloques: Uso de variables (tipos y operaciones). · Estructuras de control (secuencias de instrucciones, bucles, condicionales y eventos). · Integración de gráficos y sonidos. · Ejecución simultánea de varios objetos, clones y comunicación entre ellos.",
+      "id": "B.3"
+     },
+     {
+      "texto": "Programación por bloques de animaciones, presentaciones y videojuegos sencillos.",
+      "id": "B.4"
+     },
+     {
+      "texto": "Programación por bloques de aplicaciones para dispositivos móviles: Programación orientada a eventos. · Diseño de la interfaz de usuario. · Uso de sensores de los dispositivos móviles.",
+      "id": "B.5"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Computadores",
+    "items": [
+     {
+      "texto": "Hardware de sistemas informáticos: Componentes (procesador, memoria, unidades de almacenamiento, periféricos). · Conexiones entre ellos y flujo de la información.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Software de sistemas informáticos: sistemas operativos, software de utilidad.",
+      "id": "C.2"
+     },
+     {
+      "texto": "Organización de la información en el almacenamiento secundario. Operaciones básicas con archivos y carpetas.",
+      "id": "C.3"
+     },
+     {
+      "texto": "La imagen digital: Tipos de imágenes. · El píxel. · Propiedades de la imagen: resolución, dimensión, profundidad y modo de color. · Formatos de imagen.",
+      "id": "C.4"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Redes",
+    "items": [
+     {
+      "texto": "Redes de computadores: elementos componentes, usos y topología.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Conexión segura de equipos informáticos a redes de área local y a internet.",
+      "id": "D.2"
+     },
+     {
+      "texto": "Internet: estructura y funcionamiento. Servicios de internet, incluida la World Wide Web.",
+      "id": "D.3"
+     },
+     {
+      "texto": "Prácticas de uso seguro y responsable de internet.",
+      "id": "D.4"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cc-2eso",
+  "materia": "Ciencias de la Computación",
+  "curso": "2º ESO",
+  "decreto": "Decreto 65/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Entender y utilizar algoritmos que lleven a la resolución de problemas concretos, aplicando los principios del pensamiento computacional y el razonamiento lógico.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Entender el funcionamiento de algoritmos sencillos para la búsqueda y ordenación de datos."
+     },
+     {
+      "id": "1.2",
+      "texto": "Diseñar y representar algoritmos que resuelvan problemas sencillos y que incluyan secuencias, decisiones e iteraciones."
+     },
+     {
+      "id": "1.3",
+      "texto": "Entender los fundamentos de la lógica booleana, utilizar tablas de verdad y funciones lógicas con los operadores lógicos AND, OR y NOT para resolver problemas sencillos."
+     },
+     {
+      "id": "1.4",
+      "texto": "Implementar funciones lógicas sencillas mediante puertas AND, OR y NOT."
+     },
+     {
+      "id": "1.5",
+      "texto": "Ser capaz de transformar números naturales en el sistema decimal a los sistemas de numeración binario y hexadecimal, así como convertirlos de un sistema a otro."
+     },
+     {
+      "id": "1.6",
+      "texto": "Conocer cómo cualquier tipo de información puede ser codificada en binario: números, píxeles e imágenes, caracteres de la tabla ASCII (American Standard Code for Information Interchange)."
+     },
+     {
+      "id": "1.7",
+      "texto": "Reconocer aplicaciones de la Inteligencia Artificial en el día a día, citando ejemplos y valorando, con actitud crítica, las aportaciones y problemas que plantea su presencia creciente."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Diseñar, escribir y depurar aplicaciones informáticas, en entornos de programación gráfica y textual, que den solución a problemas concretos, incluyendo el control de sistemas físicos y robóticos.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Utilizar un lenguaje de programación textual para resolver problemas variados, haciendo un uso correcto de los tipos de datos y seleccionando las estructuras apropiadas, así como valorando la importancia de documentarlos suficientemente para facilitar la depuración de errores y la reusabilidad."
+     },
+     {
+      "id": "2.2",
+      "texto": "Distinguir la función de cada uno de los elementos de un sistema de control programado (sensores, microcontrolador y actuadores), seleccionando los que resulten más apropiados para proyectos sencillos de computación física."
+     },
+     {
+      "id": "2.3",
+      "texto": "Programar tarjetas programables para controlar el comportamiento de dispositivos electrónicos y electromecánicos como diodos leds, zumbadores, relés basándose en los datos obtenidos a partir de sensores de todo tipo."
+     },
+     {
+      "id": "2.4",
+      "texto": "Ser capaz de programar los movimientos de un robot móvil para que se desplace evitando obstáculos o siguiendo una línea."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Conocer los elementos componentes, tanto hardware como software, de los distintos sistemas informáticos, valorando la importancia de su mantenimiento y actualización, así como la manera en la que la información es tratada y almacenada en ellos.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Describir los elementos del modelo de Von Neumann de una computadora y conocer cómo es tratada la información en él."
+     },
+     {
+      "id": "3.2",
+      "texto": "Ser capaz de estimar el volumen de datos que ocupan los distintos tipos de archivos, así como la capacidad de almacenamiento de dispositivos como discos duros, pendrives, o los servicios de almacenamiento en la nube."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Comprender cómo los equipos informáticos se comunican entre sí formando redes, desde las más pequeñas hasta internet, para compartir información, servicios y recursos, siendo conscientes de las amenazas que esto conlleva y de la importancia de la ciberseguridad.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Conocer el significado de dirección IP (Internet Protocol) de una computadora conectada a una red, cuál es su estructura y cómo es asignada; obtener la dirección IP de un dispositivo conectado a una red."
+     },
+     {
+      "id": "4.2",
+      "texto": "Conocer y entender los peligros a los que están expuestos los sistemas informáticos y la información que procesan y almacenan, haciendo un uso seguro de los mismos y valorando la importancia de la ciberseguridad."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Pensamiento computacional",
+    "items": [
+     {
+      "texto": "Algoritmos de ordenación y de búsqueda.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Elección entre algoritmos alternativos para la resolución de un mismo problema.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Lógica booleana: puertas lógicas AND, OR y NOT, circuitos lógicos simples, tablas de verdad. Aplicación de operadores lógicos en tablas de verdad para la resolución de problemas.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Representación binaria de datos de todo tipo: numéricos, texto, sonido e imágenes. Conversión entre binario, decimal y hexadecimal. Tabla ASCII de caracteres.",
+      "id": "A.4"
+     },
+     {
+      "texto": "Introducción a la Inteligencia Artificial: concepto de IA; diferencias entre IA, Machine Learning y Deep Learning; ejemplos de IA en actividades cotidianas.",
+      "id": "A.5"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Programación",
+    "items": [
+     {
+      "texto": "Lenguajes de programación de alto y de bajo nivel. Código máquina y compiladores: definición y fundamentos.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Lenguajes de programación textuales. Estructura, tipos y estructuras de datos (enteros, booleanos, reales, carácter, cadenas, arrays, listas), sintaxis.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Resolución de problemas haciendo uso de un lenguaje de programación textual.",
+      "id": "B.3"
+     },
+     {
+      "texto": "Documentación de programas: importancia para la depuración y corrección de errores.",
+      "id": "B.4"
+     },
+     {
+      "texto": "Programación modular y reusabilidad de procedimientos o funciones. Programación de subrutinas.",
+      "id": "B.5"
+     },
+     {
+      "texto": "Computación física: sensores, actuadores y microcontroladores. Uso de tarjetas programables para el control de proyectos sencillos.",
+      "id": "B.6"
+     },
+     {
+      "texto": "Programación de robots para tareas básicas como desplazamientos, detección de obstáculos, seguimiento de líneas o resolución de laberintos.",
+      "id": "B.7"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Computadores",
+    "items": [
+     {
+      "texto": "Hardware: arquitectura de computadoras, modelo de Von Neumann.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Almacenamiento de la información en los sistemas informáticos y en la nube.",
+      "id": "C.2"
+     },
+     {
+      "texto": "Cálculo de capacidades de almacenamiento para distintos tipos de información.",
+      "id": "C.3"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Redes",
+    "items": [
+     {
+      "texto": "Protocolos de redes: Ethernet, TCP (Transmission Control Protocol), IP.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Ciberseguridad: Seguridad en internet. · Tipos de ataques. · Identificación de vulnerabilidades y amenazas. · Software para la protección frente a ciberataques.",
+      "id": "D.2"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tyd-2eso",
+  "materia": "Tecnología y Digitalización",
+  "curso": "2º ESO",
+  "decreto": "Decreto 65/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Buscar y seleccionar la información adecuada proveniente de diversas fuentes, de manera crítica y segura, aplicando procesos de investigación, métodos de análisis de productos y experimentando con herramientas de simulación, para definir problemas tecnológicos e iniciar procesos de creación de soluciones a partir de la información obtenida.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Definir problemas o necesidades planteadas, buscando y contrastando información de forma guiada procedente de diferentes fuentes de manera crítica y segura."
+     },
+     {
+      "id": "1.2",
+      "texto": "Comprender y examinar productos tecnológicos de uso habitual a través del análisis de objetos y sistemas cotidianos, empleando el método científico y utilizando herramientas de simulación adecuadas al nivel del alumnado que faciliten la construcción de conocimiento."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Abordar problemas tecnológicos con autonomía y actitud creativa, aplicando conocimientos interdisciplinares y trabajando en grupo, para diseñar y planificar soluciones a un problema o necesidad de forma eficaz e innovadora.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Idear y describir soluciones originales a problemas definidos sencillos, aplicando conceptos, técnicas y procedimientos interdisciplinares, así como criterios de sostenibilidad con actitud emprendedora, perseverante y creativa."
+     },
+     {
+      "id": "2.2",
+      "texto": "Seleccionar, planificar y organizar los materiales y herramientas, así como establecer de forma guiada la secuencia de las tareas necesarias para la construcción de una solución a un problema planteado, trabajando individualmente o en grupo."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Aplicar de forma apropiada y segura distintas técnicas y conocimientos interdisciplinares utilizando operadores, sistemas tecnológicos y herramientas, teniendo en cuenta la planificación y el diseño previo para construir o fabricar soluciones tecnológicas adecuadas que den respuesta a necesidades en diferentes contextos.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Fabricar objetos o modelos mediante la manipulación y conformación de materiales, empleando herramientas y máquinas adecuadas, aplicando los fundamentos de estructuras, mecanismos y electricidad y respetando las normas de seguridad y salud."
+     },
+     {
+      "id": "3.2",
+      "texto": "Estimar cualitativamente las transformaciones de velocidades y fuerzas en mecanismos simples."
+     },
+     {
+      "id": "3.3",
+      "texto": "Identificar las magnitudes eléctricas básicas, su relación y su efecto en circuitos sencillos."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Describir, representar e intercambiar ideas o soluciones a problemas tecnológicos o digitales, utilizando medios de representación, simbología y vocabulario adecuados, así como los instrumentos y recursos disponibles y valorando la utilidad de las herramientas digitales para comunicar y difundir información y propuestas.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Identificar las fases del proceso de creación de un producto desde su diseño hasta su difusión."
+     },
+     {
+      "id": "4.2",
+      "texto": "Conocer y elaborar de forma guiada la documentación técnica y gráfica básica, utilizando la simbología y el vocabulario técnico adecuados, tanto presencialmente como en remoto."
+     }
+    ]
+   },
+   {
+    "id": "5",
+    "texto": "Desarrollar algoritmos y aplicaciones informáticas en distintos entornos, aplicando los principios del pensamiento computacional e incorporando las tecnologías emergentes, para crear soluciones a problemas concretos, automatizar procesos y aplicarlos en sistemas de control o en robótica.",
+    "criterios": [
+     {
+      "id": "5.1",
+      "texto": "Describir, interpretar y diseñar soluciones a problemas informáticos a través de algoritmos básicos y diagramas de flujo sencillos, aplicando los elementos y técnicas de programación de manera creativa."
+     },
+     {
+      "id": "5.2",
+      "texto": "Programar aplicaciones sencillas, de forma guiada con una finalidad concreta y definida, para distintos dispositivos (ordenadores, dispositivos móviles y otros) aplicando herramientas de edición y empleando los elementos de programación por bloques de manera apropiada."
+     }
+    ]
+   },
+   {
+    "id": "6",
+    "texto": "Comprender los fundamentos del funcionamiento de los dispositivos y aplicaciones habituales de su entorno digital de aprendizaje, analizando sus componentes y funciones y ajustándolos a sus necesidades para hacer un uso más eficiente y seguro de los mismos y para detectar y resolver problemas técnicos sencillos.",
+    "criterios": [
+     {
+      "id": "6.1",
+      "texto": "Usar de manera eficiente y segura los dispositivos digitales de uso cotidiano en la resolución de problemas sencillos, conociendo los riesgos y adoptando medidas de seguridad para la protección de datos y equipos."
+     },
+     {
+      "id": "6.2",
+      "texto": "Crear contenidos y elaborar materiales sencillos y estructurados, configurando correctamente las herramientas digitales habituales del entorno de aprendizaje, ajustándolas a sus necesidades y respetando los derechos de autor y la etiqueta digital."
+     },
+     {
+      "id": "6.3",
+      "texto": "Organizar la información de manera estructurada, aplicando técnicas de almacenamiento seguro y haciendo uso de los formatos de ficheros más apropiados."
+     }
+    ]
+   },
+   {
+    "id": "7",
+    "texto": "Hacer un uso responsable de la tecnología, mostrando interés por un desarrollo equilibrado, identificando sus repercusiones y valorando la contribución de las tecnologías emergentes, para identificar las aportaciones y el impacto del desarrollo tecnológico.",
+    "criterios": [
+     {
+      "id": "7.1",
+      "texto": "Reconocer la influencia de la actividad tecnológica en la sociedad y en el entorno a lo largo de su historia."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Proceso de resolución de problemas",
+    "items": [
+     {
+      "id": "A.1",
+      "texto": "Introducción a las estrategias, técnicas y marcos de resolución de problemas en diferentes contextos y sus fases."
+     },
+     {
+      "id": "A.2",
+      "texto": "Introducción a la búsqueda crítica de información durante la investigación y definición de problemas planteados."
+     },
+     {
+      "id": "A.3",
+      "texto": "Estructuras para la construcción de modelos: Resistencia, estabilidad y rigidez de estructuras. Esfuerzos estructurales: compresión, tracción, flexión, torsión y cortante."
+     },
+     {
+      "id": "A.4",
+      "texto": "Materiales técnicos en estructuras industriales y arquitectónicas. Diseño de elementos de soporte y estructuras de apoyo. Estructuras de barras, triangulación."
+     },
+     {
+      "id": "A.5",
+      "texto": "Sistemas mecánicos básicos: Montajes físicos o uso de simuladores. Palancas de primer, segundo y tercer grado. Ley de la palanca. Análisis cualitativo de sistemas poleas y engranajes."
+     },
+     {
+      "id": "A.6",
+      "texto": "Electricidad básica para el montaje de esquemas y circuitos físicos o simulados: Elementos de un circuito eléctrico básico. Magnitudes fundamentales eléctricas: concepto y unidades de medida. Simbología normalizada de circuitos. Interpretación."
+     },
+     {
+      "id": "A.7",
+      "texto": "Materiales tecnológicos y su impacto ambiental."
+     },
+     {
+      "id": "A.8",
+      "texto": "Herramientas y técnicas de manipulación y mecanizado básicas de materiales en la construcción de objetos y prototipos. Respeto de las normas de seguridad e higiene."
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Comunicación y difusión de ideas",
+    "items": [
+     {
+      "id": "B.1",
+      "texto": "Habilidades básicas de comunicación interpersonal. Pautas de conducta propias del entorno virtual (etiqueta digital)."
+     },
+     {
+      "id": "B.2",
+      "texto": "Técnicas de representación gráfica: Boceto y croquis. Proyección cilíndrica ortogonal para la representación de objetos: vistas normalizadas de una pieza. Acotación normalizada de piezas sencillas."
+     },
+     {
+      "id": "B.3",
+      "texto": "Introducción al software de diseño gráfico en dos dimensiones."
+     },
+     {
+      "id": "B.4",
+      "texto": "Herramientas digitales para la elaboración y presentación de documentación técnica e información multimedia relativa a proyectos."
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Pensamiento computacional, programación y robótica",
+    "items": [
+     {
+      "id": "C.1",
+      "texto": "Algorítmia y diagramas de flujo."
+     },
+     {
+      "id": "C.2",
+      "texto": "Aplicaciones informáticas sencillas para ordenador y dispositivos móviles."
+     },
+     {
+      "id": "C.3",
+      "texto": "Uso de herramientas de programación por bloques."
+     },
+     {
+      "id": "C.4",
+      "texto": "Autoconfianza e iniciativa: el error, la reevaluación y la depuración de errores como parte del proceso de aprendizaje."
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Digitalización del entorno personal de aprendizaje",
+    "items": [
+     {
+      "id": "D.1",
+      "texto": "Dispositivos digitales: Elementos del hardware y del software. Identificación y resolución de problemas técnicos sencillos."
+     },
+     {
+      "id": "D.2",
+      "texto": "Sistemas de comunicación digital de uso común."
+     },
+     {
+      "id": "D.3",
+      "texto": "Uso seguro y responsable de internet: búsqueda de información, correo electrónico, mensajería instantánea, redes sociales."
+     },
+     {
+      "id": "D.4",
+      "texto": "Herramientas y plataformas de aprendizaje: configuración, mantenimiento y uso crítico."
+     },
+     {
+      "id": "D.5",
+      "texto": "Técnicas de tratamiento, organización y almacenamiento seguro de la información. Formatos de ficheros. Copias de seguridad."
+     },
+     {
+      "id": "D.6",
+      "texto": "Seguridad en la red: Riesgos, amenazas y ataques. Medidas de protección de datos y de información: antivirus, cortafuegos, servidores proxy, entre otros."
+     },
+     {
+      "id": "D.7",
+      "texto": "Buen uso digital: prácticas seguras y riesgos (ciberacoso, sextorsión, vulneración de la propia imagen y de la intimidad, acceso a contenidos inadecuados, adicciones, etc.)."
+     }
+    ]
+   },
+   {
+    "id": "E",
+    "titulo": "Tecnología sostenible",
+    "items": [
+     {
+      "id": "E.1",
+      "texto": "Desarrollo tecnológico: creatividad, innovación, investigación, obsolescencia e impacto."
+     }
+    ]
+   }
+  ],
+  "notas": "Saberes básicos y criterios 6.3 y 7.1 tomados del Planificador y del Seguimiento de Criterios (no venían en el documento de currículos)."
+ },
+ {
+  "id": "dig-4eso",
+  "materia": "Digitalización",
+  "curso": "4º ESO",
+  "decreto": "Decreto 65/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Identificar y resolver problemas técnicos sencillos, conectar y configurar dispositivos a redes domésticas, aplicando los conocimientos de hardware y sistemas operativos, para gestionar las herramientas e instalaciones informáticas y de comunicación de uso cotidiano.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Conectar dispositivos y gestionar redes locales aplicando los conocimientos y procesos asociados a sistemas de comunicación alámbrica e inalámbrica con una actitud proactiva."
+     },
+     {
+      "id": "1.2",
+      "texto": "Instalar y mantener sistemas operativos configurando sus características en función de sus necesidades personales."
+     },
+     {
+      "id": "1.3",
+      "texto": "Identificar y resolver problemas técnicos sencillos analizando componentes y funciones de los dispositivos digitales, evaluando las soluciones de manera crítica."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Configurar el entorno personal de aprendizaje, interactuando y aprovechando los recursos del ámbito digital, para optimizar y gestionar el aprendizaje permanente.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Gestionar el aprendizaje en el ámbito digital, configurando el entorno personal de aprendizaje (EPA) mediante la integración de recursos digitales de manera autónoma."
+     },
+     {
+      "id": "2.2",
+      "texto": "Buscar, seleccionar y archivar información haciendo uso de las herramientas del EPA con sentido crítico y siguiendo normas básicas de seguridad."
+     },
+     {
+      "id": "2.3",
+      "texto": "Crear, programar, integrar y reelaborar contenidos digitales de forma individual o colectiva, respetando los derechos de autor y licencias de uso."
+     },
+     {
+      "id": "2.4",
+      "texto": "Interactuar en espacios virtuales de comunicación y plataformas de aprendizaje colaborativo, compartiendo y publicando información con una actitud participativa y respetuosa."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Desarrollar hábitos que fomenten el bienestar digital, aplicando medidas preventivas y correctivas, para proteger dispositivos, datos personales y la propia salud.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Proteger los datos personales y la huella digital generada en internet, configurando las condiciones de privacidad de redes sociales y espacios virtuales."
+     },
+     {
+      "id": "3.2",
+      "texto": "Configurar y actualizar contraseñas, sistemas operativos y antivirus de forma periódica en los distintos dispositivos."
+     },
+     {
+      "id": "3.3",
+      "texto": "Identificar y saber reaccionar ante situaciones que representan una amenaza en la red, desarrollando prácticas saludables y seguras, y valorando el bienestar físico y mental."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Ejercer una ciudadanía digital crítica, conociendo las posibles acciones que realizar en la red, e identificando sus repercusiones, para hacer un uso activo, responsable y ético de la tecnología.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Hacer un uso ético de los datos y las herramientas digitales, aplicando las normas de etiqueta digital y respetando la privacidad y la propiedad intelectual."
+     },
+     {
+      "id": "4.2",
+      "texto": "Reconocer las aportaciones de las tecnologías digitales en las gestiones administrativas y el comercio electrónico, siendo consciente de la brecha social de acceso y uso."
+     },
+     {
+      "id": "4.3",
+      "texto": "Valorar la importancia, facilidad y libertad de expresión que suponen los medios digitales, analizando de forma crítica los mensajes que se reciben y transmiten (objetividad, intencionalidad, sesgos)."
+     },
+     {
+      "id": "4.4",
+      "texto": "Analizar la necesidad y los beneficios globales de un uso y desarrollo ecosocialmente responsable de las tecnologías, teniendo en cuenta criterios de accesibilidad, sostenibilidad e impacto."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Dispositivos digitales, sistemas operativos y de comunicación",
+    "items": [
+     {
+      "texto": "Arquitectura de ordenadores: elementos, montaje, configuración y resolución de problemas.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Sistemas operativos: instalación y configuración de usuario.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Sistemas de comunicación e internet: dispositivos de red y funcionamiento. Procedimiento de configuración de una red doméstica y conexión de dispositivos.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Dispositivos conectados (IoT + Wearables): configuración y conexión.",
+      "id": "A.4"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Digitalización del entorno personal de aprendizaje",
+    "items": [
+     {
+      "texto": "Búsqueda, selección y archivo de información.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Edición y creación de contenidos: aplicaciones de productividad, desarrollo de aplicaciones sencillas para dispositivos móviles y web, realidad virtual, aumentada y mixta.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Comunicación y colaboración en red.",
+      "id": "B.3"
+     },
+     {
+      "texto": "Publicación y difusión responsable en redes.",
+      "id": "B.4"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Seguridad y bienestar digital",
+    "items": [
+     {
+      "texto": "Seguridad de dispositivos: medidas preventivas y correctivas para hacer frente a riesgos, amenazas y ataques.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Seguridad y protección de datos: identidad, reputación digital, privacidad y huella digital. Medidas preventivas en la configuración de redes sociales y la gestión de identidades virtuales.",
+      "id": "C.2"
+     },
+     {
+      "texto": "Seguridad en la salud física y mental: Riesgos y amenazas al bienestar personal. Opciones de respuesta y prácticas de uso saludable. Situaciones de violencia y de riesgo en la red (ciberacoso, sextorsión, dependencia tecnológica, etc.).",
+      "id": "C.3"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Ciudadanía digital crítica",
+    "items": [
+     {
+      "texto": "Interactividad en la red: libertad de expresión, etiqueta digital, propiedad intelectual y licencias de uso.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Educación mediática: periodismo digital, blogosfera, estrategias comunicativas y uso crítico de la red. Herramientas para detectar noticias falsas y fraudes.",
+      "id": "D.2"
+     },
+     {
+      "texto": "Gestiones administrativas: servicios públicos en línea, registros digitales y certificados oficiales.",
+      "id": "D.3"
+     },
+     {
+      "texto": "Comercio electrónico: facturas digitales, formas de pago y criptomonedas.",
+      "id": "D.4"
+     },
+     {
+      "texto": "Ética en el uso de datos y herramientas digitales: inteligencia artificial, sesgos algorítmicos e ideológicos, obsolescencia programada, soberanía tecnológica y digitalización sostenible.",
+      "id": "D.5"
+     },
+     {
+      "texto": "Activismo en línea: plataformas de iniciativa ciudadana, cibervoluntariado y comunidades de hardware y software libres.",
+      "id": "D.6"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cc-1bach",
+  "materia": "Ciencias de la Computación I",
+  "curso": "1º Bachillerato",
+  "decreto": "Decreto 64/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Reconocer y analizar los elementos físicos que componen un sistema informático, estudiando su evolución histórica y las ventajas que ha supuesto la implementación de los avances tecnológicos en estos sistemas, para identificar las posibilidades y funcionalidades de la informática y su presencia en la actividad cotidiana.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Conocer la evolución histórica de los avances tecnológicos así como los principios físicos y técnicos de su funcionamiento, para analizar la revolución digital y el desarrollo de las ciencias de la computación así como los impactos que en cada caso han originado en la sociedad."
+     },
+     {
+      "id": "1.2",
+      "texto": "Identificar los subsistemas y elementos de un sistema informático, valorando la influencia de los avances tecnológicos en los cambios que se implementan en estos sistemas."
+     },
+     {
+      "id": "1.3",
+      "texto": "Reconocer la arquitectura los sistemas informáticos, analizando los cambios que se han ido produciendo en su estructura en la historia reciente y han facilitado el desarrollo tecnológico."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Identificar las características y funciones de los diferentes componentes de un sistema informático y la interrelación entre los mismos, así como los sistemas de comunicación para la conexión entre diferentes dispositivos y las redes de comunicación estableciendo configuraciones seguras, analizando el impacto social, económico y cultural que han tenido los sistemas de comunicación y trasmisión de la información en la historia reciente.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Identificar y conocer las características de cada componente de un sistema informático, así como las conexiones entre ellos, valorando las funciones que realizan en el conjunto del sistema."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Conocer y utilizar a nivel de usuario las aplicaciones informáticas de uso más frecuente; ofimáticas, de edición de imagen, sonido y vídeo, valorando las posibilidades que ofrecen estas herramientas en la difusión del conocimiento y la promoción profesional, para integrar el uso de las aplicaciones informáticas en las diferentes actividades académicas, profesionales, personales y sociales.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Manejar de forma adecuada las herramientas de ofimática para la elaboración de documentación y el tratamiento de la información, incorporando estas herramientas como un elemento instrumental en su vida académica."
+     },
+     {
+      "id": "3.2",
+      "texto": "Conocer las funciones avanzadas de la ofimática y las herramientas de gestión de proyectos, utilizando estas aplicaciones en situaciones prácticas de su vida académica."
+     },
+     {
+      "id": "3.3",
+      "texto": "Elaborar y difundir contenidos e información contrastada en Internet, desarrollando proyectos para la elaboración de contenidos web en equipos de trabajo, utilizando las herramientas y aplicaciones ofimáticas más adecuadas para la gestión de las tareas en cada caso."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Diseñar y crear aplicaciones y programas informáticos con diversas finalidades para dar respuesta a problemas y situaciones que puedan producirse en el ámbito académico y profesional, estructurando y aplicando los algoritmos necesarios, así como realizando las operaciones de compilación y depuración necesarias, valorando la incidencia de la programación y su impacto en la sociedad actual.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Detectar problemas y situaciones en las que puedan aplicarse algoritmos para su resolución, valorando el papel del pensamiento computacional y la programación para su resolución."
+     },
+     {
+      "id": "4.2",
+      "texto": "Diseñar la estructura de un programa informático basándose en los fundamentos de la programación, seleccionando el lenguaje más idóneo para materializarlo."
+     },
+     {
+      "id": "4.3",
+      "texto": "Conocer las principales sentencias e instrucciones de uno o varios lenguajes de programación, considerando la importancia de la corrección en la sintaxis para su depuración y compilación."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Ciencias de la computación. Evolución histórica",
+    "items": [
+     {
+      "texto": "Los inicios de las ciencias de la computación (Alan Turing, Ada Lovelace, John von Neumann). Teoría de algoritmos. Máquina de Turing. Álgebra de Boole.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Computación y computabilidad. Problemas de decisión y problemas indecibles.",
+      "id": "A.2"
+     },
+     {
+      "texto": "El comienzo de la revolución digital. La era de la información y el internet.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Avances tecnológicos en la computación a lo largo de la historia: Las primeras máquinas matemáticas: el ábaco, los logaritmos de Napier, la regla deslizante (William Oughtred, 1621), la rueda de pascal o pascalina (Blaise Pascal, 1642). · La máquina diferencial de Charles Babbage (1822). · La válvula de vacío. El primer ordenador electrónico (ENIAC 1943-1946). · El transistor. · El circuito integrado. El chip. · Los sensores. La robótica. · La inteligencia artificial.",
+      "id": "A.4"
+     },
+     {
+      "texto": "Las tarjetas perforadas. Los lenguajes de programación. La computación gráfica. Los simuladores.",
+      "id": "A.5"
+     },
+     {
+      "texto": "Computación y sociedad. Impacto en el desarrollo social y económico. Beneficios y efectos negativos.",
+      "id": "A.6"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Los sistemas informáticos",
+    "items": [
+     {
+      "texto": "Elementos de un sistema informático: subsistema físico (hardware), subsistema lógico (software) y el usuario (analistas, programadores, operarios, etc.)",
+      "id": "B.1"
+     },
+     {
+      "texto": "Ordenadores personales, sistemas departamentales y grandes ordenadores.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Estructura del hardware. · Arquitectura de Neumann: procesador, memoria, interfaces de entrada y salida, buses. · Dispositivos de cómputo: unidad central de proceso (CPU), memoria (RAM, ROM, caché), bus de datos. · Dispositivos de almacenamiento. · Dispositivos de comunicación. · Dispositivos de entrada. · Dispositivos de salida.",
+      "id": "B.3"
+     },
+     {
+      "texto": "La placa base (mainboard): Conectores de alimentación. · Zócalo de CPU. · Ranuras de RAM. · Chipset: puente norte (interconexiones CPU, RAM, procesador gráfico) y puente sur (interconexiones periféricos y dispositivos de almacenamiento). · Reloj. · Semiconductor complementario de óxido metálico (CMOS), memoria de configuración del equipo. · Firmware: sistema básico de entrada y salida (BIOS), interfaz unificada de firmware extensible (UEFI). · Buses y conectores. Puertos más frecuentes en los equipos.",
+      "id": "B.4"
+     },
+     {
+      "texto": "Subsistemas integrantes de equipos informáticos. Alimentación. Sistemas de protección ante fallos.",
+      "id": "B.5"
+     },
+     {
+      "texto": "Secuencia de arranque de un equipo informático, el gestor de arranque (bootloader).",
+      "id": "B.6"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Software de sistema y de utilidad",
+    "items": [
+     {
+      "texto": "Software de sistema: sistemas operativos, lenguajes de programación.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Sistemas operativos: Funciones del sistema operativo. · Interfaz: de línea de comandos, gráfica de usuario (GUI). · Tipos de sistemas. · Componentes: sistema de archivos, interpretación de comandos, núcleo.",
+      "id": "C.2"
+     },
+     {
+      "texto": "Lenguajes de programación: de bajo y alto nivel.",
+      "id": "C.3"
+     },
+     {
+      "texto": "Tipos de programación: declarativa, imperativa, estructurada, modular, orientada a objetos, orientada a eventos.",
+      "id": "C.4"
+     },
+     {
+      "texto": "Software de utilidad. · Software libre y propietario. · Tipos de aplicaciones. · Instalación y prueba de aplicaciones. · Requerimientos de las aplicaciones.",
+      "id": "C.5"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Elaboración y difusión de la información",
+    "items": [
+     {
+      "texto": "Ofimática y documentación electrónica.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Utilización académica y profesional de procesadores de texto, hojas de cálculo, bases de datos, presentaciones y organización de proyectos.",
+      "id": "D.2"
+     },
+     {
+      "texto": "Software de comunicación: desde el correo electrónico y los gestores de agenda hasta las redes sociales y los entornos virtuales para la comunicación en tiempo real.",
+      "id": "D.3"
+     },
+     {
+      "texto": "Herramientas de gestión de archivos y almacenamiento en la nube. Contenidos compartidos.",
+      "id": "D.4"
+     },
+     {
+      "texto": "Diseño y edición de páginas web. Aplicaciones y lenguajes. Publicación de páginas web. Estándares de accesibilidad de la información.",
+      "id": "D.5"
+     },
+     {
+      "texto": "La evolución de Internet y su impacto social. · La revolución de la web 1.0, el acceso instantáneo a la información. El nacimiento de la sociedad de la información y la comunicación. · La web 2.0, la interoperabilidad y la creación colaborativa de contenidos, la web social. Usos y riesgos de las redes sociales y sus aplicaciones. · La web 3.0 el internet de las cosas y la incorporación de la inteligencia artificial a la red, el BigData.",
+      "id": "D.6"
+     }
+    ]
+   },
+   {
+    "id": "E",
+    "titulo": "Programación",
+    "items": [
+     {
+      "texto": "Elementos de programación.",
+      "id": "E.1"
+     },
+     {
+      "texto": "Conceptos básicos: ingeniería de software, lenguajes de programación, evolución de la programación.",
+      "id": "E.2"
+     },
+     {
+      "texto": "Algoritmos: estáticos, probabilísticos y adaptativos.",
+      "id": "E.3"
+     },
+     {
+      "texto": "Diagramas de flujo: símbolos gráficos, elaboración de diagramas.",
+      "id": "E.4"
+     },
+     {
+      "texto": "Pseudocódigo: instrucciones primitivas, de proceso, de control, compuestas, de descripción.",
+      "id": "E.5"
+     },
+     {
+      "texto": "Resolución de problemas mediante programación. Descomposición de problemas mayores en otros más pequeños.",
+      "id": "E.6"
+     },
+     {
+      "texto": "Estructuras básicas de la programación. Programación estructurada.",
+      "id": "E.7"
+     },
+     {
+      "texto": "Entornos de programación.",
+      "id": "E.8"
+     },
+     {
+      "texto": "Metodología de desarrollo de programas: Sentencias de programación: simples y estructuradas. · Sintaxis y codificación: variables y vectores, expresiones condicionales, selección y bucles, funciones. · Ensamblaje o compilación del programa. · Prueba y depuración del programa.",
+      "id": "E.9"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cc-2bach",
+  "materia": "Ciencias de la Computación II",
+  "curso": "2º Bachillerato",
+  "decreto": "Decreto 64/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Reconocer y analizar los elementos físicos que componen un sistema informático, estudiando su evolución histórica y las ventajas que ha supuesto la implementación de los avances tecnológicos en estos sistemas, para identificar las posibilidades y funcionalidades de la informática y su presencia en la actividad cotidiana.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Identificar los componentes de un sistema informático destinados a establecer conexiones y transmisión de datos."
+     },
+     {
+      "id": "1.2",
+      "texto": "Conocer los medios de transmisión utilizados en redes y los distintos tipos de conectores, identificando los espacios físicos de la red."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Identificar las características y funciones de los diferentes componentes de un sistema informático y la interrelación entre los mismos, así como los sistemas de comunicación para la conexión entre diferentes dispositivos y las redes de comunicación estableciendo configuraciones seguras, analizando el impacto social, económico y cultural que han tenido los sistemas de comunicación y trasmisión de la información en la historia reciente.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Valorar la influencia en la historia reciente de los avances tecnológicos en la transmisión de datos."
+     },
+     {
+      "id": "2.2",
+      "texto": "Identificar las funciones de los elementos de la electrónica de red y las conexiones entre ellos."
+     },
+     {
+      "id": "2.3",
+      "texto": "Analizar los principales riesgos derivados del malware y utilizar herramientas y sistemas para dotar de seguridad una red."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Conocer y utilizar a nivel de usuario las aplicaciones informáticas de uso más frecuente; ofimáticas, de edición de imagen, sonido y vídeo, valorando las posibilidades que ofrecen estas herramientas en la difusión del conocimiento y la promoción profesional, para integrar el uso de las aplicaciones informáticas en las diferentes actividades académicas, profesionales, personales y sociales.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Conocer los diferentes formatos digitales de imagen, audio y vídeo, utilizando las aplicaciones adecuadas para crear, comprimir y exportar archivos."
+     },
+     {
+      "id": "3.2",
+      "texto": "Realizar modificaciones básicas en imágenes, audios y vídeos con diferentes programas, utilizando los elementos de lenguaje audiovisual de forma intencionada."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Diseñar y crear aplicaciones y programas informáticos con diversas finalidades para dar respuesta a problemas y situaciones que puedan producirse en el ámbito académico y profesional, estructurando y aplicando los algoritmos necesarios, así como realizando las operaciones de compilación y depuración necesarias, valorando la incidencia de la programación y su impacto en la sociedad actual.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Utilizar diferentes entornos de programación para la creación de programas o aplicaciones sencillas."
+     },
+     {
+      "id": "4.2",
+      "texto": "Desarrollar programas, planificando y estructurando la secuencia de tareas e instrucciones que deben ejecutarse."
+     },
+     {
+      "id": "4.3",
+      "texto": "Conocer diferentes entornos de programación y entornos para la creación de aplicaciones para móviles, valorando las posibilidades que ofrecen en cada caso."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Las redes informáticas",
+    "items": [
+     {
+      "texto": "Componentes básicos de una red: Software: sistema operativo de red y software de aplicación. · Hardware: estaciones y puestos de trabajo, tarjetas y adaptadores de red, servidores (de archivos, de correo, de impresión, de telefonía, web, proxy, de acceso remoto, de aplicaciones, entre otros). · Elementos de la electrónica de red: conmutador de red, enrutador, puente de red, punto de acceso inalámbrico, entre otros.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Topología de red: malla, estrella, árbol, bus, anillo.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Redes cableadas, redes inalámbricas.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Tipos de redes: red de área local (LAN), red de área metropolitana (MAN), red de área amplia (WAN).",
+      "id": "A.4"
+     },
+     {
+      "texto": "Configuración de sistemas en la red local.",
+      "id": "A.5"
+     },
+     {
+      "texto": "Protocolos de redes: El modelo de interconexión de sistemas abiertos (modelo OSI). Capas. Proceso de transmisión de datos. · Modelo TCP/IP. Capas. · Otros estándares: IEEE 802.3 (Ethernet), IEEE 802.11 (WLAN), IEEE 802.15 (Bluethoot), entre otros.",
+      "id": "A.6"
+     },
+     {
+      "texto": "Evolución cronológica y avances tecnológicos más representativos: Primeras redes locales: terminales y máquina central, con cableado estructurado (cable coaxial). · Advance Research Projects Agency (ARPA) y ARPANET. Primera transferencia de datos entre ordenadores a gran distancia (1969). · Primer tráfico de e-mails (1971). Primera red internacional SATNET (1973). · El protocolo TCP/IP para redes (1978) y el protocolo IPv4 para Internet (1981). · Transición de ARPANET a TCP/IP (1983) · Tecnología WaveLAN (1988). Protocolo IPv6 (1996). Estándar IEEE 802.11a para Wi-Fi (1999), WPA2 (2003), protocolo IEEE 802.11n para Wi-Fi (2009), WPA3 para Wi-Fi (2018).",
+      "id": "A.7"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Seguridad en sistemas informáticos y redes",
+    "items": [
+     {
+      "texto": "Conceptos básicos de criptografía. Protocolos seguros. Uso de claves. Protección de documentos.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Seguridad en lenguajes y aplicaciones.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Sistemas de verificación e identificación.",
+      "id": "B.3"
+     },
+     {
+      "texto": "Técnicas contra el malware.",
+      "id": "B.4"
+     },
+     {
+      "texto": "Seguridad perimetral. Firewalls, VPN.",
+      "id": "B.5"
+     },
+     {
+      "texto": "Verificadores de Integridad y Sistemas de detección de intrusos.",
+      "id": "B.6"
+     },
+     {
+      "texto": "El hacking ético.",
+      "id": "B.7"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Software: herramientas y aplicaciones",
+    "items": [
+     {
+      "texto": "La imagen digital: tipos, resolución, tamaño, profundidad del color, formatos gráficos, digitalización de imágenes.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Modos del color: escala de grises, indexado, RGB (Red Green Blue), HSV (Hue Saturation Value), CYMK (Cyan, Magenta, Yellow, Key).",
+      "id": "C.2"
+     },
+     {
+      "texto": "Software para la edición y tratamiento de imágenes rasterizadas y vectoriales.",
+      "id": "C.3"
+     },
+     {
+      "texto": "Modificaciones básicas en imágenes rasterizadas: filtros, composiciones, recortes, tamaños, resolución, ajustes, reparaciones, transformaciones, filtros y efectos.",
+      "id": "C.4"
+     },
+     {
+      "texto": "Creación y edición de imágenes vectoriales.",
+      "id": "C.5"
+     },
+     {
+      "texto": "Software para la edición de audio: formatos y conversión de archivos de audio, digitalización, grabación, edición y mezcla de varias pistas, sincronización, volumen, tono, efectos, velocidad.",
+      "id": "C.6"
+     },
+     {
+      "texto": "Software para la edición de vídeos: recortes, sonido, títulos, filtros, transiciones y efectos especiales.",
+      "id": "C.7"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Programación",
+    "items": [
+     {
+      "texto": "Programación de aplicaciones sencillas.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Conceptos de clases y objetos.",
+      "id": "D.2"
+     },
+     {
+      "texto": "Lectura y escritura de datos.",
+      "id": "D.3"
+     },
+     {
+      "texto": "Estructuras de almacenamiento.",
+      "id": "D.4"
+     },
+     {
+      "texto": "Entornos de programación.",
+      "id": "D.5"
+     },
+     {
+      "texto": "Entornos para la creación de aplicaciones para móviles.",
+      "id": "D.6"
+     },
+     {
+      "texto": "Elaboración de programas.",
+      "id": "D.7"
+     },
+     {
+      "texto": "Depuración de programas.",
+      "id": "D.8"
+     },
+     {
+      "texto": "Fundamentos del software adaptativo.",
+      "id": "D.9"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tei-1bach",
+  "materia": "Tecnología e Ingeniería I",
+  "curso": "1º Bachillerato",
+  "decreto": "Decreto 64/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Coordinar y desarrollar proyectos de investigación con una actitud crítica y emprendedora, implementando estrategias y técnicas eficientes de resolución de problemas y comunicando los resultados de manera adecuada, para crear y mejorar productos y sistemas de manera continua.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Investigar y diseñar proyectos que muestren de forma gráfica la creación y mejora de un producto, seleccionando, referenciando e interpretando información relacionada."
+     },
+     {
+      "id": "1.2",
+      "texto": "Participar en el desarrollo, gestión y coordinación de proyectos de creación y mejora continua de productos viables y socialmente responsables, identificando mejoras y creando prototipos mediante un proceso iterativo, con actitud crítica, creativa y emprendedora."
+     },
+     {
+      "id": "1.3",
+      "texto": "Colaborar en tareas tecnológicas, escuchando el razonamiento de los demás, aportando al equipo a través del rol asignado y fomentando el bienestar grupal y las relaciones saludables e inclusivas."
+     },
+     {
+      "id": "1.4",
+      "texto": "Elaborar documentación técnica con precisión y rigor, generando diagramas funcionales y utilizando medios manuales y aplicaciones digitales."
+     },
+     {
+      "id": "1.5",
+      "texto": "Comunicar de manera eficaz y organizada las ideas y soluciones tecnológicas, empleando el soporte, la terminología y el rigor apropiados."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Seleccionar materiales y elaborar estudios de impacto, aplicando criterios técnicos y de sostenibilidad para fabricar productos de calidad que den respuesta a problemas y tareas planteados, desde un enfoque responsable y ético.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Determinar el ciclo de vida de un producto, planificando y aplicando medidas de control de calidad en sus distintas etapas, desde el diseño a la comercialización, teniendo en consideración estrategias de mejora continua."
+     },
+     {
+      "id": "2.2",
+      "texto": "Seleccionar los materiales, tradicionales o de nueva generación, adecuados para la fabricación de productos de calidad basándose en el conocimiento de sus propiedades y de sus características técnicas y atendiendo a criterios de sostenibilidad de manera responsable y ética."
+     },
+     {
+      "id": "2.3",
+      "texto": "Fabricar modelos o prototipos empleando las técnicas de fabricación más adecuadas, incluidas las de fabricación digital, y aplicando los criterios técnicos y de sostenibilidad necesarios."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Utilizar las herramientas digitales adecuadas, analizando sus posibilidades, configurándolas de acuerdo a sus necesidades y aplicando conocimientos interdisciplinares, para resolver tareas, así como para realizar la presentación de los resultados de una manera óptima.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Resolver tareas propuestas y funciones asignadas, mediante el uso y configuración de diferentes herramientas digitales de manera óptima y autónoma."
+     },
+     {
+      "id": "3.2",
+      "texto": "Realizar la presentación de proyectos empleando herramientas digitales adecuadas."
+     },
+     {
+      "id": "3.3",
+      "texto": "Conocer programas de CAD (Computer Aided Desing), CAE (Computer Aided Engineering) y CAM (Computer Aided Manufacturing) para el diseño y desarrollo de proyectos, valorando su utilidad en los procesos de diseño, dimensionado y fabricación de un producto industrial."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Generar conocimientos y mejorar las destrezas técnicas, transfiriendo y aplicando conocimientos de otras disciplinas científicas con actitud creativa, para calcular y resolver problemas o dar respuesta a necesidades de los distintos ámbitos de la ingeniería.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Resolver problemas asociados a sistemas e instalaciones mecánicas, aplicando fundamentos de mecanismos transmisión y transformación de movimientos, soporte y unión al desarrollo de montajes o simulaciones."
+     },
+     {
+      "id": "4.2",
+      "texto": "Resolver problemas asociados a sistemas e instalaciones eléctricas y electrónicas, aplicando fundamentos de corriente continua y máquinas eléctricas al desarrollo de montajes o simulaciones."
+     }
+    ]
+   },
+   {
+    "id": "5",
+    "texto": "Diseñar, crear y evaluar sistemas tecnológicos, aplicando conocimientos de programación informática, regulación automática y control, así como las posibilidades que ofrecen las tecnologías emergentes, para estudiar, controlar y automatizar tareas en sistemas tecnológicos y robóticos.",
+    "criterios": [
+     {
+      "id": "5.1",
+      "texto": "Controlar el funcionamiento de sistemas tecnológicos y robóticos, utilizando lenguajes de programación informática textuales, aplicando el paradigma de la programación estructurada, y aplicando las posibilidades que ofrecen las tecnologías emergentes, tales como Inteligencia artificial, internet de las cosas, Big Data..."
+     },
+     {
+      "id": "5.2",
+      "texto": "Automatizar, programar y evaluar movimientos de robots, mediante la modelización, la aplicación de algoritmos sencillos y el uso de herramientas informáticas."
+     },
+     {
+      "id": "5.3",
+      "texto": "Conocer y comprender conceptos básicos de programación textual, mostrando el progreso paso a paso de la ejecución de un programa a partir del estado inicial y prediciendo su estado final tras su ejecución."
+     }
+    ]
+   },
+   {
+    "id": "6",
+    "texto": "Analizar y comprender sistemas tecnológicos de los distintos ámbitos de la ingeniería, estudiando sus características, consumo y eficiencia energética, para evaluar el uso responsable y sostenible que se hace de la tecnología.",
+    "criterios": [
+     {
+      "id": "6.1",
+      "texto": "Evaluar los distintos sistemas de generación de energía eléctrica y mercados energéticos, estudiando sus características, calculando sus magnitudes y valorando su eficiencia."
+     },
+     {
+      "id": "6.2",
+      "texto": "Analizar las diferentes instalaciones de una vivienda desde el punto de vista de su eficiencia energética, fomentando un uso responsable de las mismas."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Proyectos de investigación y desarrollo",
+    "items": [
+     {
+      "texto": "Estrategias de gestión y desarrollo de proyectos: Planificación y organización: metodologías Agile, identificación de tareas y secuenciación de las mismas, diagramas de Gantt y seguimiento. · Técnicas de investigación e ideación. Técnicas de trabajo en equipo.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Productos: Planificación y desarrollo de diseño y comercialización. Ciclo de vida. · Metrología y normalización. Control de calidad del producto. · Logística, transporte y distribución. · Estrategias de mejora continua: ciclo de Deming y planes de mejora.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Expresión gráfica para la planificación y desarrollo de proyectos: Diagramas funcionales, esquemas y croquis. · Aplicaciones CAD, CAE y CAM: funciones y utilidades de estas aplicaciones en los procesos de diseño de la geometría, en el análisis del funcionamiento y en la definición y control de los procesos de fabricación del producto.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Emprendimiento, perseverancia y creatividad para abordar problemas desde una perspectiva interdisciplinar.",
+      "id": "A.4"
+     },
+     {
+      "texto": "Autoconfianza e iniciativa.",
+      "id": "A.5"
+     },
+     {
+      "texto": "El error y la reevaluación como parte del proceso de aprendizaje y como herramienta para la mejora de los proyectos de investigación y desarrollo.",
+      "id": "A.6"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Materiales y fabricación",
+    "items": [
+     {
+      "texto": "Propiedades de los materiales: físicas, químicas y mecánicas.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Materiales técnicos: metálicos, cerámicos, moleculares, poliméricos e híbridos, entre otros, nuevos materiales (grafeno, estaneno, shrilk, entre otros) y nuevos tratamientos (PVD (Physical Vapor Deposition), CVD (Chemical Vapor Deposition), entre otros).",
+      "id": "B.2"
+     },
+     {
+      "texto": "Clasificación y criterios de sostenibilidad. Selección y aplicaciones características.",
+      "id": "B.3"
+     },
+     {
+      "texto": "Técnicas de fabricación: prototipado rápido y bajo demanda. Fabricación digital aplicada a proyectos.",
+      "id": "B.4"
+     },
+     {
+      "texto": "Normas de seguridad e higiene en el trabajo.",
+      "id": "B.5"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Sistemas mecánicos",
+    "items": [
+     {
+      "texto": "Máquinas y sistemas mecánicos.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Mecanismos de transmisión y transformación de movimientos: Elementos de transmisión: engranajes, poleas y correas, cadenas de rodillos, cigüeñal, caja de cambios. · Soportes y unión de elementos mecánicos. Acoplamientos rígidos y flexibles. Junta Cardan. · Diseño, cálculo, montaje y experimentación física o simulada de sistemas mecánicos. · Aplicación práctica a proyectos.",
+      "id": "C.2"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Sistemas eléctricos y electrónicos",
+    "items": [
+     {
+      "texto": "Circuitos y máquinas eléctricas de corriente continua: Interpretación y representación esquematizada de circuitos eléctricos. · Cálculo, montaje y experimentación física o simulada de circuitos eléctricos. · Motores eléctricos de corriente continua: características y funcionamiento. · Aplicación a proyectos.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Componentes y circuitos electrónicos. Interpretación de circuitos básicos.",
+      "id": "D.2"
+     }
+    ]
+   },
+   {
+    "id": "E",
+    "titulo": "Sistemas informáticos. Programación",
+    "items": [
+     {
+      "texto": "Fundamentos de la programación textual. Características, elementos y lenguajes: Tipos de datos, constantes y variables. · Estructura de un programa: instrucciones, comandos y sintaxis. · Operaciones básicas con variables. · Bucles, expresiones condicionales y estructuras de datos.",
+      "id": "E.1"
+     },
+     {
+      "texto": "Proceso de desarrollo: edición, compilación o interpretación, ejecución, pruebas y depuración.",
+      "id": "E.2"
+     },
+     {
+      "texto": "Creación de programas para la resolución de problemas. Modularización.",
+      "id": "E.3"
+     },
+     {
+      "texto": "Tecnologías emergentes: internet de las cosas. Aplicación a proyectos.",
+      "id": "E.4"
+     },
+     {
+      "texto": "Protocolos de comunicación de redes de dispositivos.",
+      "id": "E.5"
+     }
+    ]
+   },
+   {
+    "id": "F",
+    "titulo": "Sistemas automáticos",
+    "items": [
+     {
+      "texto": "Sistemas de control. Conceptos y elementos. Modelización de sistemas sencillos.",
+      "id": "F.1"
+     },
+     {
+      "texto": "Automatización programada de procesos. Diseño, programación, construcción y simulación o montaje.",
+      "id": "F.2"
+     },
+     {
+      "texto": "Sistemas de supervisión SCADA (Supervisory Control And Data Acquisition): definición, características y ventajas. Telemetría y monitorización.",
+      "id": "F.3"
+     },
+     {
+      "texto": "Aplicación de las tecnologías emergentes a los sistemas de control.",
+      "id": "F.4"
+     },
+     {
+      "texto": "Robótica: modelización de movimientos y acciones mecánicas. Aplicación práctica a proyectos.",
+      "id": "F.5"
+     },
+     {
+      "texto": "Inteligencia artificial aplicada a los sistemas de control.",
+      "id": "F.6"
+     }
+    ]
+   },
+   {
+    "id": "G",
+    "titulo": "Tecnología sostenible",
+    "items": [
+     {
+      "texto": "Obtención, transformación y distribución de las principales fuentes de energía.",
+      "id": "G.1"
+     },
+     {
+      "texto": "Sistemas y mercados energéticos. Consumo energético sostenible, cálculo de costos, técnicas y criterios de ahorro.",
+      "id": "G.2"
+     },
+     {
+      "texto": "Suministros domésticos en las instalaciones en viviendas: Instalaciones eléctricas: elementos de protección y cuadro de distribución, esquemas de circuitos básicos de fuerza e iluminación. Control de potencia, el consumo eléctrico y la factura eléctrica. · Instalaciones de abastecimiento agua: esquemas de distribución y tipos de válvulas. El ahorro en el consumo de agua: aireadores y grifos inteligentes, recirculadores de agua caliente, sistemas para la reutilización de aguas grises y pluviales, entre otros. · Instalaciones de climatización. El aislamiento térmico en la vivienda. Arquitectura sostenible: bio-construcción y eco-arquitectura. Uso eficiente de los sistemas de climatización de la vivienda. · Instalaciones de comunicación y domóticas. Sistemas para la contribución al ahorro energético.",
+      "id": "G.3"
+     },
+     {
+      "texto": "Energías renovables, eficiencia energética, certificación energética y sostenibilidad.",
+      "id": "G.4"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tei-2bach",
+  "materia": "Tecnología e Ingeniería II",
+  "curso": "2º Bachillerato",
+  "decreto": "Decreto 64/2022, de 20 de julio (Comunidad de Madrid)",
+  "competencias": [
+   {
+    "id": "1",
+    "texto": "Coordinar y desarrollar proyectos de investigación con una actitud crítica y emprendedora, implementando estrategias y técnicas eficientes de resolución de problemas y comunicando los resultados de manera adecuada, para crear y mejorar productos y sistemas de manera continua.",
+    "criterios": [
+     {
+      "id": "1.1",
+      "texto": "Desarrollar proyectos de investigación e innovación con el fin de crear y mejorar productos de forma continua, utilizando modelos de gestión cooperativos y flexibles."
+     },
+     {
+      "id": "1.2",
+      "texto": "Comunicar y difundir de forma clara y comprensible proyectos elaborados y presentarlos con la documentación técnica necesaria."
+     },
+     {
+      "id": "1.3",
+      "texto": "Perseverar en la consecución de objetivos en situaciones de incertidumbre, identificando y gestionando emociones, aceptando y aprendiendo de la crítica razonada y utilizando el error como parte del proceso de aprendizaje."
+     }
+    ]
+   },
+   {
+    "id": "2",
+    "texto": "Seleccionar materiales y elaborar estudios de impacto, aplicando criterios técnicos y de sostenibilidad para fabricar productos de calidad que den respuesta a problemas y tareas planteados, desde un enfoque responsable y ético.",
+    "criterios": [
+     {
+      "id": "2.1",
+      "texto": "Analizar la idoneidad de los materiales técnicos en la fabricación de productos sostenibles y de calidad, estudiando su estructura interna, propiedades, tratamientos de modificación y mejora de sus propiedades."
+     },
+     {
+      "id": "2.2",
+      "texto": "Elaborar informes sencillos de evaluación de impacto ambiental, de manera fundamentada y estructurada."
+     }
+    ]
+   },
+   {
+    "id": "3",
+    "texto": "Utilizar las herramientas digitales adecuadas, analizando sus posibilidades, configurándolas de acuerdo a sus necesidades y aplicando conocimientos interdisciplinares, para resolver tareas, así como para realizar la presentación de los resultados de una manera óptima.",
+    "criterios": [
+     {
+      "id": "3.1",
+      "texto": "Resolver problemas asociados a las distintas fases del desarrollo y gestión de un proyecto (diseño, simulación y montaje y presentación), utilizando las herramientas adecuadas que proveen las aplicaciones digitales."
+     }
+    ]
+   },
+   {
+    "id": "4",
+    "texto": "Generar conocimientos y mejorar las destrezas técnicas, transfiriendo y aplicando conocimientos de otras disciplinas científicas con actitud creativa, para calcular y resolver problemas o dar respuesta a necesidades de los distintos ámbitos de la ingeniería.",
+    "criterios": [
+     {
+      "id": "4.1",
+      "texto": "Calcular y montar estructuras sencillas, estudiando los tipos de cargas a los que se puedan ver sometidas y su estabilidad."
+     },
+     {
+      "id": "4.2",
+      "texto": "Analizar las máquinas térmicas: máquinas frigoríficas, bombas de calor y motores térmicos, comprendiendo su funcionamiento y realizando simulaciones y cálculos básicos sobre su eficiencia, rendimiento y transferencias energéticas."
+     },
+     {
+      "id": "4.3",
+      "texto": "Interpretar y solucionar esquemas de sistemas neumáticos e hidráulicos, a través de montajes o simulaciones, comprendiendo y documentando el funcionamiento de cada uno de sus elementos y del sistema en su totalidad."
+     },
+     {
+      "id": "4.4",
+      "texto": "Interpretar y resolver circuitos de corriente alterna, mediante montajes o simulaciones, identificando sus elementos y comprendiendo su funcionamiento."
+     },
+     {
+      "id": "4.5",
+      "texto": "Experimentar y diseñar circuitos combinacionales y secuenciales físicos y simulados aplicando fundamentos de la electrónica digital, comprendiendo su funcionamiento en el diseño de soluciones tecnológicas."
+     }
+    ]
+   },
+   {
+    "id": "5",
+    "texto": "Diseñar, crear y evaluar sistemas tecnológicos, aplicando conocimientos de programación informática, regulación automática y control, así como las posibilidades que ofrecen las tecnologías emergentes, para estudiar, controlar y automatizar tareas en sistemas tecnológicos y robóticos.",
+    "criterios": [
+     {
+      "id": "5.1",
+      "texto": "Comprender y simular el funcionamiento de los procesos tecnológicos basados en sistemas automáticos de lazo abierto y cerrado, aplicando técnicas de simplificación y analizando su estabilidad."
+     },
+     {
+      "id": "5.2",
+      "texto": "Conocer y evaluar sistemas informáticos emergentes y sus implicaciones en la seguridad de los datos, analizando modelos existentes."
+     }
+    ]
+   },
+   {
+    "id": "6",
+    "texto": "Analizar y comprender sistemas tecnológicos de los distintos ámbitos de la ingeniería, estudiando sus características, consumo y eficiencia energética, para evaluar el uso responsable y sostenible que se hace de la tecnología.",
+    "criterios": [
+     {
+      "id": "6.1",
+      "texto": "Analizar los distintos sistemas de ingeniería desde el punto de vista de la responsabilidad social y la sostenibilidad, estudiando las características de eficiencia energética asociadas a los materiales y a los procesos de fabricación."
+     }
+    ]
+   }
+  ],
+  "bloques": [
+   {
+    "id": "A",
+    "titulo": "Proyectos de investigación y desarrollo",
+    "items": [
+     {
+      "texto": "Gestión y desarrollo de proyectos: Técnicas y estrategias de trabajo en equipo. · Metodologías Agile: tipos, características y aplicaciones. · Fases del desarrollo de proyecto: análisis de viabilidad, planificación de los trabajos (identificación y secuenciación de tareas, elaboración del plan de trabajo), ejecución, seguimiento y evaluación de los resultados. · Documentación técnica de un proyecto: memorias, pliegos de condiciones, presupuestos y planos. Características y contenido básico.",
+      "id": "A.1"
+     },
+     {
+      "texto": "Difusión y comunicación de documentación técnica. Elaboración, referenciación y presentación.",
+      "id": "A.2"
+     },
+     {
+      "texto": "Autoconfianza e iniciativa en los trabajos colaborativos. Identificación y gestión de emociones en el trabajo en equipo: empatía y respeto.",
+      "id": "A.3"
+     },
+     {
+      "texto": "Utilización del error y la reevaluación en la mejora de los proyectos y como parte del proceso de aprendizaje.",
+      "id": "A.4"
+     },
+     {
+      "texto": "Emprendimiento, resiliencia, perseverancia y creatividad para abordar problemas desde una perspectiva interdisciplinar.",
+      "id": "A.5"
+     }
+    ]
+   },
+   {
+    "id": "B",
+    "titulo": "Materiales y fabricación",
+    "items": [
+     {
+      "texto": "Estructura interna. Propiedades mecánicas y procedimientos de ensayo y medida.",
+      "id": "B.1"
+     },
+     {
+      "texto": "Técnicas de diseño y tratamientos de modificación y mejora de las propiedades y sostenibilidad de los materiales.",
+      "id": "B.2"
+     },
+     {
+      "texto": "Técnicas de fabricación industrial: Operaciones de procesamiento: moldeado, conformado por deformación, forja, estampación, extrusión, mecanizado de piezas, tratamientos térmicos, tratamiento de las superficies. · Operaciones de ensamblaje: uniones permanentes y ensambles mecánicos.",
+      "id": "B.3"
+     }
+    ]
+   },
+   {
+    "id": "C",
+    "titulo": "Sistemas mecánicos",
+    "items": [
+     {
+      "texto": "Descripción y elementos de estructuras sencillas: En edificación: cimentación, pórticos (pilares y vigas), cerchas. · En maquinaria: chasis y bastidores, bancadas.",
+      "id": "C.1"
+     },
+     {
+      "texto": "Estabilidad y cálculos básicos de estructuras: Tipos de cargas: puntual y uniformemente repartida. · Tipos de apoyos y uniones: empotramientos, apoyos fijos y articulados. · Cálculo de esfuerzos en vigas simplemente apoyadas sometidas a cargas puntuales y/o uniformemente repartidas. Diagramas de esfuerzos cortantes y de flexión. · Cálculo de los esfuerzos de compresión y/o tracción en estructuras isostáticas de barras articuladas. Diagrama de Cremona. · Montaje o simulación de ejemplos sencillos.",
+      "id": "C.2"
+     },
+     {
+      "texto": "Máquinas térmicas: Máquina frigorífica, bomba de calor y motores térmicos. Elementos y fundamentos físicos de funcionamiento. · Cálculos básicos de potencia, energía útil, par motor y rendimiento. · Simulación y aplicaciones.",
+      "id": "C.3"
+     },
+     {
+      "texto": "Neumática e hidráulica: Principios físicos en neumática. El aire, ley de los gases perfectos, magnitudes y unidades básicas. · Principios físicos en hidráulica: presión hidráulica (principio de Pascal), principio de Bernouilli, efecto Venturi, magnitudes y unidades básicas. · Componentes: compresor (neumática), depósito y bomba (hidráulica), sistemas de mantenimiento, cilindros neumáticos e hidráulicos, motores, válvulas, tuberías. Descripción y análisis. · Esquemas característicos de aplicación. · Diseño y montaje físico o simulado.",
+      "id": "C.4"
+     }
+    ]
+   },
+   {
+    "id": "D",
+    "titulo": "Sistemas eléctricos y electrónicos",
+    "items": [
+     {
+      "texto": "Circuitos de corriente alterna: Generación de la corriente alterna. · Valores instantáneos, medios y eficaces. Diagrama de Fresnel. · Ley de Ohm en corriente alterna. Impedancia, factor de potencia. Triángulo de potencias. · Cálculo, montaje o simulación.",
+      "id": "D.1"
+     },
+     {
+      "texto": "Electrónica digital combinacional: Puertas lógicas: NOT, AND, OR. · Álgebra de Boole. Diseño y simplificación: mapas de Karnaugh. · Experimentación en simuladores.",
+      "id": "D.2"
+     },
+     {
+      "texto": "Electrónica digital secuencial. Experimentación en simuladores.",
+      "id": "D.3"
+     }
+    ]
+   },
+   {
+    "id": "E",
+    "titulo": "Sistemas informáticos emergentes",
+    "items": [
+     {
+      "texto": "Fundamentos de la inteligencia artificial. Tipos: máquinas reactivas, memoria limitada, teoría de la mente y autoconciencia.",
+      "id": "E.1"
+     },
+     {
+      "texto": "Características fundamentales del big data: volumen, velocidad, variedad de los datos, veracidad de los datos, viabilidad, visualización de los datos y valor. Bases de datos distribuidas. Bases de datos relacionales.",
+      "id": "E.2"
+     },
+     {
+      "texto": "La ciberseguridad a nivel de usuario. Concepto, amenazas, medidas básicas de protección.",
+      "id": "E.3"
+     }
+    ]
+   },
+   {
+    "id": "F",
+    "titulo": "Sistemas automáticos",
+    "items": [
+     {
+      "texto": "Sistemas en lazo abierto y cerrado. Álgebra de bloques y simplificación de sistemas.",
+      "id": "F.1"
+     },
+     {
+      "texto": "Estabilidad. Experimentación en simuladores.",
+      "id": "F.2"
+     }
+    ]
+   },
+   {
+    "id": "G",
+    "titulo": "Tecnología sostenible",
+    "items": [
+     {
+      "texto": "Impacto social y ambiental. Valoración crítica de las tecnologías desde el punto de vista de la sostenibilidad.",
+      "id": "G.1"
+     },
+     {
+      "texto": "Informes de evaluación de impacto ambiental.",
+      "id": "G.2"
+     }
+    ]
+   }
+  ]
+ }
+];
+</script>
+
+<script>
+/* ======================= ESTADO ======================= */
+const STORE_KEY = 'planificador-saberes-v2';
+const TRIMESTRES = [1, 2, 3];
+let store = {};                       // { materiaId: { temas: [{uid, nombre, trimestre, saberes:[ids], criterios:[ids]}] } }
+let current = null;                   // materia actual
+let bankTab = 'saberes';
+let view = 'plan';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+function load(){ try { store = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ store = {}; } }
+function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){} }
+function plan(){ return store[current.id] ||= { temas: [] }; }
+
+/* Índices del currículo actual */
+let SAB = {}, CRIT = {}, BLOQUE_IDX = {}, COMP_IDX = {};
+function indexMateria(){
+  SAB = {}; CRIT = {}; BLOQUE_IDX = {}; COMP_IDX = {};
+  current.bloques.forEach((b, i) => { BLOQUE_IDX[b.id] = i; b.items.forEach(it => SAB[it.id] = { ...it, bloque: b }); });
+  current.competencias.forEach((c, i) => { COMP_IDX[c.id] = i; c.criterios.forEach(k => CRIT[k.id] = { ...k, comp: c }); });
+}
+const colorSab = id => 'c' + (BLOQUE_IDX[id.split('.')[0]] % 7);
+const colorCrit = id => 'c' + (COMP_IDX[id.split('.')[0]] % 7);
+const uses = (kind, id) => plan().temas.filter(t => t[kind].includes(id)).length;
+
+/* ======================= RENDER ======================= */
+function chip(kind, id, opts = {}){
+  const isS = kind === 'saberes';
+  const full = isS ? SAB[id]?.texto : CRIT[id]?.texto;
+  if (!full) return '';
+  const n = uses(kind, id);
+  return `<span class="chip ${isS ? colorSab(id) : 'crit ' + colorCrit(id)} ${opts.bank ? (n ? 'used' : 'unused') : ''}"
+      draggable="true" data-kind="${kind}" data-id="${id}" ${opts.from ? `data-from="${opts.from}"` : ''} title="${esc(full)}" tabindex="0">
+      ${isS ? '' : 'CE '}${id}${opts.bank ? `<span class="n">${n}</span>` : ''}
+      ${opts.from ? `<button class="x" data-remove="${opts.from}" aria-label="Quitar">×</button>` : ''}</span>`;
+}
+
+function renderBank(){
+  document.querySelectorAll('[data-bank]').forEach(b => b.setAttribute('aria-selected', b.dataset.bank === bankTab));
+  let h = '';
+  if (bankTab === 'saberes'){
+    current.bloques.forEach(b => {
+      h += `<div class="grp"><span class="pill ${colorSab(b.id + '.1')}" style="box-shadow:none;padding:0 6px">${b.id}</span> <span>${esc(b.titulo)}</span></div>
+            <div class="chips">${b.items.map(it => chip('saberes', it.id, { bank: true })).join('')}</div>`;
+    });
+  } else {
+    current.competencias.forEach(c => {
+      h += `<div class="grp"><span class="pill ${colorCrit(c.id + '.1')}" style="box-shadow:none;padding:0 6px">CE${c.id}</span> <small>${esc(c.texto.slice(0, 110))}${c.texto.length > 110 ? '…' : ''}</small></div>
+            <div class="chips">${c.criterios.map(k => chip('criterios', k.id, { bank: true })).join('')}</div>`;
+    });
+  }
+  $('#bank').innerHTML = h;
+}
+
+function renderBoard(){
+  const temas = plan().temas;
+  $('#board').innerHTML = TRIMESTRES.map(tr => `
+    <section class="trim">
+      <div class="row"><h2>Trimestre ${tr}</h2><button class="btn sm primary no-print" data-add="${tr}">+ Añadir tema</button></div>
+      <div class="temas">
+        ${temas.filter(t => t.trimestre === tr).map(t => `
+          <article class="card tema" data-tema="${t.uid}">
+            <div class="th">
+              <input value="${esc(t.nombre)}" data-rename="${t.uid}" aria-label="Nombre del tema">
+              <select class="input" data-move="${t.uid}" style="width:auto;padding:2px 4px;font-size:.8rem" aria-label="Trimestre">
+                ${TRIMESTRES.map(x => `<option value="${x}" ${x === tr ? 'selected' : ''}>T${x}</option>`).join('')}
+              </select>
+              <button class="btn sm danger" data-del="${t.uid}" aria-label="Eliminar tema">🗑</button>
             </div>
-            <!-- Botón para AÑADIR TEMA a ESTE trimestre -->
-            <button class="neo-button add-tema-btn">+ Añadir Tema a T1</button>
-        </div>
+            <div class="zone" data-zone="saberes" data-tema="${t.uid}"><b>Saberes (${t.saberes.length})</b>
+              <div class="chips">${t.saberes.map(id => chip('saberes', id, { from: t.uid })).join('') || '<span class="empty-z">Arrastra aquí saberes</span>'}</div></div>
+            <div class="zone" data-zone="criterios" data-tema="${t.uid}"><b>Criterios (${t.criterios.length})</b>
+              <div class="chips">${t.criterios.map(id => chip('criterios', id, { from: t.uid })).join('') || '<span class="empty-z">Arrastra aquí criterios</span>'}</div></div>
+          </article>`).join('') || '<p class="empty-z">Sin temas todavía.</p>'}
+      </div>
+    </section>`).join('');
+}
 
-        <!-- Grupo Trimestre 2 -->
-        <div class="trimestre-group" id="trim-2-group">
-            <h3>Trimestre 2</h3>
-            <div class="tema-columns-container">
-                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
-            </div>
-            <button class="neo-button add-tema-btn">+ Añadir Tema a T2</button>
-        </div>
+function coverage(){
+  const p = plan().temas;
+  const sabOut = Object.keys(SAB).filter(id => !p.some(t => t.saberes.includes(id)));
+  const critOut = Object.keys(CRIT).filter(id => !p.some(t => t.criterios.includes(id)));
+  return { sabOut, critOut };
+}
 
-        <!-- Grupo Trimestre 3 -->
-        <div class="trimestre-group" id="trim-3-group">
-            <h3>Trimestre 3</h3>
-            <div class="tema-columns-container">
-                <!-- Las columnas de "Tema" se añadirán aquí dinámicamente -->
-            </div>
-            <button class="neo-button add-tema-btn">+ Añadir Tema a T3</button>
-        </div>
-
+function renderMatriz(){
+  const temas = [...plan().temas].sort((a, b) => a.trimestre - b.trimestre);
+  const { sabOut, critOut } = coverage();
+  const nS = Object.keys(SAB).length, nC = Object.keys(CRIT).length;
+  const table = (kind, rows) => `<div class="scroll-x"><table class="t"><thead><tr><th>${kind === 'saberes' ? 'Saber' : 'Criterio'}</th>
+      ${temas.map(t => `<th class="rot" title="T${t.trimestre}">T${t.trimestre} · ${esc(t.nombre)}</th>`).join('')}<th>Nº</th></tr></thead><tbody>
+      ${rows.map(r => { const n = temas.filter(t => t[kind].includes(r.id)).length;
+        return `<tr><td title="${esc(r.texto)}">${kind === 'criterios' ? 'CE ' : ''}${r.id}</td>${temas.map(t => t[kind].includes(r.id) ? '<td class="ok">✓</td>' : '<td class="no">·</td>').join('')}
+        <td style="text-align:center;font-weight:900;${n ? '' : 'background:var(--pink)'}">${n}</td></tr>`; }).join('')}</tbody></table></div>`;
+  $('#v-matriz').innerHTML = `
+    <div class="cov">
+      <span class="pill ${critOut.length ? 'pink' : 'lime'}">Criterios cubiertos: ${nC - critOut.length}/${nC}</span>
+      <span class="pill ${sabOut.length ? 'pink' : 'lime'}">Saberes cubiertos: ${nS - sabOut.length}/${nS}</span>
+      <span class="pill">Temas: ${temas.length}</span>
     </div>
+    ${critOut.length ? `<div class="note warn">⚠️ Criterios sin tema: ${critOut.map(id => 'CE ' + id).join(', ')}</div>` : '<div class="note ok">✅ Todos los criterios están en algún tema.</div>'}
+    ${sabOut.length ? `<div class="note warn">⚠️ Saberes sin tema: ${sabOut.join(', ')}</div>` : '<div class="note ok">✅ Todos los saberes están en algún tema.</div>'}
+    ${temas.length ? `<section class="card"><h3>Criterios × temas</h3>${table('criterios', Object.values(CRIT))}</section>
+    <section class="card"><h3>Saberes × temas</h3>${table('saberes', Object.values(SAB))}</section>` : '<p class="empty-z">Crea temas en la pestaña de planificación para ver la matriz.</p>'}`;
+}
 
-    <!-- Elemento Tooltip (un solo elemento para toda la página) -->
-    <div id="tooltip"></div>
+function renderCurr(){
+  $('#v-curr').innerHTML = `
+    <section class="card yellow"><span class="tag">${esc(current.curso)}</span><h2 style="margin-top:8px">${esc(current.materia)}</h2>
+      <p>${esc(current.decreto)}</p>${current.notas ? `<div class="note info">💡 ${esc(current.notas)}</div>` : ''}</section>
+    <section class="card"><h3>Competencias específicas y criterios de evaluación</h3>
+      ${current.competencias.map(c => `<div style="margin-top:14px"><p><span class="pill ${colorCrit(c.id + '.1')}">CE${c.id}</span> <strong>${esc(c.texto)}</strong></p>
+        <ul style="margin:6px 0 0 18px">${c.criterios.map(k => `<li><strong>${k.id}</strong> ${esc(k.texto)}</li>`).join('')}</ul></div>`).join('')}</section>
+    <section class="card"><h3>Saberes básicos</h3>
+      ${current.bloques.map(b => `<div style="margin-top:14px"><p><span class="pill ${colorSab(b.id + '.1')}">${b.id}</span> <strong>${esc(b.titulo)}</strong></p>
+        <ul style="margin:6px 0 0 18px">${b.items.map(it => `<li><strong>${it.id}</strong> ${esc(it.texto)}</li>`).join('')}</ul></div>`).join('')}</section>`;
+}
 
-    <!-- ============================================= -->
-    <!-- ====== NUEVO: MODAL DE CONFIRMACIÓN ====== -->
-    <!-- ============================================= -->
-    <div id="modal-backdrop">
-        <div id="modal-box">
-            <p id="modal-message">¿Seguro que quieres eliminar este tema?</p>
-            <div id="modal-buttons">
-                <button id="modal-btn-cancel" class="neo-button">Cancelar</button>
-                <button id="modal-btn-confirm" class="neo-button">Eliminar</button>
-            </div>
-        </div>
-    </div>
+function render(){
+  $('#sub').textContent = `${current.materia} · ${current.curso} · Comunidad de Madrid`;
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-selected', b.dataset.view === view));
+  ['plan', 'matriz', 'curr'].forEach(v => $('#v-' + v).classList.toggle('hidden', v !== view));
+  if (view === 'plan'){ renderBank(); renderBoard(); }
+  if (view === 'matriz') renderMatriz();
+  if (view === 'curr') renderCurr();
+}
+const commit = () => { save(); render(); };
 
+/* ======================= ACCIONES ======================= */
+const temaById = u => plan().temas.find(t => t.uid === u);
+function assign(kind, id, temaUid, on = true){
+  const t = temaById(temaUid); if (!t) return;
+  const has = t[kind].includes(id);
+  if (on && !has){ t[kind].push(id); t[kind].sort((a, b) => a.localeCompare(b, 'es', { numeric: true })); }
+  if (!on && has) t[kind] = t[kind].filter(x => x !== id);
+}
+function addTema(tr){
+  const n = plan().temas.length + 1;
+  plan().temas.push({ uid: uid(), nombre: `Tema ${n}`, trimestre: tr, saberes: [], criterios: [] });
+  commit();
+}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.add('hidden'), 2200); }
+function closeModal(){ $('#modal').classList.add('hidden'); }
+function openModal(html){ $('#modal-body').innerHTML = html; $('#modal').classList.remove('hidden'); }
 
-            let draggedElement = null;
-            const saberesBankContainer = document.getElementById('saberes-bank-container');
-            const boardContainer = document.getElementById('board-container');
-            const tooltip = document.getElementById('tooltip');
-            
-            // NUEVO: Variables para el modal
-            const modalBackdrop = document.getElementById('modal-backdrop');
-            const modalBtnConfirm = document.getElementById('modal-btn-confirm');
-            const modalBtnCancel = document.getElementById('modal-btn-cancel');
-            let columnToDelete = null; // Guardará la columna a eliminar
-            
-            let temaCounter = 0;
+function openDetail(kind, id){
+  const isS = kind === 'saberes', d = isS ? SAB[id] : CRIT[id];
+  const temas = plan().temas;
+  openModal(`
+    <span class="tag">${isS ? 'Saber básico · Bloque ' + d.bloque.id : 'Criterio · CE' + d.comp.id}</span>
+    <h2 style="margin:10px 0">${isS ? '' : 'CE '}${id}</h2>
+    <p class="detail">${esc(d.texto)}</p>
+    <p class="legend" style="margin-top:8px">${isS ? esc(d.bloque.titulo) : 'Competencia ' + d.comp.id + ': ' + esc(d.comp.texto)}</p>
+    <h3 style="margin-top:16px">Asignar a temas</h3>
+    ${temas.length ? `<div class="assign">${[...temas].sort((a, b) => a.trimestre - b.trimestre).map(t => `
+      <label class="check"><input type="checkbox" data-assign="${t.uid}" ${t[kind].includes(id) ? 'checked' : ''}> T${t.trimestre} · ${esc(t.nombre)}</label>`).join('')}</div>`
+      : '<div class="note warn">Primero crea un tema en algún trimestre.</div>'}
+    <p class="row" style="margin-top:16px"><span class="spacer"></span><button class="btn primary" onclick="closeModal()">Hecho</button></p>`);
+  $('#modal-body').querySelectorAll('[data-assign]').forEach(cb => cb.onchange = () => { assign(kind, id, cb.dataset.assign, cb.checked); commit(); });
+}
 
-            // --- 1. Lógica de Arrastrar (Drag) ---
-            /**
-             * Añade los eventos de 'drag' y 'tooltip' a un elemento
-             * @param {HTMLElement} el - El elemento que se hará arrastrable
-             */
-            function addDragEvents(el) {
-                // Evento Drag Start
-                el.addEventListener('dragstart', (e) => {
-                    draggedElement = e.target;
-                    e.dataTransfer.setData('text/plain', e.target.id);
-                    e.dataTransfer.setData('bloque', e.target.dataset.bloque || '');
-                    e.stopPropagation();
-                    setTimeout(() => { 
-                        if (draggedElement) draggedElement.style.opacity = '0.5'; 
-                    }, 0);
-                });
+/* ======================= EXPORTAR / IMPORTAR ======================= */
+function buildExport(){
+  const temas = plan().temas;
+  const sabFull = id => ({ id, texto: SAB[id].texto, bloque: { id: SAB[id].bloque.id, titulo: SAB[id].bloque.titulo } });
+  const critFull = id => ({ id, texto: CRIT[id].texto, competencia: { id: CRIT[id].comp.id, texto: CRIT[id].comp.texto } });
+  const { sabOut, critOut } = coverage();
+  return {
+    formato: 'planificador-saberes-criterios',
+    version: 2,
+    exportado: new Date().toISOString(),
+    materia: { id: current.id, materia: current.materia, curso: current.curso, decreto: current.decreto, ...(current.notas ? { notas: current.notas } : {}) },
+    trimestres: TRIMESTRES.map(tr => ({
+      trimestre: tr,
+      temas: temas.filter(t => t.trimestre === tr).map(t => ({
+        nombre: t.nombre,
+        saberes: t.saberes.filter(id => SAB[id]).map(sabFull),
+        criterios: t.criterios.filter(id => CRIT[id]).map(critFull)
+      }))
+    })),
+    relaciones: {
+      criterios: Object.keys(CRIT).map(id => {
+        const ts = temas.filter(t => t.criterios.includes(id));
+        return { criterio: id, temas: ts.map(t => ({ trimestre: t.trimestre, nombre: t.nombre })), saberes: [...new Set(ts.flatMap(t => t.saberes))] };
+      }),
+      saberes: Object.keys(SAB).map(id => {
+        const ts = temas.filter(t => t.saberes.includes(id));
+        return { saber: id, temas: ts.map(t => ({ trimestre: t.trimestre, nombre: t.nombre })), criterios: [...new Set(ts.flatMap(t => t.criterios))] };
+      })
+    },
+    cobertura: {
+      criterios: { total: Object.keys(CRIT).length, sin_asignar: critOut },
+      saberes: { total: Object.keys(SAB).length, sin_asignar: sabOut }
+    },
+    curriculo: { competencias: current.competencias, bloques: current.bloques }
+  };
+}
+function download(obj, name){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function importData(data){
+  // Formato nuevo
+  if (data && data.formato === 'planificador-saberes-criterios'){
+    const m = CURRICULO.find(c => c.id === data.materia?.id);
+    if (!m) throw new Error('Materia desconocida');
+    store[m.id] = { temas: data.trimestres.flatMap(tr => tr.temas.map(t => ({
+      uid: uid(), nombre: t.nombre, trimestre: tr.trimestre,
+      saberes: (t.saberes || []).map(s => typeof s === 'string' ? s : s.id),
+      criterios: (t.criterios || []).map(k => typeof k === 'string' ? k : k.id) }))) };
+    return m.id;
+  }
+  // Formato antiguo {T1:[{tema, saberes:["s-a-1"]}], T2, T3} → Tecnología y Digitalización 2º ESO
+  if (data && (data.T1 || data.T2 || data.T3)){
+    const conv = id => id.replace(/^s-([a-z])-(\d+)$/, (_, b, n) => b.toUpperCase() + '.' + n);
+    store['tyd-2eso'] = { temas: TRIMESTRES.flatMap(tr => (data['T' + tr] || []).map(t => ({
+      uid: uid(), nombre: t.tema, trimestre: tr, saberes: (t.saberes || []).map(conv), criterios: [] }))) };
+    return 'tyd-2eso';
+  }
+  throw new Error('Formato no reconocido');
+}
 
-                // Evento Drag End
-                el.addEventListener('dragend', (e) => {
-                    if (draggedElement) {
-                        draggedElement.style.opacity = '1';
-                    }
-                    draggedElement = null;
-                });
+/* ======================= EVENTOS ======================= */
+function setMateria(id){ current = CURRICULO.find(c => c.id === id) || CURRICULO[0]; $('#materia').value = current.id; indexMateria(); try { localStorage.setItem(STORE_KEY + '-materia', current.id); } catch(e){} render(); }
 
-                // Eventos de Tooltip
-                el.addEventListener('mouseover', (e) => {
-                    const fullText = e.currentTarget.dataset.fullText;
-                    if (fullText) {
-                        tooltip.textContent = fullText;
-                        tooltip.style.display = 'block';
-                    }
-                });
-                el.addEventListener('mouseout', (e) => {
-                    tooltip.style.display = 'none';
-                });
-                el.addEventListener('mousemove', (e) => {
-                    tooltip.style.left = (e.pageX + 10) + 'px';
-                    tooltip.style.top = (e.pageY + 10) + 'px';
-                });
-            }
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest('[data-view]')){ view = t.closest('[data-view]').dataset.view; render(); return; }
+  if (t.closest('[data-bank]')){ bankTab = t.closest('[data-bank]').dataset.bank; renderBank(); return; }
+  if (t.dataset.add){ addTema(+t.dataset.add); return; }
+  if (t.dataset.del){
+    const tm = temaById(t.dataset.del);
+    openModal(`<span class="tag">Eliminar</span><h2 style="margin:10px 0">¿Eliminar «${esc(tm.nombre)}»?</h2><p>Se quitarán sus saberes y criterios asignados.</p>
+      <p class="row" style="margin-top:14px"><button class="btn secondary" onclick="closeModal()">Cancelar</button><span class="spacer"></span><button class="btn danger" id="confirm-del">Eliminar</button></p>`);
+    $('#confirm-del').onclick = () => { plan().temas = plan().temas.filter(x => x.uid !== tm.uid); closeModal(); commit(); };
+    return;
+  }
+  if (t.dataset.remove){ const c = t.closest('.chip'); assign(c.dataset.kind, c.dataset.id, t.dataset.remove, false); commit(); return; }
+  const c = t.closest('.chip');
+  if (c) openDetail(c.dataset.kind, c.dataset.id);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && e.target.classList?.contains('chip')) openDetail(e.target.dataset.kind, e.target.dataset.id);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.rename){ temaById(t.dataset.rename).nombre = t.value.trim() || 'Sin nombre'; commit(); }
+  if (t.dataset.move){ temaById(t.dataset.move).trimestre = +t.value; commit(); }
+});
 
-            // Añadir eventos a los saberes iniciales del banco
-            document.querySelectorAll('#saberes-bank .saber-item').forEach(addDragEvents);
+/* Arrastrar y soltar */
+document.addEventListener('dragstart', e => {
+  const c = e.target.closest?.('.chip'); if (!c) return;
+  e.dataTransfer.setData('text/plain', JSON.stringify({ kind: c.dataset.kind, id: c.dataset.id, from: c.dataset.from || null }));
+  e.dataTransfer.effectAllowed = 'copyMove';
+});
+document.addEventListener('dragover', e => { const z = e.target.closest?.('.tema, #bank'); if (z){ e.preventDefault(); z.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const z = e.target.closest?.('.tema, #bank'); if (z && !z.contains(e.relatedTarget)) z.classList.remove('over'); });
+document.addEventListener('drop', e => {
+  const z = e.target.closest?.('.tema, #bank'); if (!z) return;
+  e.preventDefault(); z.classList.remove('over');
+  let d; try { d = JSON.parse(e.dataTransfer.getData('text/plain')); } catch(_) { return; }
+  if (z.id === 'bank'){ if (d.from){ assign(d.kind, d.id, d.from, false); commit(); } return; }   // soltar en el banco = quitar
+  const to = z.dataset.tema;
+  if (d.from && d.from !== to && !e.altKey) assign(d.kind, d.id, d.from, false);                // mover entre temas
+  assign(d.kind, d.id, to, true); commit();
+});
 
-            // --- 2. Lógica de Zonas de Soltar (Drop) ---
-            /**
-             * Configura una zona para que acepte elementos arrastrables
-             * @param {HTMLElement} zone - La zona que aceptará los 'drop'
-             */
-            function setupDropZone(zone) {
-                zone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    zone.classList.add('drag-over');
-                });
+$('#materia').onchange = e => setMateria(e.target.value);
+$('#export').onclick = () => {
+  const data = buildExport();
+  const name = `planificacion_${current.id}_${new Date().toISOString().slice(0, 10)}.json`;
+  download(data, name); toast('JSON exportado ✓');
+};
+$('#import').onclick = () => $('#file').click();
+$('#file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try { const id = importData(JSON.parse(ev.target.result)); save(); setMateria(id); toast('Planificación importada ✓'); }
+    catch(err){ openModal(`<div class="note error">❌ No se ha podido importar: ${esc(err.message)}</div><p class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Cerrar</button></p>`); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+};
+$('#reset').onclick = () => {
+  openModal(`<span class="tag">Vaciar</span><h2 style="margin:10px 0">¿Vaciar la planificación de ${esc(current.materia)} (${esc(current.curso)})?</h2><p>Se borrarán todos sus temas. Exporta antes el JSON si quieres conservarla.</p>
+    <p class="row" style="margin-top:14px"><button class="btn secondary" onclick="closeModal()">Cancelar</button><span class="spacer"></span><button class="btn danger" id="confirm-reset">Vaciar</button></p>`);
+  $('#confirm-reset').onclick = () => { store[current.id] = { temas: [] }; closeModal(); commit(); };
+};
 
-                zone.addEventListener('dragleave', () => {
-                    zone.classList.remove('drag-over');
-                });
-
-                zone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    zone.classList.remove('drag-over');
-
-                    const id = e.dataTransfer.getData('text/plain');
-                    if (!id) return;
-                    const sourceElement = document.getElementById(id);
-                    if (!sourceElement) return;
-
-                    const isFromBank = sourceElement.closest('#saberes-bank') !== null;
-
-                    // CASO 1: Soltar en el Banco de Saberes (BORRAR)
-                    if (zone.id === 'saberes-bank-container' || zone.id === 'saberes-bank') {
-                        if (!isFromBank) { // Si viene de una columna
-                            sourceElement.remove(); // Borra el clon
-                        }
-                    } 
-                    // CASO 2: Soltar en una columna (Trimestre o Tema)
-                    else if (zone.classList.contains('drop-zone')) {
-                        if (isFromBank) { // Viene del banco: CLONAR
-                            const originalId = sourceElement.id;
-                            const clone = sourceElement.cloneNode(true);
-                            clone.id = `${originalId}-clone-${Date.now()}`; // ID único para el clon
-                            clone.dataset.originalId = originalId; // Guardar referencia
-                            clone.style.opacity = '1';
-                            addDragEvents(clone); // Hacer que el clon también sea arrastrable
-                            zone.appendChild(clone);
-                        } else { // Viene de otra columna: MOVER
-                            sourceElement.style.opacity = '1';
-                            zone.appendChild(sourceElement);
-                        }
-                    }
-                    
-                    // NUEVO: Ordenar la columna después de soltar
-                    if (zone.classList.contains('drop-zone') && !zone.closest('#saberes-bank-container')) {
-                        sortZoneItems(zone);
-                    }
-
-                    // Actualizar estado de cobertura
-                    updateSaberCoverage();
-                });
-            }
-
-            // Configurar el banco como zona de "drop" (para borrar)
-            setupDropZone(saberesBankContainer);
-
-
-            // --- 3. NUEVO: Lógica de Ordenar Saberes ---
-            /**
-             * Ordena los saberes dentro de una drop-zone por su texto (A.1, A.2, B.1...)
-             * @param {HTMLElement} zone 
-             */
-            function sortZoneItems(zone) {
-                const items = Array.from(zone.children);
-                
-                items.sort((a, b) => {
-                    const textA = a.textContent.trim();
-                    const textB = b.textContent.trim();
-                    return textA.localeCompare(textB, undefined, { numeric: true, sensitivity: 'base' });
-                });
-                items.forEach(item => zone.appendChild(item));
-            }
-
-
-            // --- 4. Lógica de Cobertura de Saberes ---
-            function updateSaberCoverage() {
-                const allOriginalIds = new Set();
-                document.querySelectorAll('#saberes-bank .saber-item').forEach(s => allOriginalIds.add(s.id));
-
-                const usedOriginalIds = new Set();
-                document.querySelectorAll('#board-container .saber-item').forEach(s => {
-                    if (s.dataset.originalId) {
-                        usedOriginalIds.add(s.dataset.originalId);
-                    }
-                });
-
-                allOriginalIds.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (usedOriginalIds.has(id)) {
-                        el.classList.add('covered');
-                        el.classList.remove('uncovered');
-                    } else {
-                        el.classList.add('uncovered');
-                        el.classList.remove('covered');
-                    }
-                });
-            }
-
-            // --- 5. Lógica de Añadir Columna de Tema (Modificada) ---
-
-            /**
-             * Crea un elemento de columna de Tema completo
-             * @param {string} temaName - El nombre para el título del tema
-             * @returns {HTMLElement} - El elemento .column completo
-             */
-            function createTemaColumn(temaName) {
-                temaCounter++;
-                
-                const column = document.createElement('div');
-                column.classList.add('column', 'tema-column');
-                
-                const title = document.createElement('h3');
-                
-                const titleText = document.createElement('span');
-                titleText.textContent = temaName;
-                titleText.setAttribute('contenteditable', 'true');
-                titleText.addEventListener('blur', (e) => {
-                    if (e.target.textContent.trim() === "") {
-                        e.target.textContent = "Tema (Editar)";
-                    }
-                });
-                
-                const deleteBtn = document.createElement('span');
-                deleteBtn.textContent = '❌';
-                deleteBtn.className = 'delete-tema-btn';
-                deleteBtn.title = 'Eliminar este tema';
-
-                // MODIFICADO: Ahora abre el modal
-                deleteBtn.addEventListener('click', () => {
-                    columnToDelete = deleteBtn.closest('.column'); // Guarda la columna
-                    modalBackdrop.style.display = 'flex'; // Muestra el modal
-                });
-
-                title.appendChild(titleText);
-                title.appendChild(deleteBtn);
-                
-                column.appendChild(title);
-                
-                const dropZone = document.createElement('div');
-                dropZone.classList.add('drop-zone');
-                dropZone.id = `tema-zone-${temaCounter}`;
-                setupDropZone(dropZone); // ¡Importante!
-                column.appendChild(dropZone);
-                
-                return column;
-            }
-
-            // Asignar evento a TODOS los botones de "+ Añadir Tema"
-            document.querySelectorAll('.add-tema-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const temaName = `Tema ${temaCounter + 1}`;
-                    const newColumn = createTemaColumn(temaName.trim());
-                    const trimestreGroup = e.target.closest('.trimestre-group');
-                    const temaContainer = trimestreGroup.querySelector('.tema-columns-container');
-                    temaContainer.appendChild(newColumn);
-                });
-            });
-
-            // --- 6. Lógica de Importar / Exportar JSON ---
-            
-            const exportBtn = document.getElementById('export-btn');
-            const importBtn = document.getElementById('import-btn');
-            const importFileInput = document.getElementById('import-file');
-
-            // -- EXPORTAR --
-            exportBtn.addEventListener('click', () => {
-                const data = {
-                    T1: [],
-                    T2: [],
-                    T3: []
-                };
-
-                // Recorrer Trimestre 1
-                document.querySelectorAll('#trim-1-group .column').forEach(col => {
-                    // FIX: .trim() al nombre del tema
-                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
-                    // FIX: Filtrar IDs nulos, indefinidos o vacíos
-                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
-                                      .map(s => s.dataset.originalId)
-                                      .filter(id => id && id.trim() !== "");
-                    data.T1.push({ tema: temaName, saberes: saberes });
-                });
-
-                // Recorrer Trimestre 2
-                document.querySelectorAll('#trim-2-group .column').forEach(col => {
-                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
-                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
-                                      .map(s => s.dataset.originalId)
-                                      .filter(id => id && id.trim() !== "");
-                    data.T2.push({ tema: temaName, saberes: saberes });
-                });
-
-                // Recorrer Trimestre 3
-                document.querySelectorAll('#trim-3-group .column').forEach(col => {
-                    const temaName = col.querySelector('h3 span[contenteditable]').textContent.trim();
-                    const saberes = Array.from(col.querySelectorAll('.saber-item'))
-                                      .map(s => s.dataset.originalId)
-                                      .filter(id => id && id.trim() !== "");
-                    data.T3.push({ tema: temaName, saberes: saberes });
-                });
-
-                downloadJSON(JSON.stringify(data, null, 2), 'planificacion_saberes.json');
-            });
-
-            function downloadJSON(content, fileName) {
-                const a = document.createElement('a');
-                const file = new Blob([content], { type: 'application/json' });
-                a.href = URL.createObjectURL(file);
-                a.download = fileName;
-                a.click();
-                URL.revokeObjectURL(a.href);
-            }
-
-            // -- IMPORTAR --
-            importBtn.addEventListener('click', () => {
-                importFileInput.click();
-            });
-
-            importFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        loadDataFromJSON(data);
-                    } catch (err) {
-                        console.error("Error al parsear el JSON:", err);
-                    }
-                    importFileInput.value = null;
-                };
-                reader.readText(file);
-            });
-
-            function loadDataFromJSON(data) {
-                // DEBUG: Añadido console.log
-                console.log("Iniciando carga desde JSON...", data);
-                const containers = document.querySelectorAll('.tema-columns-container');
-                containers.forEach(container => container.innerHTML = '');
-
-                loadTrimestre('#trim-1-group', data.T1);
-                loadTrimestre('#trim-2-group', data.T2);
-                loadTrimestre('#trim-3-group', data.T3);
-
-                updateSaberCoverage();
-            }
-
-            function loadTrimestre(trimestreGroupId, temaData) {
-                // DEBUG: Añadido console.log
-                if (!temaData) {
-                    console.log(`No hay datos para ${trimestreGroupId}`);
-                    return;
-                }
-                console.log(`Cargando Trimestre: ${trimestreGroupId} con ${temaData.length} temas`);
-                
-                const container = document.querySelector(`${trimestreGroupId} .tema-columns-container`);
-
-                temaData.forEach(tema => {
-                    const newColumn = createTemaColumn(tema.tema);
-                    container.appendChild(newColumn);
-                    const dropZone = newColumn.querySelector('.drop-zone');
-
-                    if (tema.saberes) {
-                        // FIX: Filtrar IDs nulos, indefinidos o vacíos del JSON
-                        tema.saberes.filter(id => id && id.trim() !== "").forEach(saberId => {
-                            const originalSaber = document.getElementById(saberId);
-                            // DEBUG: Añadido else para advertencia
-                            if (originalSaber) {
-                                const clone = originalSaber.cloneNode(true);
-                                clone.id = `${saberId}-clone-${Date.now()}`;
-                                clone.dataset.originalId = saberId;
-                                clone.style.opacity = '1';
-                                addDragEvents(clone);
-                                dropZone.appendChild(clone);
-                            } else {
-                                console.warn("ADVERTENCIA: No se encontró el saber original con ID:", saberId);
-                            }
-                        });
-                    }
-                    sortZoneItems(dropZone);
-                });
-            }
-
-
-            // --- 7. NUEVO: Lógica del Modal de Confirmación ---
-            
-            function hideModal() {
-                modalBackdrop.style.display = 'none';
-                columnToDelete = null; // Limpiar la variable
-            }
-
-            modalBtnCancel.addEventListener('click', hideModal);
-
-            modalBtnConfirm.addEventListener('click', () => {
-                if (columnToDelete) {
-                    columnToDelete.remove();
-                    updateSaberCoverage(); // ¡Importante!
-                }
-                hideModal();
-            });
-
-
-            // --- 8. Estado Inicial ---
-            updateSaberCoverage(); // Llamar al inicio
-        });
-    </script>
-
+/* ======================= INICIO ======================= */
+$('#materia').innerHTML = CURRICULO.map(c => `<option value="${c.id}">${esc(c.curso)} · ${esc(c.materia)}</option>`).join('');
+load();
+let last = null; try { last = localStorage.getItem(STORE_KEY + '-materia'); } catch(e){}
+setMateria(last || 'tyd-2eso');
+</script>
 </body>
 </html>
