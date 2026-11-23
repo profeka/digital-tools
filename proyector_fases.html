@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fases y temporizador · Órdenes a ciegas</title>
+<!-- Autocontenida: sin librerías ni CDN. Pensada para proyectar. -->
+<style>
+:root{--ink:#111;--paper:#fff7e0;--white:#fff;--yellow:#ffe14d;--orange:#ff8a3d;--cyan:#6ee7f9;--lime:#a3e635;--pink:#ff7ab8;--violet:#c4b5fd;--bw:3px;
+  --shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--font:'Trebuchet MS','Segoe UI',system-ui,-apple-system,Arial,sans-serif;--mono:ui-monospace,'Cascadia Code',Consolas,'Courier New',monospace}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);background-image:radial-gradient(#11111122 1px,transparent 1px);background-size:18px 18px;min-height:100vh;display:flex;flex-direction:column;line-height:1.4}
+h1,h2,h3{font-weight:900;text-transform:uppercase;letter-spacing:-.4px;line-height:1.1}
+.hidden{display:none!important}
+:focus-visible{outline:4px solid var(--violet);outline-offset:2px}
+.topbar{background:var(--yellow);border-bottom:4px solid var(--ink);padding:10px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:44px;height:44px;background:var(--cyan);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;font-size:1.4rem}
+.topbar h1{font-size:clamp(1.1rem,2.4vw,1.6rem)}
+.spacer{flex:1}
+.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;background:var(--white);color:var(--ink);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:9px 14px;transition:transform .08s,box-shadow .08s;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:.9rem}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--orange)} .btn.lime{background:var(--lime)} .btn.cyan{background:var(--cyan)} .btn.yellow{background:var(--yellow)} .btn.pink{background:var(--pink)} .btn.violet{background:var(--violet)}
+.btn.sm{padding:5px 10px;font-size:.75rem}
+.btn.xl{font-size:clamp(1rem,2vw,1.5rem);padding:10px 20px}
+main{flex:1;display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:20px;padding:20px;max-width:1500px;width:100%;margin:0 auto}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow);padding:16px}
+/* lista de fases */
+#list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ph{display:flex;gap:10px;align-items:center;border:var(--bw) solid var(--ink);background:var(--white);padding:7px 10px;cursor:pointer;font-weight:800;font-size:.95rem;text-align:left;font:inherit;font-weight:800;width:100%}
+.ph .n{display:grid;place-items:center;min-width:28px;height:28px;background:var(--yellow);border:var(--bw) solid var(--ink);font-weight:900;font-size:.85rem}
+.ph .t{flex:1}
+.ph .m{font-family:var(--mono);font-size:.78rem;font-weight:700}
+.ph.done{background:#e8f6c4;text-decoration:line-through;opacity:.75}
+.ph.done .n{background:var(--lime)}
+.ph.cur{background:var(--orange);box-shadow:var(--shadow-sm);transform:translate(-2px,-2px);font-size:1.02rem}
+.ph input{width:54px;font:inherit;font-family:var(--mono);font-weight:800;border:2px solid var(--ink);padding:1px 4px}
+/* escena principal */
+#stage{display:flex;flex-direction:column;gap:16px;transition:background .2s}
+#stage .card.big{padding:20px 26px}
+#phase-tag{display:inline-block;background:var(--ink);color:var(--lime);border:var(--bw) solid var(--ink);padding:2px 12px;font-weight:900;text-transform:uppercase;font-size:clamp(.8rem,1.6vw,1.1rem)}
+#phase-title{font-size:clamp(1.6rem,min(5vw,7vh),3.6rem);margin:10px 0}
+#phase-desc{font-size:clamp(1.1rem,2.6vw,1.9rem);font-weight:700}
+#phase-next{margin-top:10px;font-size:clamp(.9rem,1.6vw,1.2rem);font-weight:800;opacity:.8}
+.timer{font-family:var(--mono);font-weight:900;font-size:clamp(4rem,min(17vw,24vh),13rem);line-height:1;text-align:center;letter-spacing:-.04em}
+.timer-card{text-align:center}
+#timer-card.warn{background:var(--yellow)}
+#timer-card.danger{background:var(--pink)}
+#timer-card.danger .timer{animation:pulse 1s steps(2) infinite}
+#timer-card.over{background:var(--pink);animation:flash .5s steps(2) infinite}
+@keyframes pulse{50%{opacity:.55}} @keyframes flash{50%{background:var(--yellow)}}
+.bar{height:22px;border:var(--bw) solid var(--ink);background:var(--white);margin-top:12px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--lime);width:100%;transition:width .3s linear}
+.warn .bar>i{background:var(--orange)} .danger .bar>i{background:var(--ink)}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+#alarm{position:fixed;inset:0;background:rgba(17,17,17,.78);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+#alarm .box{background:var(--pink);border:5px solid var(--ink);box-shadow:12px 12px 0 var(--ink);padding:clamp(20px,5vw,50px);text-align:center;max-width:900px}
+#alarm h2{font-size:clamp(2.4rem,9vw,6rem)}
+#alarm p{font-size:clamp(1.1rem,3vw,2rem);font-weight:800;margin:14px 0 24px}
+#alarm .box{animation:shake .6s steps(2) infinite}
+@keyframes shake{50%{transform:translate(4px,-3px) rotate(.4deg)}}
+.hint{font-size:.78rem;font-weight:700;margin-top:10px}
+kbd{font-family:var(--mono);background:var(--white);border:2px solid var(--ink);padding:0 5px;font-size:.78rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">⏱️</div>
+  <div><h1>Órdenes a ciegas · Fases</h1><div style="font-size:.82rem;font-weight:700" id="total">—</div></div>
+  <div class="spacer"></div>
+  <button class="btn sm" id="btn-edit" onclick="toggleEdit()">✏️ Editar tiempos</button>
+  <button class="btn sm cyan" onclick="toggleSound()" id="btn-sound">🔔 Sonido: sí</button>
+  <button class="btn sm yellow" onclick="fullscreen()">⛶ Pantalla completa</button>
+</header>
+
+<main>
+  <aside class="card">
+    <h3>Fases de la sesión</h3>
+    <div id="list"></div>
+    <div class="row hidden" id="edit-row" style="margin-top:12px"><button class="btn sm pink" onclick="resetPhases()">Restaurar tiempos</button></div>
+    <p class="hint">Pulsa una fase para saltar a ella.<br><kbd>Espacio</kbd> iniciar/pausar · <kbd>←</kbd><kbd>→</kbd> fase · <kbd>R</kbd> reiniciar</p>
+  </aside>
+
+  <section id="stage">
+    <div class="card big" id="phase-card">
+      <span id="phase-tag">Fase 1 de 1</span>
+      <h2 id="phase-title">—</h2>
+      <p id="phase-desc"></p>
+      <p id="phase-next"></p>
+    </div>
+    <div class="card timer-card" id="timer-card">
+      <div class="timer" id="timer" role="timer" aria-live="off">00:00</div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="ctrl">
+        <button class="btn xl lime" id="btn-go" onclick="toggleRun()">▶ Iniciar</button>
+        <button class="btn xl" onclick="adjust(-60)">−1 min</button>
+        <button class="btn xl" onclick="adjust(60)">+1 min</button>
+        <button class="btn xl yellow" onclick="resetTimer()">⟲ Reiniciar</button>
+        <button class="btn xl cyan" onclick="go(-1)">◀ Fase</button>
+        <button class="btn xl primary" onclick="go(1)">Fase ▶</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="alarm" class="hidden" role="alertdialog" aria-live="assertive">
+  <div class="box">
+    <h2>⏰ ¡Tiempo!</h2>
+    <p id="alarm-text"></p>
+    <div class="ctrl">
+      <button class="btn xl lime" onclick="stopAlarm();go(1)">Siguiente fase ▶</button>
+      <button class="btn xl" onclick="stopAlarm()">Silenciar y seguir aquí</button>
+      <button class="btn xl yellow" onclick="stopAlarm();adjust(60)">+1 min</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULTS=[
+ {icon:'🧭',name:'Arranque',min:3,desc:'Abrid el juego y escribid vuestro nombre y apellido. Nivel 1.'},
+ {icon:'✍️',name:'Nivel 1 · Escribe tus órdenes',min:8,desc:'Explica el camino con tus palabras. ¡Aún no pulses «Pasar turno»!'},
+ {icon:'🔄',name:'Rotación 1',min:1,desc:'Todos un sitio hacia la DERECHA. Quien se sienta pulsa «Pasar turno» y escribe su nombre.'},
+ {icon:'🎮',name:'Nivel 1 · Ejecuta las órdenes',min:7,desc:'El texto manda. Anota las dudas. Si no puedes llegar, explica por qué.'},
+ {icon:'↩️',name:'Vuelta a tu sitio',min:1,desc:'Cada uno a su ordenador. Pulsad «Volver al programador/a»: el profe dice la contraseña.'},
+ {icon:'🔍',name:'Depurar y reflexionar',min:5,desc:'Mirad la repetición. Escribid qué salió mal y si os explicasteis mal.'},
+ {icon:'✍️',name:'Nivel 2 · Escribe tus órdenes',min:10,desc:'Cambia a «Nivel 2 · Camino largo». Camino más largo, empiezas mirando al azar.'},
+ {icon:'🔄',name:'Rotación 2',min:1,desc:'Todos un sitio hacia la IZQUIERDA. Quien se sienta pulsa «Pasar turno».'},
+ {icon:'🎮',name:'Nivel 2 · Ejecuta las órdenes',min:8,desc:'Seguid el texto al pie de la letra. ¡Cuidado con las trampas!'},
+ {icon:'💾',name:'Vuelta, depurar y guardar',min:7,desc:'Volved a vuestro sitio, depurad, escribid la reflexión y pulsad «Guardar».'}
+];
+let phases=load(), cur=0, remaining=phases[0].min*60, running=false, endAt=0, tick=null, over=false, soundOn=true, editing=false;
+const $=id=>document.getElementById(id);
+function load(){ try{ const j=JSON.parse(localStorage.getItem('ocFases')||'null'); if(Array.isArray(j)&&j.length===DEFAULTS.length) return DEFAULTS.map((d,i)=>({...d,min:Math.max(1,+j[i].min||d.min)})); }catch(e){} return DEFAULTS.map(d=>({...d})); }
+function persist(){ try{ localStorage.setItem('ocFases',JSON.stringify(phases.map(p=>({min:p.min})))); }catch(e){} }
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+
+/* ---- render ---- */
+function renderList(){
+  const l=$('list'); l.innerHTML='';
+  phases.forEach((p,i)=>{
+    const b=document.createElement('div'); b.className='ph'+(i===cur?' cur':i<cur?' done':''); b.tabIndex=0; b.setAttribute('role','button');
+    const n=document.createElement('span'); n.className='n'; n.textContent=i<cur?'✓':i+1;
+    const t=document.createElement('span'); t.className='t'; t.textContent=p.icon+' '+p.name;
+    b.append(n,t);
+    if(editing){ const inp=document.createElement('input'); inp.type='number'; inp.min=1; inp.max=60; inp.value=p.min; inp.title='minutos';
+      inp.onclick=e=>e.stopPropagation(); inp.onchange=()=>{ p.min=Math.max(1,Math.min(60,+inp.value||1)); persist(); if(i===cur&&!running){remaining=p.min*60;over=false;} updateTotal(); render(); }; b.append(inp); }
+    else { const m=document.createElement('span'); m.className='m'; m.textContent=p.min+' min'; b.append(m); }
+    b.onclick=()=>goTo(i); b.onkeydown=e=>{ if(e.key==='Enter'){goTo(i);} };
+    l.appendChild(b);
+  });
+}
+function updateTotal(){ const t=phases.reduce((a,p)=>a+p.min,0); $('total').textContent='Duración total prevista: '+t+' min'; }
+function render(){
+  const p=phases[cur];
+  $('phase-tag').textContent='Fase '+(cur+1)+' de '+phases.length;
+  $('phase-title').textContent=p.icon+' '+p.name;
+  $('phase-desc').textContent=p.desc;
+  const nx=phases[cur+1]; $('phase-next').textContent=nx?'Después: '+nx.icon+' '+nx.name:'Última fase 🎉';
+  $('timer').textContent=fmt(remaining);
+  const total=p.min*60, pct=Math.max(0,Math.min(100,remaining/total*100)); $('bar').style.width=pct+'%';
+  const c=$('timer-card'); c.classList.toggle('warn',!over&&remaining<=60&&remaining>10); c.classList.toggle('danger',!over&&remaining<=10&&remaining>0); c.classList.toggle('over',over&&!$('alarm').classList.contains('hidden'));
+  $('btn-go').textContent=running?'⏸ Pausa':'▶ Iniciar'; $('btn-go').className='btn xl '+(running?'yellow':'lime');
+  document.title=(running?fmt(remaining)+' · ':'')+'Fases · Órdenes a ciegas';
+  renderList();
+}
+
+/* ---- temporizador ---- */
+function loop(){
+  const r=(endAt-Date.now())/1000; remaining=r;
+  if(r<=0){ remaining=0; running=false; clearInterval(tick); tick=null; over=true; ring(); }
+  render();
+}
+function toggleRun(){
+  if(running){ running=false; clearInterval(tick); tick=null; render(); return; }
+  if(remaining<=0){ remaining=phases[cur].min*60; over=false; }
+  ensureAudio(); stopAlarm(true); over=false;
+  running=true; endAt=Date.now()+remaining*1000; tick=setInterval(loop,200); render();
+}
+function resetTimer(){ stopAlarm(true); running=false; clearInterval(tick); tick=null; over=false; remaining=phases[cur].min*60; render(); }
+function adjust(sec){ remaining=Math.max(0,remaining+sec); over=false; if(running)endAt=Date.now()+remaining*1000; if(remaining>phases[cur].min*60&&!running){} render(); }
+function goTo(i){ stopAlarm(true); running=false; clearInterval(tick); tick=null; over=false; cur=Math.max(0,Math.min(phases.length-1,i)); remaining=phases[cur].min*60; render(); }
+function go(d){ goTo(cur+d); }
+
+/* ---- alarma (WebAudio, sin archivos) ---- */
+let ctx=null, alarmTimer=null;
+function ensureAudio(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); if(ctx.state==='suspended')ctx.resume(); }catch(e){} }
+function beep(f,t,d){ if(!ctx)return; const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+d+.02); }
+function pattern(){ if(!soundOn||!ctx)return; const t=ctx.currentTime; [0,.25,.5].forEach((k,i)=>beep(i%2?880:1175,t+k,.18)); }
+function ring(){
+  $('alarm-text').textContent='Fin de: '+phases[cur].icon+' '+phases[cur].name+(phases[cur+1]?'  ·  Siguiente: '+phases[cur+1].name:'');
+  $('alarm').classList.remove('hidden'); ensureAudio(); pattern(); alarmTimer=setInterval(pattern,1400); render();
+}
+function stopAlarm(silent){ $('alarm').classList.add('hidden'); clearInterval(alarmTimer); alarmTimer=null; over=false; if(!silent)render(); }
+function toggleSound(){ soundOn=!soundOn; $('btn-sound').textContent='🔔 Sonido: '+(soundOn?'sí':'no'); if(soundOn){ensureAudio();pattern();} }
+
+/* ---- varios ---- */
+function toggleEdit(){ editing=!editing; $('edit-row').classList.toggle('hidden',!editing); $('btn-edit').textContent=editing?'✔ Hecho':'✏️ Editar tiempos'; render(); }
+function resetPhases(){ phases=DEFAULTS.map(d=>({...d})); persist(); if(!running)remaining=phases[cur].min*60; updateTotal(); render(); }
+function fullscreen(){ try{ if(document.fullscreenElement)document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} }
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.code==='Space'){e.preventDefault(); if(!$('alarm').classList.contains('hidden'))stopAlarm(); else toggleRun();}
+  else if(e.key==='ArrowRight')go(1); else if(e.key==='ArrowLeft')go(-1); else if(e.key.toLowerCase()==='r')resetTimer();
+});
+updateTotal(); render();
+</script>
+</body>
+</html>
