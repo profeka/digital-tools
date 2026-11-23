@@ -55,7 +55,7 @@
         <!-- Cabecera de la página -->
         <header class="text-center my-12">
             <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter">Herramientas de Clase</h1>
-            <p class="text-lg mt-4 max-w-2xl mx-auto">Una colección de proyectos y recursos para potenciar el aprendizaje.</p>
+            <p class="text-lg mt-4 max-w-2xl mx-auto">Una colección de proyectos y recursos para potenciar el aprendizaje, y herramientas para el día a día del profesorado.</p>
         </header>
 
         <!-- Filtros por etiquetas/cursos -->
@@ -83,6 +83,16 @@
                     <button data-filter="digitalizacion" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Digitalización</button>
                 </div>
             </div>
+            <!-- Filtros por destinatario -->
+            <div class="filter-group">
+                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">¿Para quién?</h2>
+                <div id="audience-filters" class="flex justify-center items-center gap-3 flex-wrap">
+                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
+                    <button data-filter="alumnado" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Alumnado</button>
+                    <button data-filter="profesorado" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Profesorado</button>
+                </div>
+            </div>
+            <p id="results-count" class="font-bold text-lg"></p>
         </div>
 
         <!-- Grid con las tarjetas de proyectos -->
@@ -116,31 +126,41 @@
             '3eso':  { text: '#3ºESO', color: 'bg-[#FBBF24]' }, // Color de ejemplo
             '4eso':  { text: '#4ºESO', color: 'bg-[#A855F7]' }, // Re-usado
             '1bach': { text: '#1ºBach', color: 'bg-[#60A5FA]' }, // Color de ejemplo
-            '2bach': { text: '#2ºBach', color: 'bg-[#F472B6]' }  // Color de ejemplo
+            '2bach': { text: '#2ºBach', color: 'bg-[#F472B6]' }, // Color de ejemplo
+            'general': { text: '#Todas las etapas', color: 'bg-[#111827]' }
         };
         
         const SUBJECT_TAGS = {
             'ciencias-computacion': { text: '#C.Computación', color: 'bg-[#10B981]' },
             'tecnologia': { text: '#Tecnología', color: 'bg-[#3B82F6]' },
+            'general': { text: '#Todas las asignaturas', color: 'bg-[#111827]' },
             'digitalizacion': { text: '#Digitalización', color: 'bg-[#F43F5E]' } // Re-usado
         };
 
+        const AUDIENCE_TAGS = {
+            'alumnado':    { text: '#Alumnado',    color: 'bg-black' },
+            'profesorado': { text: '#Profesorado', color: 'bg-[#6B7280]' }
+        };
+
         // 2. Lista de todos tus proyectos
+        //    stage / subject: claves separadas por espacios, o "general" si sirve para todas.
+        //    audience: "alumnado" o "profesorado".
+        //    projectUrl: ruta relativa para las herramientas de este repositorio (ej. "timer.html").
         const projectsData = [
-            // --- COPIA Y PEGA ESTE BLOQUE PARA AÑADIR MÁS ---
             {
-                stage: "1eso", // Usar claves de STAGE_TAGS (ej. "1eso", "2eso 3eso")
-                subject: "ciencias-computacion", // Usar claves de SUBJECT_TAGS (ej. "tecnologia")
+                stage: "1eso",
+                subject: "ciencias-computacion",
+                audience: "alumnado",
                 title: "Escape Panda",
                 imgSrc: "https://placehold.co/600x400/34D399/000?text=Escape+Panda",
                 longDesc: "Un divertido juego de escape diseñado para que los alumnos de 1º de la ESO practiquen y desarrollen los fundamentos del pensamiento computacional mientras ayudan a un panda a resolver puzzles.",
-                projectUrl: "https://profeka.github.io/games/pandaesc.html", // Enlace al proyecto (o "#" si no hay)
+                projectUrl: "https://profeka.github.io/games/pandaesc.html",
                 description: "Juego para trabajar el pensamiento computacional."
             },
-            // --- FIN DEL BLOQUE PARA COPIAR ---
             {
                 stage: "2eso",
                 subject: "tecnologia",
+                audience: "alumnado",
                 title: "Arquitecto Dimensional",
                 imgSrc: "https://placehold.co/600x400/A78BFA/000?text=Arquitecto+Dimensional",
                 longDesc: "Una herramienta lúdica para 2º de la ESO que desafía a los estudiantes a resolver problemas geométricos en un entorno 3D, mejorando su visión espacial y su capacidad de abstracción.",
@@ -148,40 +168,184 @@
                 description: "Juego para desarrollar la visión espacial."
             },
             {
-                stage: "4eso",
-                subject: "digitalizacion",
-                title: "Marimoligram",
-                imgSrc: "https://placehold.co/600x400/F472B6/000?text=Marimoligram",
-                longDesc: "Una simulación interactiva de una red social. Permite a los alumnos de 4º de la ESO enfrentarse a situaciones realistas para aprender a identificar amenazas, gestionar su privacidad y proteger su identidad digital.",
-                projectUrl: "#",
-                description: "Simulación de red social para aprender sobre privacidad y amenazas."
+                stage: "2eso",
+                subject: "tecnologia",
+                audience: "alumnado",
+                title: "Diédrico Creator",
+                imgSrc: "https://placehold.co/600x400/FB923C/000?text=Diédrico+Creator",
+                longDesc: "Los alumnos diseñan su nombre con piezas en 3D y trabajan sus vistas en sistema diédrico (alzado, planta y perfil). Pensado para el bloque de representación gráfica.",
+                projectUrl: "d_build.html",
+                description: "Diseña tu nombre en 3D y obtén sus vistas en diédrico."
             },
             {
-                stage: "1eso",
-                subject: "ciencias-computacion",
+                stage: "2eso",
+                subject: "tecnologia",
+                audience: "alumnado",
+                title: "Órdenes a ciegas",
+                imgSrc: "https://placehold.co/600x400/F43F5E/000?text=Órdenes+a+ciegas",
+                longDesc: "Actividad por parejas de algoritmos (crit. 5.1): un programador/a escribe las órdenes y un ejecutor/a las sigue sin ver el mapa. Varios mundos (mazmorra, cocina, panda), tres niveles, depuración paso a paso, guardado de partida y rúbrica.",
+                projectUrl: "ordenes_ciegas_2eso.html",
+                description: "Algoritmos por parejas: escribir órdenes precisas y depurarlas."
+            },
+            {
+                stage: "1eso 2eso",
+                subject: "ciencias-computacion tecnologia",
+                audience: "alumnado",
                 title: "Creador de Diagramas de Flujo",
-                imgSrc: "https://placehold.co/600x400/FBBF24/000?text=Diagramas",
-                longDesc: "Una herramienta sencilla e intuitiva para que los alumnos de 1º de la ESO puedan crear sus primeros diagramas de flujo. Ideal para visualizar algoritmos y procesos de forma clara y ordenada.",
-                projectUrl: "https://profeka.github.io/digital-tools/flow_dig.html",
+                imgSrc: "https://placehold.co/600x400/FBBF24/000?text=Creador+de+Diagramas+de+Flujo",
+                longDesc: "Una herramienta sencilla e intuitiva para crear diagramas de flujo con bloques de inicio/fin, proceso y decisión, flechas curvas y exportación a PNG. Ideal para visualizar algoritmos y procesos de forma clara y ordenada.",
+                projectUrl: "flow_dig.html",
                 description: "Herramienta sencilla para crear diagramas de flujo."
             },
             {
-                stage: "4eso",
-                subject: "digitalizacion",
-                title: "Auditoría Digital de Ciberseguridad",
-                imgSrc: "https://placehold.co/600x400/60A5FA/000?text=Auditoría+Digital",
-                longDesc: "Un conjunto de misiones y retos para 4º de la ESO donde los alumnos realizan una auditoría de su propia huella digital. Aprenden a configurar la privacidad de sus cuentas y a mejorar su seguridad en línea de forma práctica.",
-                projectUrl: "#",
-                description: "Misiones para mejorar la privacidad y seguridad online."
+                stage: "2eso",
+                subject: "tecnologia digitalizacion",
+                audience: "alumnado",
+                title: "El plano de la red de tu casa",
+                imgSrc: "https://placehold.co/600x400/22D3EE/000?text=El+plano+de+la+red+de+tu+casa",
+                longDesc: "Los alumnos dibujan la red de su casa: añaden aparatos, los conectan por cable o Wi-Fi y les asignan IP. Incluye diccionario del técnico, retos personalizados, tarjetas de ayuda y un corrector.",
+                projectUrl: "plano_red_casa.html",
+                description: "Dibuja la red de tu casa: aparatos, conexiones e IP."
             },
             {
                 stage: "1eso",
                 subject: "ciencias-computacion",
+                audience: "alumnado",
                 title: "Tema 1: Algoritmos",
-                imgSrc: "https://placehold.co/600x400/F43F5E/000?text=Algoritmos",
+                imgSrc: "https://placehold.co/600x400/F43F5E/000?text=Tema+1:+Algoritmos",
                 longDesc: "Material de estudio para el primer tema de Ciencias de la Computación en 1º de la ESO. Introduce el concepto de algoritmo, sus características y cómo se representan, sentando las bases del pensamiento computacional.",
                 projectUrl: "https://profeka.github.io/temario/1ESO-CC-T1.html",
                 description: "Temario del primer tema de Ciencias de la Computación."
+            },
+            {
+                stage: "4eso",
+                subject: "digitalizacion",
+                audience: "alumnado",
+                title: "Marimoligram",
+                imgSrc: "https://placehold.co/600x400/F472B6/000?text=Marimoligram",
+                longDesc: "Una simulación interactiva de una red social. Permite a los alumnos de 4º de la ESO enfrentarse a situaciones realistas (cookies, publicaciones, anuncios engañosos, bulos) para aprender a identificar amenazas, gestionar su privacidad y proteger su identidad digital. Incluye las páginas enlazadas AeroVuela Max y Verdad Digital.",
+                projectUrl: "marmolgr.html",
+                description: "Simulación de red social para aprender sobre privacidad y amenazas."
+            },
+            {
+                stage: "4eso",
+                subject: "digitalizacion",
+                audience: "alumnado",
+                title: "Auditoría de Bienestar Digital",
+                imgSrc: "https://placehold.co/600x400/60A5FA/000?text=Auditoría+de+Bienestar+Digital",
+                longDesc: "Un conjunto de misiones donde los alumnos repasan conceptos clave, comprueban la fortaleza de sus contraseñas y simulan una auditoría de privacidad de sus cuentas, terminando con una checklist de buenas prácticas.",
+                projectUrl: "audit-dig.html",
+                description: "Misiones para mejorar la privacidad y seguridad online."
+            },
+            {
+                stage: "4eso",
+                subject: "digitalizacion",
+                audience: "alumnado",
+                title: "Autoevaluación de Digitalización",
+                imgSrc: "https://placehold.co/600x400/A855F7/000?text=Autoevaluación+de+Digitalización",
+                longDesc: "Formulario de autoevaluación con descriptores por niveles (trabajo en clase, dossier HTML, proyectos…) para que cada alumno reflexione sobre su desempeño.",
+                projectUrl: "autoevaluacion.html",
+                description: "Autoevaluación del alumno con rúbrica por apartados."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Timer de Aula",
+                imgSrc: "https://placehold.co/600x400/FDE047/000?text=Timer+de+Aula",
+                longDesc: "Cuenta atrás grande para proyectar en clase, con tiempos rápidos (5 min a 1 h), tiempo personalizado y confirmación antes de detenerla.",
+                projectUrl: "timer.html",
+                description: "Temporizador de clase para proyectar."
+            },
+            {
+                stage: "2eso",
+                subject: "tecnologia",
+                audience: "profesorado",
+                title: "Fases y temporizador · Órdenes a ciegas",
+                imgSrc: "https://placehold.co/600x400/FCA5A5/000?text=Fases+y+temporizador+·+Órdenes+a+ciegas",
+                longDesc: "Proyector de fases para la sesión de Órdenes a ciegas: temporizador por fases editable, aviso sonoro, pantalla completa y atajos de teclado.",
+                projectUrl: "proyector_fases.html",
+                description: "Temporizador por fases para proyectar durante la actividad."
+            },
+            {
+                stage: "2eso",
+                subject: "tecnologia",
+                audience: "profesorado",
+                title: "Planificador Anual de Saberes",
+                imgSrc: "https://placehold.co/600x400/86EFAC/000?text=Planificador+Anual+de+Saberes",
+                longDesc: "Organiza los saberes básicos (bloques A–E) en temas y trimestres arrastrando y soltando. Permite exportar e importar la planificación en JSON.",
+                projectUrl: "seguimiento_saberes.html",
+                description: "Reparte los saberes básicos por trimestres y temas."
+            },
+            {
+                stage: "2eso",
+                subject: "tecnologia",
+                audience: "profesorado",
+                title: "Seguimiento de Criterios por Proyecto",
+                imgSrc: "https://placehold.co/600x400/93C5FD/000?text=Seguimiento+de+Criterios+por+Proyecto",
+                longDesc: "Banco de criterios de evaluación de Tecnología 2º ESO para asignarlos a cada proyecto y comprobar qué criterios quedan cubiertos a lo largo del curso.",
+                projectUrl: "proyect_org_tool.html",
+                description: "Asigna criterios de evaluación a cada proyecto."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Herramienta de Calificación (Cloud)",
+                imgSrc: "https://placehold.co/600x400/34D399/000?text=Herramienta+de+Calificación+(Cloud)",
+                longDesc: "Corrige con rúbricas guardadas en la nube: carga la rúbrica, puntúa por ítems y obtén el informe por sección y por criterio. Permite guardar y retomar el progreso.",
+                projectUrl: "califtool_v2.html",
+                description: "Califica con rúbricas en la nube e informes por criterio."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Repositorio de Rúbricas (Cloud)",
+                imgSrc: "https://placehold.co/600x400/6EE7B7/000?text=Repositorio+de+Rúbricas+(Cloud)",
+                longDesc: "Editor de rúbricas conectado a la nube: define criterios, secciones e ítems, guárdalas y edítalas. Incluye importación masiva de rúbricas antiguas en JSON.",
+                projectUrl: "califrepo_v2.html",
+                description: "Crea y guarda rúbricas en la nube."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Herramienta de Calificación",
+                imgSrc: "https://placehold.co/600x400/A7F3D0/000?text=Herramienta+de+Calificación",
+                longDesc: "Versión local (sin nube) de la herramienta de calificación: pega la rúbrica en JSON, puntúa y exporta el informe o el código de progreso.",
+                projectUrl: "calif.html",
+                description: "Califica con rúbricas en JSON, sin conexión."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Repositorio de Rúbricas",
+                imgSrc: "https://placehold.co/600x400/BBF7D0/000?text=Repositorio+de+Rúbricas",
+                longDesc: "Constructor de rúbricas en versión local: genera el JSON de la rúbrica para usarlo en la Herramienta de Calificación.",
+                projectUrl: "rub_repo.html",
+                description: "Construye rúbricas y genera su JSON."
+            },
+            {
+                stage: "general",
+                subject: "general",
+                audience: "profesorado",
+                title: "Dashboard de Progreso",
+                imgSrc: "https://placehold.co/600x400/C4B5FD/000?text=Dashboard+de+Progreso",
+                longDesc: "Reúne los códigos de progreso de varias correcciones y muestra el informe agregado: nota media ponderada y media por criterio.",
+                projectUrl: "dashboard.html",
+                description: "Informe agregado de progreso por criterios."
+            },
+            {
+                stage: "4eso",
+                subject: "digitalizacion",
+                audience: "profesorado",
+                title: "Calificación Marimoligram",
+                imgSrc: "https://placehold.co/600x400/F9A8D4/000?text=Calificación+Marimoligram",
+                longDesc: "Herramienta de calificación con la rúbrica de la actividad Marimoligram ya cargada, con informe por sección y por criterio.",
+                projectUrl: "calif_marmolgr.html",
+                description: "Rúbrica lista para corregir la actividad Marimoligram."
             }
         ];
 
@@ -190,6 +354,8 @@
         // Elementos estáticos del DOM
         const stageFilterButtons = document.querySelectorAll('#stage-filters .filter-btn');
         const subjectFilterButtons = document.querySelectorAll('#subject-filters .filter-btn');
+        const audienceFilterButtons = document.querySelectorAll('#audience-filters .filter-btn');
+        const resultsCount = document.getElementById('results-count');
         const grid = document.getElementById('projects-grid');
         const modal = document.getElementById('project-modal');
         const modalContent = document.getElementById('modal-content');
@@ -202,6 +368,7 @@
         // Estado de filtros
         let activeStageFilter = 'all';
         let activeSubjectFilter = 'all';
+        let activeAudienceFilter = 'all';
 
         // Función para generar el HTML de una tarjeta
         function renderProjectCard(project) {
@@ -223,10 +390,16 @@
                 })
                 .join(' ');
 
+            const audienceTag = AUDIENCE_TAGS[project.audience];
+            const audienceTagHTML = audienceTag
+                ? `<span class="${audienceTag.color} text-white text-xs font-bold px-3 py-1 border-2 border-black">${audienceTag.text}</span>`
+                : '';
+
             return `
             <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" 
                  data-stage="${project.stage}" 
                  data-subject="${project.subject}" 
+                 data-audience="${project.audience}" 
                  data-title="${project.title}" 
                  data-img-src="${project.imgSrc}" 
                  data-long-desc="${project.longDesc}" 
@@ -240,6 +413,7 @@
                 <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
                     ${stageTagsHTML}
                     ${subjectTagsHTML}
+                    ${audienceTagHTML}
                 </div>
                 <a href="${project.projectUrl}" target="_blank" rel="noopener noreferrer" class="project-link-btn inline-block bg-blue-500 text-white font-bold py-2 px-4 border-2 border-black hard-shadow-small btn-effect mt-4 transition-transform duration-100 z-10 relative self-start">Ver Proyecto &rarr;</a>
             </div>
@@ -289,48 +463,44 @@
         // --- LÓGICA DE FILTROS ---
         function applyFilters() {
             const projectCards = grid.querySelectorAll('.project-card'); // Re-seleccionar tarjetas
+            let visible = 0;
             projectCards.forEach(card => {
-                const stages = card.dataset.stage;
-                const subjects = card.dataset.subject;
+                const stages = card.dataset.stage.split(' ');
+                const subjects = card.dataset.subject.split(' ');
 
-                const stageMatch = activeStageFilter === 'all' || stages.includes(activeStageFilter);
-                const subjectMatch = activeSubjectFilter === 'all' || subjects.includes(activeSubjectFilter);
+                const stageMatch = activeStageFilter === 'all' || stages.includes('general') || stages.includes(activeStageFilter);
+                const subjectMatch = activeSubjectFilter === 'all' || subjects.includes('general') || subjects.includes(activeSubjectFilter);
+                const audienceMatch = activeAudienceFilter === 'all' || card.dataset.audience === activeAudienceFilter;
 
-                if (stageMatch && subjectMatch) {
+                if (stageMatch && subjectMatch && audienceMatch) {
                     card.style.display = 'flex';
+                    visible++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+            resultsCount.textContent = visible === 1 ? '1 herramienta' : `${visible} herramientas`;
         }
 
-        stageFilterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                stageFilterButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-yellow-400');
-                    btn.classList.add('bg-white');
+        // Activa un botón dentro de su grupo y devuelve su filtro
+        function setupFilterGroup(buttons, onChange) {
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    buttons.forEach(btn => {
+                        btn.classList.remove('active', 'bg-yellow-400');
+                        btn.classList.add('bg-white');
+                    });
+                    button.classList.add('active', 'bg-yellow-400');
+                    button.classList.remove('bg-white');
+                    onChange(button.dataset.filter);
+                    applyFilters();
                 });
-                button.classList.add('active', 'bg-yellow-400');
-                button.classList.remove('bg-white');
-
-                activeStageFilter = button.dataset.filter;
-                applyFilters();
             });
-        });
-        
-        subjectFilterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                subjectFilterButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-yellow-400');
-                    btn.classList.add('bg-white');
-                });
-                button.classList.add('active', 'bg-yellow-400');
-                button.classList.remove('bg-white');
+        }
 
-                activeSubjectFilter = button.dataset.filter;
-                applyFilters();
-            });
-        });
+        setupFilterGroup(stageFilterButtons, f => activeStageFilter = f);
+        setupFilterGroup(subjectFilterButtons, f => activeSubjectFilter = f);
+        setupFilterGroup(audienceFilterButtons, f => activeAudienceFilter = f);
 
         // --- LÓGICA DEL MODAL ---
         const openModal = (card) => {
@@ -368,6 +538,7 @@
         // --- INICIALIZACIÓN ---
         // Renderizar las tarjetas al cargar la página
         renderAllCards();
+        applyFilters();
 
     </script>
 
