@@ -1,548 +1,354 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio de Herramientas | Estilo Neubrutalista</title>
-    <!-- Incluyendo Tailwind CSS para los estilos -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Usaremos la fuente Inter, que es muy versátil -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* Estilos personalizados para complementar Tailwind */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Sombra dura personalizada que es clave en el neubrutalismo */
-        .hard-shadow {
-            box-shadow: 8px 8px 0px #000;
-        }
-        .hard-shadow-small {
-            box-shadow: 4px 4px 0px #000;
-        }
-        /* Efecto de transición al pulsar botones y tarjetas */
-        .btn-effect:active {
-            transform: translate(4px, 4px);
-            box-shadow: 0px 0px 0px #000 !important;
-        }
-        .card-effect:hover {
-            transform: translate(-4px, -4px);
-            box-shadow: 12px 12px 0px #000;
-        }
-        /* Animaciones para la aparición del modal */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes scaleUp {
-            from { transform: scale(0.95); opacity: 0.5; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .modal-fade-in {
-            animation: fadeIn 0.2s ease-out;
-        }
-        .modal-scale-up {
-            animation: scaleUp 0.2s ease-out;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Herramientas de clase · digital-tools</title>
+<!-- Estilo: Base neobrutalista (bloque neo-base copiado tal cual) + unos pocos estilos propios del índice -->
+<style id="neo-base">
+/* ================= TOKENS ================= */
+:root{
+  --ink:#111;            /* texto y bordes */
+  --paper:#fff7e0;       /* fondo de página */
+  --white:#fff;
+  --yellow:#ffe14d;      /* acento principal / cabeceras */
+  --orange:#ff8a3d;      /* acción principal */
+  --cyan:#6ee7f9;        /* acción secundaria / info */
+  --lime:#a3e635;        /* correcto / éxito */
+  --pink:#ff7ab8;        /* error / peligro */
+  --violet:#c4b5fd;      /* extra / reto */
+  --muted:#555;
+  --bw:3px;              /* grosor de borde */
+  --shadow:6px 6px 0 var(--ink);
+  --shadow-sm:4px 4px 0 var(--ink);
+  --font:'Trebuchet MS','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:ui-monospace,'Cascadia Code','SFMono-Regular',Consolas,'Courier New',monospace;
+}
+/* ================= BASE ================= */
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(#11111122 1px,transparent 1px);background-size:18px 18px;
+  line-height:1.5;min-height:100vh}
+h1,h2,h3,h4{font-weight:900;text-transform:uppercase;letter-spacing:-.4px;line-height:1.15}
+h1{font-size:clamp(1.5rem,4vw,2.2rem)} h2{font-size:clamp(1.25rem,3vw,1.6rem)} h3{font-size:1.1rem}
+p{margin:.5em 0} a{color:var(--ink);font-weight:800;text-decoration-thickness:3px;text-underline-offset:3px}
+a:hover{background:var(--yellow)}
+code,.mono{font-family:var(--mono)}
+code{overflow-wrap:anywhere;background:var(--white);border:2px solid var(--ink);padding:0 5px;font-size:.9em}
+:focus-visible{outline:4px solid var(--violet);outline-offset:2px}
+.hidden{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+.grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)} .grid>*{min-width:0} .g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+/* ================= CABECERA ================= */
+.topbar{background:var(--yellow);border-bottom:4px solid var(--ink);padding:14px 20px}
+.topbar .inner{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:48px;height:48px;background:var(--white);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;font-size:1.6rem}
+.topbar .sub{font-size:.85rem;font-weight:700}
+/* ================= TARJETAS ================= */
+.card{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow);padding:18px}
+.card>h2,.card>h3{margin-bottom:10px}
+.card.yellow{background:var(--yellow)} .card.cyan{background:var(--cyan)} .card.pink{background:var(--pink)}
+.card.lime{background:var(--lime)} .card.violet{background:var(--violet)} .card.ink{background:var(--ink);color:var(--white)}
+.card.flat{box-shadow:none}
+.card.ink code{color:var(--ink)}
+/* ================= BOTONES ================= */
+.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;
+  background:var(--white);color:var(--ink);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);
+  padding:10px 18px;transition:transform .08s,box-shadow .08s;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn:active:not(:disabled){transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{background:#ddd;color:#777;box-shadow:none;cursor:not-allowed}
+.btn.primary{background:var(--orange)} .btn.secondary{background:var(--cyan)}
+.btn.success{background:var(--lime)} .btn.danger{background:var(--pink)} .btn.yellow{background:var(--yellow)}
+.btn.sm{padding:5px 10px;font-size:.8rem} .btn.lg{padding:14px 26px;font-size:1.1rem} .btn.block{width:100%}
+/* ================= ETIQUETAS / PÍLDORAS ================= */
+.pill{display:inline-flex;gap:6px;align-items:center;background:var(--white);border:var(--bw) solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);padding:3px 10px;font-weight:800;font-size:.85rem}
+.pill.yellow{background:var(--yellow)} .pill.lime{background:var(--lime)} .pill.pink{background:var(--pink)}
+.pill.cyan{background:var(--cyan)} .pill.violet{background:var(--violet)} .pill.orange{background:var(--orange)}
+.tag{display:inline-block;background:var(--yellow);border:var(--bw) solid var(--ink);padding:2px 10px;font-weight:900;font-size:.78rem;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink)}
+/* ================= FORMULARIOS ================= */
+label{display:block;font-weight:800;margin-bottom:4px}
+.input,select.input,textarea.input{font:inherit;width:100%;background:var(--white);color:var(--ink);
+  border:var(--bw) solid var(--ink);padding:9px 12px;border-radius:0}
+.input:focus{outline:none;box-shadow:4px 4px 0 var(--orange)}
+textarea.input{min-height:90px;resize:vertical}
+.check{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
+.check input{appearance:none;width:24px;height:24px;border:var(--bw) solid var(--ink);background:var(--white);display:grid;place-content:center;cursor:pointer;flex:none}
+.check input:checked{background:var(--lime)} .check input:checked::after{content:"✓";font-weight:900;line-height:1}
+input[type=range]{width:100%;accent-color:var(--orange)}
+/* ================= PROGRESO ================= */
+.bar{height:24px;background:var(--white);border:var(--bw) solid var(--ink);position:relative;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--orange);border-right:var(--bw) solid var(--ink);width:0;transition:width .3s}
+/* ================= AVISOS ================= */
+.note{border:var(--bw) solid var(--ink);padding:10px 14px;font-weight:700;background:var(--cyan)}
+.note.ok{background:var(--lime)} .note.warn{background:var(--yellow)} .note.error{background:var(--pink)} .note.info{background:var(--cyan)}
+/* ================= PASOS (stepper) ================= */
+.steps{display:flex;gap:6px;flex-wrap:wrap;background:var(--white);border-bottom:4px solid var(--ink);padding:10px 20px}
+.step{display:flex;gap:8px;align-items:center;padding:4px 10px;font-weight:800;font-size:.9rem;color:var(--muted)}
+.step b{display:grid;place-items:center;width:28px;height:28px;border:var(--bw) solid var(--ink);background:var(--white);color:var(--ink)}
+.step.active{color:var(--ink);background:#fff3cc} .step.active b{background:var(--orange);box-shadow:3px 3px 0 var(--ink)}
+.step.done b{background:var(--lime)}
+/* ================= PESTAÑAS ================= */
+.tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:var(--bw) solid var(--ink)}
+.tab{font:inherit;font-weight:900;text-transform:uppercase;background:var(--white);border:var(--bw) solid var(--ink);border-bottom:0;margin-right:-3px;padding:8px 16px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--yellow)}
+.tabpanel{background:var(--white);border:var(--bw) solid var(--ink);border-top:0;padding:16px}
+/* ================= OPCIONES (tipo test) ================= */
+.opt{display:block;width:100%;text-align:left;font:inherit;font-weight:600;background:var(--white);color:var(--ink);
+  border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){background:var(--yellow)} .opt.good{background:var(--lime)} .opt.bad{background:var(--pink)}
+.opt:disabled{cursor:default}
+/* ================= TABLA ================= */
+table.t{width:100%;border-collapse:collapse;background:var(--white);border:var(--bw) solid var(--ink)}
+.t th{background:var(--yellow);text-transform:uppercase;text-align:left;font-weight:900}
+.t th,.t td{border:2px solid var(--ink);padding:8px 10px}
+.t tr:nth-child(even) td{background:#fffaf0}
+.scroll-x{overflow-x:auto}
+/* ================= TERMINAL / CÓDIGO ================= */
+.term{background:#0b0b0b;color:#e5e5e5;font-family:var(--mono);font-size:.9rem;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:12px 14px;white-space:pre-wrap;overflow-x:auto}
+.term .p{color:var(--lime)} .term .e{color:var(--pink)}
+/* ================= VENTANA FALSA (para simulaciones) ================= */
+.win{background:var(--white);border:var(--bw) solid var(--ink);box-shadow:var(--shadow)}
+.win>.bar-title{background:var(--ink);color:var(--white);padding:5px 10px;font-weight:800;font-size:.85rem;display:flex;gap:6px;align-items:center}
+.win>.bar-title i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid var(--white)}
+.win>.body{padding:14px}
+/* ================= MODAL ================= */
+.modal-back{position:fixed;inset:0;background:rgba(17,17,17,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--white);border:4px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:22px;max-width:620px;width:100%;max-height:92vh;overflow:auto}
+/* ================= TÉRMINO (glosario) ================= */
+.term-w{background:var(--yellow);border-bottom:2px solid var(--ink);cursor:help;font-weight:700}
+/* ================= TOAST ================= */
+#toast{position:fixed;right:16px;bottom:16px;background:var(--lime);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:10px 16px;font-weight:900;z-index:60}
+/* ================= IMPRESIÓN ================= */
+@media print{body{background:#fff}.topbar,.steps,.btn,.no-print{display:none!important}.card{box-shadow:none}}
+@media (max-width:600px){.card{padding:14px}.topbar{padding:12px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="index-extra">
+/* ---- Estilos propios del índice ---- */
+.hero h1{font-size:clamp(1.8rem,5vw,3rem)}
+.filters{display:grid;gap:14px}
+.fgroup{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fgroup>.flabel{font-weight:900;text-transform:uppercase;font-size:.85rem;min-width:110px}
+.fbtn[aria-pressed=true]{background:var(--yellow)}
+.tools{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.tool{display:flex;flex-direction:column;padding:0;transition:transform .08s,box-shadow .08s}
+.tool:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--ink)}
+.tool .head{border-bottom:var(--bw) solid var(--ink);padding:18px;display:flex;align-items:center;gap:14px;min-height:96px}
+.tool .ico{width:58px;height:58px;flex:none;background:var(--white);border:var(--bw) solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;font-size:1.9rem}
+.tool .head h3{font-size:1.15rem}
+.tool .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+.tool .body p{margin:0;color:#222}
+.tool .tags{display:flex;gap:8px;flex-wrap:wrap}
+.tool .tags .pill{font-size:.75rem;box-shadow:2px 2px 0 var(--ink);padding:1px 8px}
+.tool .actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+.bg-yellow{background:var(--yellow)} .bg-orange{background:var(--orange)} .bg-cyan{background:var(--cyan)}
+.bg-lime{background:var(--lime)} .bg-pink{background:var(--pink)} .bg-violet{background:var(--violet)}
+a.btn{text-decoration:none} a.btn.primary:hover{background:var(--orange)}
+.empty{text-align:center}
+footer{text-align:center;font-weight:700;font-size:.85rem;color:var(--muted);padding:0 16px 32px}
+</style>
 </head>
-<body class="bg-[#FDF3E3] text-black">
+<body>
 
-    <div class="container mx-auto p-4 md:p-8">
-
-        <!-- Cabecera de la página -->
-        <header class="text-center my-12">
-            <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter">Herramientas de Clase</h1>
-            <p class="text-lg mt-4 max-w-2xl mx-auto">Una colección de proyectos y recursos para potenciar el aprendizaje, y herramientas para el día a día del profesorado.</p>
-        </header>
-
-        <!-- Filtros por etiquetas/cursos -->
-        <div id="filters" class="flex flex-col items-center gap-8 mb-16">
-            <!-- Filtros por Etapa -->
-            <div class="filter-group">
-                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">Etapa Educativa</h2>
-                <div id="stage-filters" class="flex justify-center items-center gap-3 flex-wrap">
-                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
-                    <button data-filter="1eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">1ºESO</button>
-                    <button data-filter="2eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">2ºESO</button>
-                    <button data-filter="3eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">3ºESO</button>
-                    <button data-filter="4eso" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">4ºESO</button>
-                    <button data-filter="1bach" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">1ºBach</button>
-                    <button data-filter="2bach" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">2ºBach</button>
-                </div>
-            </div>
-            <!-- Filtros por Asignatura -->
-            <div class="filter-group">
-                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">Asignatura</h2>
-                <div id="subject-filters" class="flex justify-center items-center gap-3 flex-wrap">
-                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
-                    <button data-filter="ciencias-computacion" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">C. Computación</button>
-                    <button data-filter="tecnologia" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Tecnología</button>
-                    <button data-filter="digitalizacion" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Digitalización</button>
-                </div>
-            </div>
-            <!-- Filtros por destinatario -->
-            <div class="filter-group">
-                <h2 class="text-xl font-bold text-center mb-3 uppercase tracking-wider">¿Para quién?</h2>
-                <div id="audience-filters" class="flex justify-center items-center gap-3 flex-wrap">
-                    <button data-filter="all" class="filter-btn active bg-yellow-400 text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Todas</button>
-                    <button data-filter="alumnado" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Alumnado</button>
-                    <button data-filter="profesorado" class="filter-btn bg-white text-black font-bold py-2 px-5 border-2 border-black hard-shadow-small btn-effect transition-transform duration-100">Profesorado</button>
-                </div>
-            </div>
-            <p id="results-count" class="font-bold text-lg"></p>
-        </div>
-
-        <!-- Grid con las tarjetas de proyectos -->
-        <main id="projects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            <!-- Los proyectos se generarán aquí por JavaScript -->
-        </main>
+<header class="topbar">
+  <div class="inner">
+    <div class="logo">🧰</div>
+    <div class="hero">
+      <h1>Herramientas de clase</h1>
+      <div class="sub">Tecnología y Digitalización · Ciencias de la Computación · Digitalización</div>
     </div>
+    <div class="spacer"></div>
+    <span class="pill"><span id="count">0</span>&nbsp;herramientas</span>
+  </div>
+</header>
 
-    <!-- Modal para mostrar detalles del proyecto -->
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex justify-center items-center p-4 z-50">
-        <div id="modal-content" class="bg-[#FDF3E3] border-4 border-black p-6 md:p-8 max-w-2xl w-full relative hard-shadow">
-            <!-- Botón de cerrar -->
-            <button id="close-modal-btn" class="absolute -top-4 -right-4 bg-red-500 text-white font-black text-2xl w-12 h-12 border-4 border-black hard-shadow-small btn-effect flex items-center justify-center transition-transform duration-100">&times;</button>
-            
-            <img id="modal-img" src="" alt="Imagen del proyecto" class="w-full h-64 object-cover border-2 border-black mb-6">
-            <h2 id="modal-title" class="text-4xl font-black mb-4"></h2>
-            <p id="modal-description" class="text-gray-700 text-lg"></p>
-            <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white font-bold py-3 px-6 border-2 border-black hard-shadow-small btn-effect mt-6 transition-transform duration-100 hidden">Visitar Herramienta &rarr;</a>
-        </div>
+<main class="wrap grid">
+
+  <section class="card filters" aria-label="Filtros">
+    <div class="fgroup">
+      <label class="flabel" for="search">Buscar</label>
+      <input id="search" class="input" style="flex:1;min-width:200px" placeholder="Ej: algoritmos, red, diédrico…" autocomplete="off">
     </div>
+    <div class="fgroup" data-group="stage"><span class="flabel">Etapa</span></div>
+    <div class="fgroup" data-group="subject"><span class="flabel">Asignatura</span></div>
+    <div class="fgroup" data-group="audience"><span class="flabel">Para</span></div>
+  </section>
 
+  <section id="tools" class="tools" aria-live="polite"></section>
 
-    <script>
-        // --- LÓGICA DE DATOS ---
-        // ¡Este es el único lugar que necesitas editar para añadir o cambiar proyectos!
-        
-        // 1. Define los textos y colores para las etiquetas
-        const STAGE_TAGS = {
-            '1eso':  { text: '#1ºESO', color: 'bg-[#A855F7]' },
-            '2eso':  { text: '#2ºESO', color: 'bg-[#F43F5E]' },
-            '3eso':  { text: '#3ºESO', color: 'bg-[#FBBF24]' }, // Color de ejemplo
-            '4eso':  { text: '#4ºESO', color: 'bg-[#A855F7]' }, // Re-usado
-            '1bach': { text: '#1ºBach', color: 'bg-[#60A5FA]' }, // Color de ejemplo
-            '2bach': { text: '#2ºBach', color: 'bg-[#F472B6]' }, // Color de ejemplo
-            'general': { text: '#Todas las etapas', color: 'bg-[#111827]' }
-        };
-        
-        const SUBJECT_TAGS = {
-            'ciencias-computacion': { text: '#C.Computación', color: 'bg-[#10B981]' },
-            'tecnologia': { text: '#Tecnología', color: 'bg-[#3B82F6]' },
-            'general': { text: '#Todas las asignaturas', color: 'bg-[#111827]' },
-            'digitalizacion': { text: '#Digitalización', color: 'bg-[#F43F5E]' } // Re-usado
-        };
+  <div id="empty" class="note warn empty hidden">😕 Ninguna herramienta coincide con estos filtros.
+    <p style="margin-top:10px"><button class="btn sm" onclick="resetFilters()">Quitar filtros</button></p></div>
 
-        const AUDIENCE_TAGS = {
-            'alumnado':    { text: '#Alumnado',    color: 'bg-black' },
-            'profesorado': { text: '#Profesorado', color: 'bg-[#6B7280]' }
-        };
+</main>
 
-        // 2. Lista de todos tus proyectos
-        //    stage / subject: claves separadas por espacios, o "general" si sirve para todas.
-        //    audience: "alumnado" o "profesorado".
-        //    projectUrl: ruta relativa para las herramientas de este repositorio (ej. "timer.html").
-        const projectsData = [
-            {
-                stage: "1eso",
-                subject: "ciencias-computacion",
-                audience: "alumnado",
-                title: "Escape Panda",
-                imgSrc: "https://placehold.co/600x400/34D399/000?text=Escape+Panda",
-                longDesc: "Un divertido juego de escape diseñado para que los alumnos de 1º de la ESO practiquen y desarrollen los fundamentos del pensamiento computacional mientras ayudan a un panda a resolver puzzles.",
-                projectUrl: "https://profeka.github.io/games/pandaesc.html",
-                description: "Juego para trabajar el pensamiento computacional."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "alumnado",
-                title: "Arquitecto Dimensional",
-                imgSrc: "https://placehold.co/600x400/A78BFA/000?text=Arquitecto+Dimensional",
-                longDesc: "Una herramienta lúdica para 2º de la ESO que desafía a los estudiantes a resolver problemas geométricos en un entorno 3D, mejorando su visión espacial y su capacidad de abstracción.",
-                projectUrl: "https://profeka.github.io/games/arqdim.html",
-                description: "Juego para desarrollar la visión espacial."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "alumnado",
-                title: "Diédrico Creator",
-                imgSrc: "https://placehold.co/600x400/FB923C/000?text=Diédrico+Creator",
-                longDesc: "Los alumnos diseñan su nombre con piezas en 3D y trabajan sus vistas en sistema diédrico (alzado, planta y perfil). Pensado para el bloque de representación gráfica.",
-                projectUrl: "d_build.html",
-                description: "Diseña tu nombre en 3D y obtén sus vistas en diédrico."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "alumnado",
-                title: "Órdenes a ciegas",
-                imgSrc: "https://placehold.co/600x400/F43F5E/000?text=Órdenes+a+ciegas",
-                longDesc: "Actividad por parejas de algoritmos (crit. 5.1): un programador/a escribe las órdenes y un ejecutor/a las sigue sin ver el mapa. Varios mundos (mazmorra, cocina, panda), tres niveles, depuración paso a paso, guardado de partida y rúbrica.",
-                projectUrl: "ordenes_ciegas_2eso.html",
-                description: "Algoritmos por parejas: escribir órdenes precisas y depurarlas."
-            },
-            {
-                stage: "1eso 2eso",
-                subject: "ciencias-computacion tecnologia",
-                audience: "alumnado",
-                title: "Creador de Diagramas de Flujo",
-                imgSrc: "https://placehold.co/600x400/FBBF24/000?text=Creador+de+Diagramas+de+Flujo",
-                longDesc: "Una herramienta sencilla e intuitiva para crear diagramas de flujo con bloques de inicio/fin, proceso y decisión, flechas curvas y exportación a PNG. Ideal para visualizar algoritmos y procesos de forma clara y ordenada.",
-                projectUrl: "flow_dig.html",
-                description: "Herramienta sencilla para crear diagramas de flujo."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia digitalizacion",
-                audience: "alumnado",
-                title: "El plano de la red de tu casa",
-                imgSrc: "https://placehold.co/600x400/22D3EE/000?text=El+plano+de+la+red+de+tu+casa",
-                longDesc: "Los alumnos dibujan la red de su casa: añaden aparatos, los conectan por cable o Wi-Fi y les asignan IP. Incluye diccionario del técnico, retos personalizados, tarjetas de ayuda y un corrector.",
-                projectUrl: "plano_red_casa.html",
-                description: "Dibuja la red de tu casa: aparatos, conexiones e IP."
-            },
-            {
-                stage: "1eso",
-                subject: "ciencias-computacion",
-                audience: "alumnado",
-                title: "Tema 1: Algoritmos",
-                imgSrc: "https://placehold.co/600x400/F43F5E/000?text=Tema+1:+Algoritmos",
-                longDesc: "Material de estudio para el primer tema de Ciencias de la Computación en 1º de la ESO. Introduce el concepto de algoritmo, sus características y cómo se representan, sentando las bases del pensamiento computacional.",
-                projectUrl: "https://profeka.github.io/temario/1ESO-CC-T1.html",
-                description: "Temario del primer tema de Ciencias de la Computación."
-            },
-            {
-                stage: "4eso",
-                subject: "digitalizacion",
-                audience: "alumnado",
-                title: "Marimoligram",
-                imgSrc: "https://placehold.co/600x400/F472B6/000?text=Marimoligram",
-                longDesc: "Una simulación interactiva de una red social. Permite a los alumnos de 4º de la ESO enfrentarse a situaciones realistas (cookies, publicaciones, anuncios engañosos, bulos) para aprender a identificar amenazas, gestionar su privacidad y proteger su identidad digital. Incluye las páginas enlazadas AeroVuela Max y Verdad Digital.",
-                projectUrl: "marmolgr.html",
-                description: "Simulación de red social para aprender sobre privacidad y amenazas."
-            },
-            {
-                stage: "4eso",
-                subject: "digitalizacion",
-                audience: "alumnado",
-                title: "Auditoría de Bienestar Digital",
-                imgSrc: "https://placehold.co/600x400/60A5FA/000?text=Auditoría+de+Bienestar+Digital",
-                longDesc: "Un conjunto de misiones donde los alumnos repasan conceptos clave, comprueban la fortaleza de sus contraseñas y simulan una auditoría de privacidad de sus cuentas, terminando con una checklist de buenas prácticas.",
-                projectUrl: "audit-dig.html",
-                description: "Misiones para mejorar la privacidad y seguridad online."
-            },
-            {
-                stage: "4eso",
-                subject: "digitalizacion",
-                audience: "alumnado",
-                title: "Autoevaluación de Digitalización",
-                imgSrc: "https://placehold.co/600x400/A855F7/000?text=Autoevaluación+de+Digitalización",
-                longDesc: "Formulario de autoevaluación con descriptores por niveles (trabajo en clase, dossier HTML, proyectos…) para que cada alumno reflexione sobre su desempeño.",
-                projectUrl: "autoevaluacion.html",
-                description: "Autoevaluación del alumno con rúbrica por apartados."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Timer de Aula",
-                imgSrc: "https://placehold.co/600x400/FDE047/000?text=Timer+de+Aula",
-                longDesc: "Cuenta atrás grande para proyectar en clase, con tiempos rápidos (5 min a 1 h), tiempo personalizado y confirmación antes de detenerla.",
-                projectUrl: "timer.html",
-                description: "Temporizador de clase para proyectar."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "profesorado",
-                title: "Fases y temporizador · Órdenes a ciegas",
-                imgSrc: "https://placehold.co/600x400/FCA5A5/000?text=Fases+y+temporizador+·+Órdenes+a+ciegas",
-                longDesc: "Proyector de fases para la sesión de Órdenes a ciegas: temporizador por fases editable, aviso sonoro, pantalla completa y atajos de teclado.",
-                projectUrl: "proyector_fases.html",
-                description: "Temporizador por fases para proyectar durante la actividad."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "profesorado",
-                title: "Planificador Anual de Saberes",
-                imgSrc: "https://placehold.co/600x400/86EFAC/000?text=Planificador+Anual+de+Saberes",
-                longDesc: "Organiza los saberes básicos (bloques A–E) en temas y trimestres arrastrando y soltando. Permite exportar e importar la planificación en JSON.",
-                projectUrl: "seguimiento_saberes.html",
-                description: "Reparte los saberes básicos por trimestres y temas."
-            },
-            {
-                stage: "2eso",
-                subject: "tecnologia",
-                audience: "profesorado",
-                title: "Seguimiento de Criterios por Proyecto",
-                imgSrc: "https://placehold.co/600x400/93C5FD/000?text=Seguimiento+de+Criterios+por+Proyecto",
-                longDesc: "Banco de criterios de evaluación de Tecnología 2º ESO para asignarlos a cada proyecto y comprobar qué criterios quedan cubiertos a lo largo del curso.",
-                projectUrl: "proyect_org_tool.html",
-                description: "Asigna criterios de evaluación a cada proyecto."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Herramienta de Calificación (Cloud)",
-                imgSrc: "https://placehold.co/600x400/34D399/000?text=Herramienta+de+Calificación+(Cloud)",
-                longDesc: "Corrige con rúbricas guardadas en la nube: carga la rúbrica, puntúa por ítems y obtén el informe por sección y por criterio. Permite guardar y retomar el progreso.",
-                projectUrl: "califtool_v2.html",
-                description: "Califica con rúbricas en la nube e informes por criterio."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Repositorio de Rúbricas (Cloud)",
-                imgSrc: "https://placehold.co/600x400/6EE7B7/000?text=Repositorio+de+Rúbricas+(Cloud)",
-                longDesc: "Editor de rúbricas conectado a la nube: define criterios, secciones e ítems, guárdalas y edítalas. Incluye importación masiva de rúbricas antiguas en JSON.",
-                projectUrl: "califrepo_v2.html",
-                description: "Crea y guarda rúbricas en la nube."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Herramienta de Calificación",
-                imgSrc: "https://placehold.co/600x400/A7F3D0/000?text=Herramienta+de+Calificación",
-                longDesc: "Versión local (sin nube) de la herramienta de calificación: pega la rúbrica en JSON, puntúa y exporta el informe o el código de progreso.",
-                projectUrl: "calif.html",
-                description: "Califica con rúbricas en JSON, sin conexión."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Repositorio de Rúbricas",
-                imgSrc: "https://placehold.co/600x400/BBF7D0/000?text=Repositorio+de+Rúbricas",
-                longDesc: "Constructor de rúbricas en versión local: genera el JSON de la rúbrica para usarlo en la Herramienta de Calificación.",
-                projectUrl: "rub_repo.html",
-                description: "Construye rúbricas y genera su JSON."
-            },
-            {
-                stage: "general",
-                subject: "general",
-                audience: "profesorado",
-                title: "Dashboard de Progreso",
-                imgSrc: "https://placehold.co/600x400/C4B5FD/000?text=Dashboard+de+Progreso",
-                longDesc: "Reúne los códigos de progreso de varias correcciones y muestra el informe agregado: nota media ponderada y media por criterio.",
-                projectUrl: "dashboard.html",
-                description: "Informe agregado de progreso por criterios."
-            },
-            {
-                stage: "4eso",
-                subject: "digitalizacion",
-                audience: "profesorado",
-                title: "Calificación Marimoligram",
-                imgSrc: "https://placehold.co/600x400/F9A8D4/000?text=Calificación+Marimoligram",
-                longDesc: "Herramienta de calificación con la rúbrica de la actividad Marimoligram ya cargada, con informe por sección y por criterio.",
-                projectUrl: "calif_marmolgr.html",
-                description: "Rúbrica lista para corregir la actividad Marimoligram."
-            }
-        ];
+<footer>Hecho con la base neobrutalista de <code>digital-tools</code></footer>
 
-        // --- LÓGICA DE RENDERIZADO (NO TOCAR) ---
-        
-        // Elementos estáticos del DOM
-        const stageFilterButtons = document.querySelectorAll('#stage-filters .filter-btn');
-        const subjectFilterButtons = document.querySelectorAll('#subject-filters .filter-btn');
-        const audienceFilterButtons = document.querySelectorAll('#audience-filters .filter-btn');
-        const resultsCount = document.getElementById('results-count');
-        const grid = document.getElementById('projects-grid');
-        const modal = document.getElementById('project-modal');
-        const modalContent = document.getElementById('modal-content');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const modalImg = document.getElementById('modal-img');
-        const modalTitle = document.getElementById('modal-title');
-        const modalDescription = document.getElementById('modal-description');
-        const modalLink = document.getElementById('modal-link');
+<!-- MODAL DE DETALLE -->
+<div id="modal" class="modal-back hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <div class="row" style="align-items:flex-start">
+      <div id="m-ico" class="logo"></div>
+      <div style="flex:1;min-width:0"><h2 id="m-title"></h2><div id="m-tags" class="row" style="gap:8px;margin-top:8px"></div></div>
+    </div>
+    <p id="m-desc" style="margin-top:14px"></p>
+    <p class="row" style="margin-top:16px"><button class="btn secondary" onclick="closeModal()">⬅ Volver</button><span class="spacer"></span><a id="m-link" class="btn primary" target="_blank" rel="noopener">Abrir herramienta ➔</a></p>
+  </div>
+</div>
 
-        // Estado de filtros
-        let activeStageFilter = 'all';
-        let activeSubjectFilter = 'all';
-        let activeAudienceFilter = 'all';
+<script>
+/* =====================================================================
+   DATOS — el único sitio que hay que tocar para añadir o cambiar herramientas
+   stage / subject: claves separadas por espacios, o "general" (vale para todas)
+   audience: "alumnado" o "profesorado"
+   color: yellow | orange | cyan | lime | pink | violet
+   url: ruta relativa para las herramientas de este repositorio
+   ===================================================================== */
+const STAGES   = { '1eso':'1º ESO', '2eso':'2º ESO', '3eso':'3º ESO', '4eso':'4º ESO', '1bach':'1º Bach', '2bach':'2º Bach' };
+const SUBJECTS = { 'ciencias-computacion':'C. Computación', 'tecnologia':'Tecnología', 'digitalizacion':'Digitalización' };
+const AUDIENCES= { 'alumnado':'Alumnado', 'profesorado':'Profesorado' };
 
-        // Función para generar el HTML de una tarjeta
-        function renderProjectCard(project) {
-            // Generar etiquetas de etapa
-            const stageTagsHTML = project.stage.split(' ')
-                .map(stageKey => {
-                    const tag = STAGE_TAGS[stageKey];
-                    if (!tag) return '';
-                    return `<span class="${tag.color} text-white text-xs font-bold px-3 py-1 border-2 border-black">${tag.text}</span>`;
-                })
-                .join(' ');
-            
-            // Generar etiquetas de asignatura
-            const subjectTagsHTML = project.subject.split(' ')
-                .map(subjectKey => {
-                    const tag = SUBJECT_TAGS[subjectKey];
-                    if (!tag) return '';
-                    return `<span class="${tag.color} text-white text-xs font-bold px-3 py-1 border-2 border-black">${tag.text}</span>`;
-                })
-                .join(' ');
+const TOOLS = [
+  { stage:"1eso", subject:"ciencias-computacion", audience:"alumnado", icon:"🐼", color:"lime",
+    title:"Escape Panda", url:"https://profeka.github.io/games/pandaesc.html",
+    short:"Juego de escape para trabajar el pensamiento computacional.",
+    long:"Un juego de escape para que el alumnado de 1º ESO practique los fundamentos del pensamiento computacional mientras ayuda a un panda a resolver puzzles." },
+  { stage:"1eso", subject:"ciencias-computacion", audience:"alumnado", icon:"📘", color:"pink",
+    title:"Tema 1: Algoritmos", url:"https://profeka.github.io/temario/1ESO-CC-T1.html",
+    short:"Temario del primer tema de Ciencias de la Computación.",
+    long:"Material de estudio del primer tema: qué es un algoritmo, sus características y cómo se representa." },
+  { stage:"1eso 2eso", subject:"ciencias-computacion tecnologia", audience:"alumnado", icon:"🔀", color:"yellow",
+    title:"Diagramas de flujo", url:"flow_dig.html",
+    short:"Crea diagramas de flujo y expórtalos a PNG.",
+    long:"Constructor sencillo de diagramas de flujo con bloques de inicio/fin, proceso y decisión, flechas curvas y exportación a PNG. Ideal para representar algoritmos." },
+  { stage:"2eso", subject:"tecnologia", audience:"alumnado", icon:"🧭", color:"orange",
+    title:"Órdenes a ciegas", url:"ordenes_ciegas_2eso.html",
+    short:"Algoritmos por parejas: escribir órdenes precisas y depurarlas.",
+    long:"Un programador/a escribe las órdenes y un ejecutor/a las sigue sin ver el mapa. Varios mundos, tres niveles, depuración paso a paso, guardado de partida y rúbrica (crit. 5.1)." },
+  { stage:"2eso", subject:"tecnologia", audience:"alumnado", icon:"🧊", color:"violet",
+    title:"Arquitecto Dimensional", url:"https://profeka.github.io/games/arqdim.html",
+    short:"Juego para desarrollar la visión espacial.",
+    long:"Retos geométricos en un entorno 3D para mejorar la visión espacial y la capacidad de abstracción." },
+  { stage:"2eso", subject:"tecnologia", audience:"alumnado", icon:"📐", color:"cyan",
+    title:"Diédrico Creator", url:"d_build.html",
+    short:"Diseña tu nombre en 3D y obtén sus vistas.",
+    long:"El alumnado construye su nombre con piezas en 3D y trabaja sus vistas en sistema diédrico (alzado, planta y perfil)." },
+  { stage:"2eso", subject:"tecnologia digitalizacion", audience:"alumnado", icon:"🏠", color:"lime",
+    title:"La red de tu casa", url:"plano_red_casa.html",
+    short:"Dibuja la red de tu casa: aparatos, conexiones e IP.",
+    long:"Añade aparatos, conéctalos por cable o Wi-Fi y asígnales IP. Incluye diccionario del técnico, retos personalizados, tarjetas de ayuda y corrector." },
+  { stage:"4eso", subject:"digitalizacion", audience:"alumnado", icon:"📸", color:"pink",
+    title:"Marimoligram", url:"marmolgr.html",
+    short:"Red social simulada para aprender sobre privacidad y amenazas.",
+    long:"Simulación de una red social con situaciones realistas (cookies, publicaciones, anuncios engañosos, bulos) para identificar amenazas y proteger la identidad digital. Incluye las páginas enlazadas AeroVuela Max y Verdad Digital." },
+  { stage:"4eso", subject:"digitalizacion", audience:"alumnado", icon:"🛡️", color:"cyan",
+    title:"Auditoría de bienestar digital", url:"audit-dig.html",
+    short:"Misiones para mejorar la privacidad y la seguridad online.",
+    long:"Conceptos clave, comprobador de contraseñas y simulador de auditoría de privacidad, con una checklist final de buenas prácticas." },
+  { stage:"4eso", subject:"digitalizacion", audience:"alumnado", icon:"🪞", color:"violet",
+    title:"Autoevaluación", url:"autoevaluacion.html",
+    short:"El alumno reflexiona sobre su trabajo con una rúbrica.",
+    long:"Formulario de autoevaluación con descriptores por niveles (trabajo en clase, dossier HTML, proyectos…)." },
 
-            const audienceTag = AUDIENCE_TAGS[project.audience];
-            const audienceTagHTML = audienceTag
-                ? `<span class="${audienceTag.color} text-white text-xs font-bold px-3 py-1 border-2 border-black">${audienceTag.text}</span>`
-                : '';
+  { stage:"general", subject:"general", audience:"profesorado", icon:"⏱️", color:"yellow",
+    title:"Timer de aula", url:"timer.html",
+    short:"Cuenta atrás grande para proyectar.",
+    long:"Temporizador para proyectar en clase con tiempos rápidos (5 min a 1 h), tiempo personalizado y confirmación antes de pararlo." },
+  { stage:"2eso", subject:"tecnologia", audience:"profesorado", icon:"🎬", color:"orange",
+    title:"Fases · Órdenes a ciegas", url:"proyector_fases.html",
+    short:"Temporizador por fases para la actividad.",
+    long:"Proyector de fases de la sesión de Órdenes a ciegas: tiempos editables, aviso sonoro, pantalla completa y atajos de teclado." },
+  { stage:"1eso 2eso 4eso 1bach 2bach", subject:"ciencias-computacion tecnologia digitalizacion", audience:"profesorado", icon:"🗓️", color:"lime",
+    title:"Planificador de saberes y criterios", url:"seguimiento_saberes.html",
+    short:"Organiza saberes y criterios del currículo en temas y trimestres.",
+    long:"Currículo de la Comunidad de Madrid para C. de la Computación (1º y 2º ESO, 1º y 2º Bach), Tecnología y Digitalización 2º ESO, Digitalización 4º ESO y Tecnología e Ingeniería I y II. Crea temas por trimestre, asígnales saberes y criterios, revisa la matriz de cobertura y exporta un JSON con todos los textos." },
+  { stage:"2eso", subject:"tecnologia", audience:"profesorado", icon:"🎯", color:"cyan",
+    title:"Criterios por proyecto", url:"proyect_org_tool.html",
+    short:"Asigna criterios de evaluación a cada proyecto.",
+    long:"Banco de criterios de Tecnología 2º ESO para asignarlos a cada proyecto y ver qué criterios quedan cubiertos en el curso." },
+];
 
-            return `
-            <div class="project-card cursor-pointer bg-white border-4 border-black p-5 flex flex-col gap-4 hard-shadow card-effect transition-all duration-200" 
-                 data-stage="${project.stage}" 
-                 data-subject="${project.subject}" 
-                 data-audience="${project.audience}" 
-                 data-title="${project.title}" 
-                 data-img-src="${project.imgSrc}" 
-                 data-long-desc="${project.longDesc}" 
-                 data-project-url="${project.projectUrl}">
-                
-                <img src="${project.imgSrc}" alt="Imagen del proyecto ${project.title}" class="w-full h-52 object-cover border-2 border-black pointer-events-none">
-                <div class="flex-grow pointer-events-none">
-                    <h2 class="text-2xl font-black">${project.title}</h2>
-                    <p class="mt-2 text-gray-700">${project.description}</p>
-                </div>
-                <div class="flex flex-wrap gap-2 pt-2 pointer-events-none">
-                    ${stageTagsHTML}
-                    ${subjectTagsHTML}
-                    ${audienceTagHTML}
-                </div>
-                <a href="${project.projectUrl}" target="_blank" rel="noopener noreferrer" class="project-link-btn inline-block bg-blue-500 text-white font-bold py-2 px-4 border-2 border-black hard-shadow-small btn-effect mt-4 transition-transform duration-100 z-10 relative self-start">Ver Proyecto &rarr;</a>
-            </div>
-            `;
-        }
+/* =====================================================================
+   LÓGICA (no hace falta tocarla)
+   ===================================================================== */
+const state = { stage:'all', subject:'all', audience:'all', q:'' };
+const GROUPS = { stage:STAGES, subject:SUBJECTS, audience:AUDIENCES };
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 
-        // Función para renderizar todas las tarjetas y añadir listeners
-        function renderAllCards() {
-            // 1. Limpiar el grid
-            grid.innerHTML = '';
-            
-            // 2. Generar y añadir todas las tarjetas
-            let allCardsHTML = '';
-            projectsData.forEach(project => {
-                allCardsHTML += renderProjectCard(project);
-            });
-            grid.innerHTML = allCardsHTML;
-            
-            // 3. Añadir listeners a las nuevas tarjetas
-            attachCardListeners();
-        }
+function tagsHTML(t){
+  const out = [];
+  t.stage.split(' ').forEach(k => out.push(k==='general' ? '<span class="pill">Todas las etapas</span>' : STAGES[k] ? `<span class="pill yellow">${STAGES[k]}</span>` : ''));
+  t.subject.split(' ').forEach(k => out.push(SUBJECTS[k] ? `<span class="pill">${SUBJECTS[k]}</span>` : ''));
+  out.push(`<span class="pill ${t.audience==='profesorado'?'violet':'cyan'}">${AUDIENCES[t.audience]}</span>`);
+  return out.join('');
+}
 
-        // Función para añadir listeners a las tarjetas (modal y enlaces)
-        function attachCardListeners() {
-            const projectCards = grid.querySelectorAll('.project-card');
-            projectCards.forEach(card => {
-                card.addEventListener('click', (e) => {
-                    if (e.target.closest('.project-link-btn')) {
-                        return;
-                    }
-                    openModal(card);
-                });
-            });
+function buildFilters(){
+  Object.entries(GROUPS).forEach(([group, opts]) => {
+    const box = document.querySelector(`[data-group="${group}"]`);
+    const all = { all:'Todas', ...opts };
+    Object.entries(all).forEach(([key, label]) => {
+      const b = document.createElement('button');
+      b.className = 'btn sm fbtn'; b.textContent = label; b.dataset.key = key;
+      b.setAttribute('aria-pressed', key==='all');
+      b.onclick = () => { state[group] = key; box.querySelectorAll('.fbtn').forEach(x => x.setAttribute('aria-pressed', x===b)); render(); };
+      box.appendChild(b);
+    });
+  });
+  $('#search').addEventListener('input', e => { state.q = norm(e.target.value.trim()); render(); });
+}
 
-            const projectLinkButtons = grid.querySelectorAll('.project-link-btn');
-            projectLinkButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (button.getAttribute('href') === '#') {
-                        e.preventDefault();
-                        console.log("No hay enlace de proyecto definido.");
-                    }
-                });
-            });
-        }
+function matches(t){
+  const hit = (field, val) => val==='all' || field.split(' ').includes('general') || field.split(' ').includes(val);
+  const text = norm(t.title+' '+t.short+' '+t.long);
+  return hit(t.stage,state.stage) && hit(t.subject,state.subject) && (state.audience==='all' || t.audience===state.audience) && (!state.q || text.includes(state.q));
+}
 
-        // --- LÓGICA DE FILTROS ---
-        function applyFilters() {
-            const projectCards = grid.querySelectorAll('.project-card'); // Re-seleccionar tarjetas
-            let visible = 0;
-            projectCards.forEach(card => {
-                const stages = card.dataset.stage.split(' ');
-                const subjects = card.dataset.subject.split(' ');
+function render(){
+  const list = TOOLS.filter(matches);
+  $('#tools').innerHTML = list.map(t => `
+    <article class="card tool">
+      <div class="head bg-${t.color}"><div class="ico">${t.icon}</div><h3>${esc(t.title)}</h3></div>
+      <div class="body">
+        <p>${esc(t.short)}</p>
+        <div class="tags">${tagsHTML(t)}</div>
+        <div class="actions">
+          <button class="btn sm" data-i="${TOOLS.indexOf(t)}">ℹ️ Más info</button>
+          <a class="btn sm primary" href="${esc(t.url)}" target="_blank" rel="noopener">Abrir ➔</a>
+        </div>
+      </div>
+    </article>`).join('');
+  $('#tools').querySelectorAll('[data-i]').forEach(b => b.onclick = () => openModal(TOOLS[b.dataset.i]));
+  $('#count').textContent = list.length;
+  $('#empty').classList.toggle('hidden', list.length > 0);
+}
 
-                const stageMatch = activeStageFilter === 'all' || stages.includes('general') || stages.includes(activeStageFilter);
-                const subjectMatch = activeSubjectFilter === 'all' || subjects.includes('general') || subjects.includes(activeSubjectFilter);
-                const audienceMatch = activeAudienceFilter === 'all' || card.dataset.audience === activeAudienceFilter;
+function resetFilters(){
+  Object.assign(state, { stage:'all', subject:'all', audience:'all', q:'' });
+  $('#search').value = '';
+  document.querySelectorAll('.fbtn').forEach(b => b.setAttribute('aria-pressed', b.dataset.key==='all'));
+  render();
+}
 
-                if (stageMatch && subjectMatch && audienceMatch) {
-                    card.style.display = 'flex';
-                    visible++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            resultsCount.textContent = visible === 1 ? '1 herramienta' : `${visible} herramientas`;
-        }
+function openModal(t){
+  $('#m-ico').textContent = t.icon; $('#m-ico').className = 'logo bg-'+t.color;
+  $('#m-title').textContent = t.title;
+  $('#m-tags').innerHTML = tagsHTML(t);
+  $('#m-desc').textContent = t.long;
+  $('#m-link').href = t.url;
+  $('#modal').classList.remove('hidden');
+}
+function closeModal(){ $('#modal').classList.add('hidden'); }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-        // Activa un botón dentro de su grupo y devuelve su filtro
-        function setupFilterGroup(buttons, onChange) {
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    buttons.forEach(btn => {
-                        btn.classList.remove('active', 'bg-yellow-400');
-                        btn.classList.add('bg-white');
-                    });
-                    button.classList.add('active', 'bg-yellow-400');
-                    button.classList.remove('bg-white');
-                    onChange(button.dataset.filter);
-                    applyFilters();
-                });
-            });
-        }
-
-        setupFilterGroup(stageFilterButtons, f => activeStageFilter = f);
-        setupFilterGroup(subjectFilterButtons, f => activeSubjectFilter = f);
-        setupFilterGroup(audienceFilterButtons, f => activeAudienceFilter = f);
-
-        // --- LÓGICA DEL MODAL ---
-        const openModal = (card) => {
-            modalImg.src = card.dataset.imgSrc;
-            modalTitle.textContent = card.dataset.title;
-            modalDescription.textContent = card.dataset.longDesc;
-            
-            const projectUrl = card.dataset.projectUrl;
-            
-            if (projectUrl && projectUrl !== "#") {
-                modalLink.href = projectUrl;
-                modalLink.classList.remove('hidden');
-            } else {
-                modalLink.classList.add('hidden');
-            }
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('modal-fade-in');
-            modalContent.classList.add('modal-scale-up');
-        };
-
-        const closeModal = () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('modal-fade-in');
-            modalContent.classList.remove('modal-scale-up');
-        };
-
-        closeModalBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // --- INICIALIZACIÓN ---
-        // Renderizar las tarjetas al cargar la página
-        renderAllCards();
-        applyFilters();
-
-    </script>
-
+buildFilters();
+render();
+</script>
 </body>
 </html>
-
-
