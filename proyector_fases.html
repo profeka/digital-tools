@@ -42,6 +42,8 @@ main{flex:1;display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:20px;
 #phase-tag{display:inline-block;background:var(--ink);color:var(--lime);border:var(--bw) solid var(--ink);padding:2px 12px;font-weight:900;text-transform:uppercase;font-size:clamp(.8rem,1.6vw,1.1rem)}
 #phase-title{font-size:clamp(1.6rem,min(5vw,7vh),3.6rem);margin:10px 0}
 #phase-desc{font-size:clamp(1.1rem,2.6vw,1.9rem);font-weight:700}
+#rot{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+#rot-badge{background:var(--pink);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:6px 20px;font-weight:900;text-transform:uppercase;font-size:clamp(1.6rem,min(5vw,7vh),3.4rem)}
 #phase-next{margin-top:10px;font-size:clamp(.9rem,1.6vw,1.2rem);font-weight:800;opacity:.8}
 .timer{font-family:var(--mono);font-weight:900;font-size:clamp(4rem,min(17vw,24vh),13rem);line-height:1;text-align:center;letter-spacing:-.04em}
 .timer-card{text-align:center}
@@ -87,6 +89,7 @@ kbd{font-family:var(--mono);background:var(--white);border:2px solid var(--ink);
     <div class="card big" id="phase-card">
       <span id="phase-tag">Fase 1 de 1</span>
       <h2 id="phase-title">—</h2>
+      <div id="rot" class="hidden"><span id="rot-badge"></span><button class="btn sm yellow" onclick="reroll()">🎲 Otro número</button></div>
       <p id="phase-desc"></p>
       <p id="phase-next"></p>
     </div>
@@ -121,19 +124,23 @@ kbd{font-family:var(--mono);background:var(--white);border:2px solid var(--ink);
 const DEFAULTS=[
  {icon:'🧭',name:'Arranque',min:3,desc:'Abrid el juego y escribid vuestro nombre y apellido. Nivel 1.'},
  {icon:'✍️',name:'Nivel 1 · Escribe tus órdenes',min:8,desc:'Explica el camino con tus palabras. ¡Aún no pulses «Pasar turno»!'},
- {icon:'🔄',name:'Rotación 1',min:1,desc:'Todos un sitio hacia la DERECHA. Quien se sienta pulsa «Pasar turno» y escribe su nombre.'},
+ {icon:'🔄',name:'Rotación 1',min:1,rot:'izquierda',desc:'Quien se sienta pulsa «Pasar turno» y escribe su nombre.'},
  {icon:'🎮',name:'Nivel 1 · Ejecuta las órdenes',min:7,desc:'El texto manda. Anota las dudas. Si no puedes llegar, explica por qué.'},
  {icon:'↩️',name:'Vuelta a tu sitio',min:1,desc:'Cada uno a su ordenador. Pulsad «Volver al programador/a»: el profe dice la contraseña.'},
  {icon:'🔍',name:'Depurar y reflexionar',min:5,desc:'Mirad la repetición. Escribid qué salió mal y si os explicasteis mal.'},
  {icon:'✍️',name:'Nivel 2 · Escribe tus órdenes',min:10,desc:'Cambia a «Nivel 2 · Camino largo». Camino más largo, empiezas mirando al azar.'},
- {icon:'🔄',name:'Rotación 2',min:1,desc:'Todos un sitio hacia la IZQUIERDA. Quien se sienta pulsa «Pasar turno».'},
+ {icon:'🔄',name:'Rotación 2',min:1,rot:'derecha',desc:'Quien se sienta pulsa «Pasar turno» y escribe su nombre.'},
  {icon:'🎮',name:'Nivel 2 · Ejecuta las órdenes',min:8,desc:'Seguid el texto al pie de la letra. ¡Cuidado con las trampas!'},
  {icon:'💾',name:'Vuelta, depurar y guardar',min:7,desc:'Volved a vuestro sitio, depurad, escribid la reflexión y pulsad «Guardar».'}
 ];
 let phases=load(), cur=0, remaining=phases[0].min*60, running=false, endAt=0, tick=null, over=false, soundOn=true, editing=false;
 const $=id=>document.getElementById(id);
-function load(){ try{ const j=JSON.parse(localStorage.getItem('ocFases')||'null'); if(Array.isArray(j)&&j.length===DEFAULTS.length) return DEFAULTS.map((d,i)=>({...d,min:Math.max(1,+j[i].min||d.min)})); }catch(e){} return DEFAULTS.map(d=>({...d})); }
-function persist(){ try{ localStorage.setItem('ocFases',JSON.stringify(phases.map(p=>({min:p.min})))); }catch(e){} }
+function rnd(){ return 2+Math.floor(Math.random()*4); }   // 2, 3, 4 o 5 puestos
+function load(){ let j=null; try{ j=JSON.parse(localStorage.getItem('ocFases')||'null'); }catch(e){}
+  const ok=Array.isArray(j)&&j.length===DEFAULTS.length;
+  return DEFAULTS.map((d,i)=>({...d,min:ok?Math.max(1,+j[i].min||d.min):d.min,n:d.rot?(ok&&j[i].n>=2&&j[i].n<=5?j[i].n:rnd()):0})); }
+function persist(){ try{ localStorage.setItem('ocFases',JSON.stringify(phases.map(p=>({min:p.min,n:p.n})))); }catch(e){} }
+function reroll(){ const p=phases[cur]; if(!p.rot)return; let n; do{n=rnd();}while(n===p.n&&Math.random()<.8); p.n=n; persist(); render(); }
 const fmt=s=>{s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
 
 /* ---- render ---- */
@@ -156,7 +163,9 @@ function render(){
   const p=phases[cur];
   $('phase-tag').textContent='Fase '+(cur+1)+' de '+phases.length;
   $('phase-title').textContent=p.icon+' '+p.name;
-  $('phase-desc').textContent=p.desc;
+  $('rot').classList.toggle('hidden',!p.rot);
+  if(p.rot){ $('rot-badge').textContent=(p.rot==='izquierda'?'⬅ ':'➡ ')+p.n+' puestos a la '+p.rot; }
+  $('phase-desc').textContent=p.rot?'Todos se mueven '+p.n+' puestos hacia la '+p.rot.toUpperCase()+'. '+p.desc:p.desc;
   const nx=phases[cur+1]; $('phase-next').textContent=nx?'Después: '+nx.icon+' '+nx.name:'Última fase 🎉';
   $('timer').textContent=fmt(remaining);
   const total=p.min*60, pct=Math.max(0,Math.min(100,remaining/total*100)); $('bar').style.width=pct+'%';
@@ -197,7 +206,7 @@ function toggleSound(){ soundOn=!soundOn; $('btn-sound').textContent='🔔 Sonid
 
 /* ---- varios ---- */
 function toggleEdit(){ editing=!editing; $('edit-row').classList.toggle('hidden',!editing); $('btn-edit').textContent=editing?'✔ Hecho':'✏️ Editar tiempos'; render(); }
-function resetPhases(){ phases=DEFAULTS.map(d=>({...d})); persist(); if(!running)remaining=phases[cur].min*60; updateTotal(); render(); }
+function resetPhases(){ phases=DEFAULTS.map(d=>({...d,n:d.rot?rnd():0})); persist(); if(!running)remaining=phases[cur].min*60; updateTotal(); render(); }
 function fullscreen(){ try{ if(document.fullscreenElement)document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
