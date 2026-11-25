@@ -189,7 +189,7 @@ window.lucide={createIcons:function(){
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl sm:text-2xl font-extrabold uppercase tracking-tight leading-none">Prepara el PC de tu Cliente</h1>
-                        <span class="bg-black text-white font-mono-code text-[11px] font-bold px-2 py-0.5 border border-black">OS SIMULATOR v11</span>
+                        <span class="bg-black text-white font-mono-code text-[11px] font-bold px-2 py-0.5 border border-black">OS SIMULATOR v12</span>
                     </div>
                     <p class="text-xs font-bold text-black/80 mt-0.5">Simulador de escritorio · SdA3 · 1º Bachillerato</p>
                 </div>
@@ -5372,6 +5372,75 @@ pintarHoja = function () {
   if (sec) sec.parentElement.insertAdjacentHTML("beforeend", `<div class="hj-mini" style="margin-top:6px;color:#000">💻 Sistema que usa: <strong>${con.length ? con.map(f => NOM_FAM[f]).join(" y ") : "ninguno (no ha usado ordenador)"}</strong></div>`);
   const st = [...h.querySelectorAll(".hj-sec")].find(s => s.textContent.includes("Stats"));
   if (st) st.insertAdjacentHTML("afterend", `<div class="hj-bar"><div class="l"><span>📦 Programas (objetivo: 10)</span><span class="font-mono-code">${n} / 10</span></div><div class="t"><div style="width:${Math.min(100, n * 10)}%;background:${n >= 10 ? "#A3E635" : "#00F0FF"}"></div></div></div>${n < 10 ? `<div class="hj-mini">Si no llegas a 10, tendrás que explicar por qué.</div>` : ""}`);
+};
+
+
+/* =====================================================================
+   PARTE 17 · Letra más grande en la BIOS · Windows de Álvaro lo paga su empresa ·
+   presupuestos que permiten el camino de pago (Elena, Irene)
+   ===================================================================== */
+document.head.insertAdjacentHTML("beforeend", `<style id="bios-grande">
+#bios-scroll { font-size: 15px !important; line-height: 1.5; }
+#bios-scroll .text-xs { font-size: 15px !important; line-height: 1.5 !important; }
+#bios-scroll .text-sm { font-size: 17px !important; line-height: 1.45 !important; }
+#bios-scroll .text-\\[11px\\] { font-size: 13.5px !important; line-height: 1.45 !important; }
+#bios-scroll .text-\\[10px\\] { font-size: 12px !important; }
+#bios-scroll select, #bios-scroll button { font-size: 15px; }
+</style>`);
+
+/* presupuestos: con el más bajo posible (×0,9) tiene que caber el camino de pago */
+HW_CLI.elena.budget = 330; HW_CLI.irene.budget = 470;
+
+/* licencias del sistema que paga otro */
+FICHAS.alvaro.pagadoSO = {win11: "Licencia de Windows de su empresa"};
+FICHAS.alvaro.cond = "El portátil es de mi empresa: me pagan la licencia de Windows y la de Teams, que es lo que usamos. Tengo mil contraseñas apuntadas en un pósit.";
+function descSO(p) {
+  const f = fichaDe(p), os = osX(p && p.so);
+  return os && f.pagadoSO && f.pagadoSO[os.id] ? os.price : 0;
+}
+const _eval17 = evalProy;
+evalProy = function (p) {
+  const ev = _eval17(p), d = descSO(p);
+  if (d) {
+    ev.cost.so -= d; ev.cost.total -= d;
+    const it = ev.items.find(i => i.tipo === "presupuesto");
+    if (it) { it.ok = ev.cost.total <= p.budget; it.msg = it.ok ? `Dentro del presupuesto (${eurX(ev.cost.total)} de ${eurX(p.budget)})` : `Te pasas del presupuesto: ${eurX(ev.cost.total)} frente a ${eurX(p.budget)}`; }
+    ev.ok = ev.items.every(i => i.ok);
+  }
+  return ev;
+};
+const _just17 = justificacionesActivas;
+justificacionesActivas = function (p) {
+  const out = _just17(p), d = descSO(p);
+  if (!d) return out;
+  const tot = _evalBase12(p).cost.total - d, i = out.findIndex(j => j.k === "presupuesto");
+  if (i >= 0) {
+    if (tot <= p.budget) out.splice(i, 1);
+    else out[i].t = `Me he pasado del presupuesto en ${eurX(tot - p.budget)} (${eurX(tot)} de ${eurX(p.budget)})`;
+  }
+  return out;
+};
+/* que se vea en la BIOS, en «Este equipo» y en la revisión */
+const marcaSOPagado = (h, p) => (fichaDe(p).pagadoSO || {}).win11 ? h.split("Licencia nueva (~" + eurX(145) + ")").join("Licencia de su empresa (al cliente le cuesta 0 €)").split(eurX(145)).join("0 € · lo paga su empresa") : h;
+const _vExt17 = ventanaExt;
+ventanaExt = function (winType, targetMode, proj, client) {
+  let h = _vExt17(winType, targetMode, proj, client);
+  if (!proj) return h;
+  if (winType === "win-equipo" || winType === "win-factura") h = marcaSOPagado(h, proj);
+  if (winType === "win-factura" && descSO(proj)) {
+    const os = osX(proj.so);
+    h = h.replace('<div class="font-heading font-extrabold uppercase text-sm">Revisión técnica antes de entregar</div>', `<div class="font-heading font-extrabold uppercase text-sm">Revisión técnica antes de entregar</div><div class="bg-[#A3E635] border-2 border-black px-2 py-1 text-xs font-bold">💼 ${os.name}: ${fichaDe(proj).pagadoSO[os.id]}. No cuenta en el presupuesto.</div>`);
+  }
+  return h;
+};
+const _bios17 = pintarBios;
+pintarBios = function () {
+  _bios17();
+  const v = document.getElementById("os-screen-viewport"), p = studentProject;
+  if (!v || !p || !(fichaDe(p).pagadoSO || {}).win11) return;
+  const s = document.getElementById("bios-scroll"), top = s ? s.scrollTop : 0;
+  v.innerHTML = marcaSOPagado(v.innerHTML, p);
+  const s2 = document.getElementById("bios-scroll"); if (s2) s2.scrollTop = top;
 };
 
 </script>
