@@ -189,7 +189,7 @@ window.lucide={createIcons:function(){
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl sm:text-2xl font-extrabold uppercase tracking-tight leading-none">Prepara el PC de tu Cliente</h1>
-                        <span class="bg-black text-white font-mono-code text-[11px] font-bold px-2 py-0.5 border border-black">OS SIMULATOR v12</span>
+                        <span class="bg-black text-white font-mono-code text-[11px] font-bold px-2 py-0.5 border border-black">OS SIMULATOR v13</span>
                     </div>
                     <p class="text-xs font-bold text-black/80 mt-0.5">Simulador de escritorio · SdA3 · 1º Bachillerato</p>
                 </div>
@@ -5441,6 +5441,18 @@ pintarBios = function () {
   const s = document.getElementById("bios-scroll"), top = s ? s.scrollTop : 0;
   v.innerHTML = marcaSOPagado(v.innerHTML, p);
   const s2 = document.getElementById("bios-scroll"); if (s2) s2.scrollTop = top;
+};
+
+
+/* =====================================================================
+   PARTE 18 · Presupuesto fijo: siempre el base del cliente + 10 %
+   ===================================================================== */
+presupuestoBase = function (client) { return Math.round(hwDeCliente(client).budget * 1.1 / 5) * 5; };
+const _ase18 = asegurarExt;
+asegurarExt = function (p) {
+  const r = _ase18(p);
+  if (p && p.clientId) p.budget = presupuestoBase(clienteDe(p));
+  return r;
 };
 
 </script>
