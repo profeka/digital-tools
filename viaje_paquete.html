@@ -1,0 +1,1357 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El viaje del paquete</title>
+<style>
+
+:root{--y:#FFE600;--g:#A3E635;--p:#C4B5FD;--r:#FFB4B4;--b:#BAE6FD;--bg:#FFFBEB;--ink:#111}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;background:var(--y);border-bottom:4px solid var(--ink)}
+header h1{margin:0;font-size:22px;flex:1 1 240px}
+.who{font-weight:800}
+.btn{font:inherit;font-weight:700;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:6px 11px;cursor:pointer;border-radius:6px}
+.btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.on{background:var(--g)}
+.btn.go{background:#fb923c}
+.btn.danger{background:var(--r)}
+.btn.sm{padding:3px 8px;font-size:14px}
+input[type=text],select{font:inherit;border:3px solid var(--ink);border-radius:6px;padding:6px 9px;width:100%;background:#fff}
+input[disabled],select[disabled]{background:#e7e5e4}
+.ip{font-family:ui-monospace,Consolas,monospace;font-weight:700}
+main{display:grid;grid-template-columns:1fr 370px;gap:16px;padding:16px;max-width:1550px;margin:0 auto}
+@media(max-width:1050px){main{grid-template-columns:1fr}}
+.card{background:#fff;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);border-radius:8px;padding:12px;margin-bottom:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs .btn{padding:4px 9px;font-size:15px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:center}
+#stage{border:3px solid var(--ink);border-radius:8px;background:#fff}
+svg{display:block;width:100%;height:auto;user-select:none;touch-action:none}
+.msg{min-height:26px;font-weight:700;margin-top:6px}
+h2{margin:0 0 6px;font-size:18px}
+.small{font-size:14px;color:#44403c}
+.hint{font-size:14px;margin:4px 0 8px}
+.bad{color:#b91c1c}.good{color:#15803d}
+.hidden{display:none}
+.story{font-size:17px;margin:4px 0 8px}
+.goal{background:#FEF9C3;border:3px solid var(--ink);border-radius:8px;padding:8px 10px;margin:6px 0}
+.lab{display:block;font-weight:700;margin:8px 0 3px}
+.log{max-height:300px;overflow:auto}
+.log h3{margin:8px 0 3px;font-size:15px;background:var(--p);border:2px solid var(--ink);border-radius:6px;padding:2px 8px}
+.ent{padding:5px 8px;border-left:6px solid var(--b);margin:3px 0;background:#f8fafc;font-size:15px}
+.ent.q{border-color:#facc15}.ent.a{border-color:#4ade80}.ent.req{border-color:#60a5fa}.ent.page{border-color:#16a34a;background:#dcfce7;font-weight:700}
+.ent.fail{border-color:#dc2626;background:#fee2e2;font-weight:700}
+.ag{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin:4px 0}
+.opt{display:block;border:3px solid var(--ink);border-radius:8px;padding:8px 10px;margin:6px 0;cursor:pointer;background:#fff;width:100%;text-align:left;font:inherit}
+.opt:hover{background:#fef9c3}
+.opt:disabled{cursor:default}
+.opt.ok{background:#bbf7d0}.opt.no{background:#fecaca}
+.bar{height:20px;border:3px solid var(--ink);border-radius:6px;background:#fff;overflow:hidden}
+.bar>div{height:100%;background:var(--g);width:0;transition:width .3s}
+dialog{border:4px solid var(--ink);border-radius:10px;max-width:760px;width:94%;padding:0;box-shadow:8px 8px 0 var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{display:flex;justify-content:space-between;align-items:center;background:var(--y);padding:10px 14px;border-bottom:4px solid var(--ink)}
+.dh h2{margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;padding:14px;max-height:70vh;overflow:auto}
+.cards div{border:3px solid var(--ink);border-radius:8px;padding:8px 10px;background:#fff}
+.cards b{display:block;margin-bottom:2px}
+.gt{border-collapse:collapse;width:100%;font-size:14px}
+.gt th,.gt td{border:2px solid #111;padding:5px 8px;text-align:left;vertical-align:top}
+.gt th{background:#f3f3f3}
+.warn{color:#b45309;font-weight:700}
+#start{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
+#start .card{max-width:440px;width:92%;margin:0}
+#start.hidden{display:none}
+
+.con{background:#111;border:3px solid var(--ink);border-radius:8px;margin-top:10px;color:#e7e5e4;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.conOut{height:210px;overflow:auto;padding:8px;white-space:pre-wrap;word-break:break-word}
+.conRow{display:flex;gap:6px;align-items:center;border-top:2px solid #44403c;padding:6px 8px;color:#a3e635}
+.conRow input{flex:1;min-width:0;background:#111;color:#fde047;border:0;outline:0;font:inherit;padding:2px}
+.conOut .cm{color:#a3e635;margin-top:6px}.conOut .ok{color:#86efac}.conOut .er{color:#fca5a5}.conOut .wa{color:#fde047}.conOut .dim{color:#a8a29e}
+.cfg{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:14px;margin:4px 0}
+.clsQ{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;border:3px solid var(--ink);border-radius:8px;padding:6px 10px;margin:6px 0}.clsQ select{width:auto}.clsQ>span:last-child:not(.ip){flex-basis:100%;font-size:14px}.clsQ.ok{background:#dcfce7}.clsQ.no{background:#fee2e2}
+.ag2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0;align-items:center}
+.col{min-width:0}
+
+/* ---- distribución a pantalla completa ---- */
+html,body{height:100%}
+body{display:flex;flex-direction:column;height:100vh;overflow:hidden;font-size:15px}
+header{flex-wrap:nowrap;padding:6px 12px;gap:10px;border-bottom-width:3px}
+header h1{font-size:18px;flex:0 0 auto;white-space:nowrap}
+header .tabs{flex:1;margin:0;gap:4px;min-width:0}
+.tabs .btn{padding:2px 7px;font-size:13px;border-width:2px;box-shadow:2px 2px 0 var(--ink)}
+.tabs .btn.on{font-size:14px}
+.hbtn{padding:3px 9px;font-size:15px;white-space:nowrap}
+.pwrap{position:relative}
+#menu{position:absolute;right:0;top:calc(100% + 10px);width:320px;z-index:40;margin:0}
+#mis{margin:8px 12px 0;padding:10px 14px;display:flex;gap:14px;align-items:flex-start;box-shadow:4px 4px 0 var(--ink)}
+.misText{flex:1;min-width:0}
+.misText h2{font-size:17px;margin:0 0 2px}
+.misText .story{font-size:15px;margin:0 0 8px;line-height:1.45}
+.misText .goal{margin:0;padding:6px 12px;font-size:15px;border-width:2px;line-height:1.45}
+.misText .goal p{margin:2px 0 0}.misText .goal ol{margin:3px 0 0;padding-left:22px}.misText .goal li{margin:2px 0}
+.misText .hint{margin:4px 0 0}
+.misBtns{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.misBtns .btn{padding:4px 10px;font-size:14px}.misBtns.row{flex-direction:row}#mis:has(.misBtns.row){align-items:center}
+.clsRow{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:5px;font-size:14px}
+.clsRow select{width:auto;padding:2px 6px;border-width:2px}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr) 108px;gap:10px;padding:10px 12px 12px;max-width:none;margin:0}
+main .card{margin:0;box-shadow:4px 4px 0 var(--ink)}
+#cStage{grid-column:1;grid-row:1;display:flex;flex-direction:column;padding:6px 8px 8px;min-height:0}
+
+.tools{margin-bottom:6px;gap:10px;flex-wrap:nowrap}.tools .tip{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}.tools .btn,.tools label{white-space:nowrap}
+.tools .btn{padding:4px 10px}
+#stage{flex:1;min-height:0}
+svg{width:100%;height:100%}
+#cLog{grid-column:1;grid-row:2;display:flex;flex-direction:column;padding:6px 10px;min-height:0}
+.logH{display:flex;gap:12px;align-items:baseline}
+.logH h2{font-size:15px;margin:0;white-space:nowrap}
+.logH .msg{margin:0;min-height:0;font-size:15px}
+#cLog .log{flex:1;max-height:none;overflow:auto;margin-top:4px}
+.rec{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;padding:3px 0;border-top:1px dashed #d6d3d1;font-size:14px}
+.rec:first-child{border-top:0}
+.rl{font-weight:700;margin-right:6px;color:#44403c}
+.chip{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:0 8px;background:#dcfce7;white-space:nowrap;cursor:help}
+.chip.no{background:#fee2e2;border-color:#b91c1c}
+.arr{color:#78716c}
+.why{flex-basis:100%;color:#b91c1c;font-weight:700;font-size:14px;padding-left:4px}
+.done{font-weight:700;color:#15803d}
+#cSel{grid-column:2;grid-row:1/3;overflow:auto;display:flex;flex-direction:column;min-height:0}
+#cSel .con{flex:1;display:flex;flex-direction:column;min-height:190px}
+#cSel .conOut{flex:1;height:auto;min-height:110px}
+.empty{color:#78716c;text-align:center;margin:auto;padding:20px;font-size:15px}
+#cSel{background:#111;color:#e7e5e4;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:10px}
+#cSel .th{color:#a3e635;font-weight:700;font-size:16px;margin-bottom:6px}
+#cSel .tl{display:flex;gap:8px;line-height:1.5}#cSel .tk{color:#a8a29e;min-width:92px}#cSel .tv{color:#fde047}
+#cSel .ts{color:#a3e635;margin:10px 0 2px}#cSel .tx{color:#a8a29e;margin:6px 0;line-height:1.4}
+#cSel .lab{color:#e7e5e4;font-weight:400;margin:6px 0 2px;font-size:13px}
+#cSel input[type=text],#cSel select{background:#1c1917;color:#fde047;border:2px solid #57534e;font-family:inherit;font-size:13px;padding:4px 6px;border-radius:4px}
+#cSel input[disabled],#cSel select[disabled]{background:#292524;color:#78716c}
+#cSel .con{border:0;border-top:2px solid #44403c;border-radius:0;margin-top:8px}
+#cSel .conOut{padding:8px 0}#cSel .conRow{padding:6px 0 0}
+#cSel .empty{color:#a8a29e;font-family:system-ui,sans-serif}
+.checks{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:8px;font-size:14px}.checks>b{margin-right:4px}
+.ck{white-space:nowrap;color:#44403c;border:2px solid #d6d3d1;border-radius:999px;padding:1px 9px;background:#fff}.ck.ok{color:#15803d;font-weight:700;border-color:#86efac;background:#f0fdf4}
+@media(max-width:1000px),(max-height:560px){
+  body{height:auto;overflow:auto}
+  header{flex-wrap:wrap}
+  main{display:flex;flex-direction:column}
+  #stage{flex:none}svg{height:auto}
+  #cLog{min-height:140px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📦 El viaje del paquete</h1>
+  <div class="tabs" id="tabs"></div>
+  <button class="btn hbtn" id="bSave" title="Guardar mi partida (.json)">💾</button>
+  <div class="pwrap">
+    <button class="btn hbtn" id="bWho" title="Mi nota y mis archivos">👤 <span class="who" id="who"></span> · <span id="notaH">0</span> ▾</button>
+    <div class="card hidden" id="menu">
+      <h2>Mi nota: <span id="nota">0</span>/10</h2>
+      <div class="bar"><div id="bar"></div></div>
+      <p class="hint">Cada nivel: 7 puntos por conseguir que llegue y 3 por la pregunta. La nota es la media de los 13 niveles.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button class="btn" id="bJson">💾 Descargar .json</button>
+        <button class="btn" id="bLoad">📂 Cargar .json</button>
+        <button class="btn danger" id="bClear">🗑️ Borrar todo</button>
+      </div>
+      <input type="file" id="file" accept=".json,application/json" class="hidden">
+    </div>
+  </div>
+  <button class="btn hbtn" id="bFull" title="Pantalla completa">⛶</button>
+  <button class="btn hbtn" id="bHelp" title="Ayuda">📘</button>
+</header>
+
+<div id="start">
+  <div class="card">
+    <h2>📦 El viaje del paquete</h2>
+    <p>Tu misión: que un paquete llegue desde tu PC hasta una web y vuelva. Si algo falla, verás <b>dónde</b> se para.</p>
+    <label class="lab" for="nm">Tu nombre y apellidos:</label>
+    <input type="text" id="nm" maxlength="40" placeholder="Nombre y apellidos" autocomplete="off">
+    <p class="hint">Tu nombre no se puede cambiar después: hace que tus números sean distintos a los de tus compañeros.</p>
+    <button class="btn go" id="bStart" disabled>▶ Empezar</button>
+    <hr style="border:0;border-top:3px dashed #a8a29e;margin:14px 0">
+    <p class="hint" style="margin:0 0 6px">¿Ya habías empezado? Carga tu archivo .json y sigues donde lo dejaste.</p>
+    <button class="btn" id="bLoad0">📂 Cargar partida</button>
+    <div class="msg bad" id="startMsg"></div>
+  </div>
+</div>
+
+<div class="card" id="mis"></div>
+<main>
+  <div class="card" id="cStage">
+    <div class="tools">
+      <button class="btn go" id="bSend">▶ Comprobar los 8 PC</button>
+      <button class="btn go" id="bAttack">🕵️ Que lo intente el desconocido</button>
+      <label class="small"><input type="checkbox" id="fast"> ⏩ rápido</label>
+      <button class="btn" id="bAddSw">➕ Añadir switch</button>
+      <span class="small tip">💻 Comprueba con <b>ping</b> en la consola de cada PC · 🔌 Cable: arrastra desde un <b>puerto</b> (amarillo LAN, azul WAN) · Quitar: pulsa el cable y la 🗑️</span>
+    </div>
+    <div id="stage"><svg id="svg" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  </div>
+  <div class="card" id="cLog">
+    <div class="logH"><h2>🧾 Registro del viaje</h2><div class="msg" id="msg"></div></div>
+    <div class="log" id="log"><p class="small">Haz ping desde la consola de un PC y aquí verás por dónde pasa el paquete.</p></div>
+  </div>
+  <div class="card" id="cSel"></div>
+</main>
+
+<dialog id="dlgQ"><div class="dh"><h2>Pregunta del nivel</h2></div><div id="qBody" style="padding:14px;max-height:calc(100vh - 110px);overflow:auto"></div></dialog>
+
+<dialog id="dlg">
+  <div class="dh"><h2>📘 Ayuda</h2><button class="btn" id="dClose">Cerrar</button></div>
+  <div class="cards" id="cards"></div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+function norm(x){return (x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim()}
+function hash(str){var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function shuffled(arr,r){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+
+var KEY="viaje_paquete_v5";var VERSION=5;
+var NL=13;
+var SITES=["youtube.com","roblox.com","mi-instituto.es"];
+var ICON={pc:"💻",router:"🌐",dns:"📖",server:"🖥️",switch:"🔀",movil:"📱",iot:"💡",hacker:"🕵️",isp:"🏢"};
+var GW="192.168.1.1";
+var DNSIP="8.8.8.8";
+var SWPORTS=5;
+var COMMON=["12345678","123456789","1234567890","password","contrasena","qwertyui","qwertyuiop","00000000","11111111","87654321","iloveyou","wifi1234","admin123"];
+
+/* ---------- mundo: números distintos para cada alumno ---------- */
+var PRIV=[function(r){return "192.168."+Math.floor(r()*3)+"."+(2+Math.floor(r()*200))},function(r){return "10."+Math.floor(r()*250)+".0."+(2+Math.floor(r()*200))},function(r){return "172."+(16+Math.floor(r()*16))+"."+Math.floor(r()*250)+"."+(2+Math.floor(r()*200))}];
+var PUB=["8.8.8.8","142.250.185.46","93.184.216.34","151.101.1.140","85.54.12.7","203.0.113.77"];
+var CLSWHY={priv:"es privada: está en una de las 3 familias reservadas para dentro de casa (10.x.x.x · 172.16.x.x a 172.31.x.x · 192.168.x.x).",pub:"es pública: no está en ninguna de las 3 familias privadas, así que se ve desde internet, como la IP de una web o la del router de cada casa."};
+function clsWhy(it){
+  var m=it.ip.split(".").map(Number);
+  if(it.kind==="pub")return CLSWHY.pub;
+  if(m[0]===10)return "es privada: todas las que empiezan por 10. son privadas.";
+  if(m[0]===192)return "es privada: todas las que empiezan por 192.168. son privadas.";
+  return "es privada: empieza por 172. y el segundo número ("+m[1]+") está entre 16 y 31. Ese trozo, de 172.16.x.x a 172.31.x.x, está reservado para redes privadas.";
+}
+function clsOk(cls,w){return !!cls&&w.cls.every(function(it,i){return cls[i]===it.kind})}
+function pick(arr,n,r){var a=arr.slice(),i,j,t;for(i=0;i<n;i++){j=i+Math.floor(r()*(a.length-i));t=a[i];a[i]=a[j];a[j]=t}return a.slice(0,n)}
+function world(seed){
+  var r=rng(hash(norm(seed))),pool=[],i;
+  for(i=10;i<=250;i++)pool.push(i);
+  var p=pick(pool,5,r);
+  var p2="192.168.1."+(30+Math.floor(r()*60));
+  var fA=pick([1,2,3,4,5,6,7],3,r).sort(),fF=pick([1,2,3,4,5,6,7,8,9,10,11],5,r).sort();
+  var ssid="MiCasa_"+(1000+Math.floor(r()*9000)),vecino="Vecino_"+(1000+Math.floor(r()*9000));
+  var fake={dns:"45.83."+(10+Math.floor(r()*200))+"."+(10+Math.floor(r()*200)),web:"198.51.100."+(10+Math.floor(r()*200))};
+  var hk="185.220."+(10+Math.floor(r()*200))+"."+(10+Math.floor(r()*200)),wpass="Gato-"+(100+Math.floor(r()*900))+"-Azul";
+  var pub="85.54."+(10+Math.floor(r()*200))+"."+(10+Math.floor(r()*200));
+  var cls=[];
+  pick([0,1,2],2,r).forEach(function(g){cls.push({ip:PRIV[g](r),kind:"priv"})});
+  pick([0,1,2,3,4,5],2,r).forEach(function(g){cls.push({ip:PUB[g],kind:"pub"})});
+  cls=shuffled(cls,r);
+  return {pub:pub,cls:cls,sip:{"youtube.com":"203.0.113."+p[0],"roblox.com":"203.0.113."+p[1],"mi-instituto.es":"203.0.113."+p[2],"app-bombilla.es":"203.0.113."+p[3],"mi-banco.es":"203.0.113."+p[4]},p2:p2,fA:fA,fF:fF,ssid:ssid,vecino:vecino,fake:fake,hk:hk,wpass:wpass};
+}
+
+/* ---------- utilidades de estado ---------- */
+function nodeBy(st,id){for(var i=0;i<st.nodes.length;i++)if(st.nodes[i].id===id)return st.nodes[i];return null}
+function routerOf(st){for(var i=0;i<st.nodes.length;i++)if(st.nodes[i].type==="router")return st.nodes[i];return null}
+function linked(st,a,b){return st.links.some(function(l){return (l.a===a&&l.b===b)||(l.a===b&&l.b===a)})}
+function cnt(st,id){return st.links.filter(function(l){return l.a===id||l.b===id}).length}
+function isOut(n){return !!n&&(n.type==="server"||n.type==="dns"||n.type==="isp"||!!n.outside)}
+function isWl(n){return !!n&&(n.type==="movil"||n.type==="iot")}
+function isHost(n){return !!n&&(n.type==="pc"||isWl(n))}
+function wifiOk(st,n){
+  var R=routerOf(st),w=R&&R.wifi;
+  if(!w||!w.on)return "off";
+  if(!n.ssid)return "nossid";
+  if(n.ssid!==w.ssid)return "ssid";
+  if(w.sec!=="open"&&(n.wpass||"")!==(w.pass||""))return "pass";
+  return "ok";
+}
+function weak(p,ssid){p=p||"";return p.length<8||COMMON.indexOf(norm(p))>=0||(!!ssid&&p===ssid)}
+function secProblems(st){
+  var R=routerOf(st),w=R&&R.wifi,out=[];if(!w)return out;
+  if(w.sec==="open")out.push("🔓 Tu WiFi está abierta: cualquiera que pase cerca puede conectarse, usar tu internet y espiar lo que envías. Elige WPA2 o WPA3.");
+  else if(w.sec==="wep")out.push("🔓 WEP es un cifrado antiguo que se rompe en pocos minutos. Elige WPA2 o WPA3.");
+  if(w.sec!=="open"&&weak(w.pass,w.ssid))out.push("🔑 La contraseña del WiFi es débil: usa 8 caracteres o más, que no sea el nombre de la red ni algo como 12345678.");
+  if(norm(w.admin)==="admin"||weak(w.admin))out.push("🛠️ La contraseña para configurar el router sigue siendo débil o la de fábrica («admin»). Esas contraseñas se encuentran en internet: cámbiala por una de 8 caracteres o más.");
+  return out;
+}
+function lanCnt(st,rid){return st.links.filter(function(l){return (l.a===rid||l.b===rid)&&!isOut(nodeBy(st,l.a===rid?l.b:l.a))}).length}
+function canon(v){var m=(v||"").trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);return m?[+m[1],+m[2],+m[3],+m[4]].join("."):(v||"").trim()}
+var IPMSG={empty:"Falta la IP.",bad:"Eso no es una IP: son 4 números del 0 al 255 separados por puntos.",net:"En casa todas empiezan por 192.168.1. Esta IP es de otra red y el router no la reconoce.",range:"El último número va del 2 al 254 (el 1 es del router)."};
+function ipOk(v){
+  v=(v||"").trim();if(!v)return "empty";
+  var m=v.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if(!m||+m[1]>255||+m[2]>255||+m[3]>255||+m[4]>255)return "bad";
+  if(canon(v).indexOf("192.168.1.")!==0)return "net";
+  var l=+m[4];if(l<2||l>254)return "range";
+  return "ok";
+}
+function rLan(n){return n.ports||4}
+function nW(n){if(n.type==="router")return Math.max(Wd,rLan(n)*26+30);if(n.type==="isp")return 170;if(n.type==="switch")return 140;return Wd}
+function ispOf(st){for(var i=0;i<st.nodes.length;i++)if(st.nodes[i].type==="isp")return st.nodes[i];return null}
+function portList(n){
+  if(!n||isWl(n))return [];
+  var c=n.type==="switch"?SWPORTS:(n.type==="router"?rLan(n):(n.type==="isp"?6:1)),out=[],g=26,s0=-(c-1)*g/2,i;
+  for(i=0;i<c;i++)out.push({k:n.type==="router"?"lan":"any",dx:s0+i*g,dy:Hd/2+3});
+  if(n.type==="router")out.push({k:"wan",dx:nW(n)/2+3,dy:0});
+  return out;
+}
+function portPos(n,i){var p=portList(n)[i]||{dx:0,dy:Hd/2};return {x:n.x+p.dx,y:n.y+p.dy,k:p.k}}
+function portStub(n,i){var p=portPos(n,i);return p.k==="wan"?{x:p.x+18,y:p.y}:{x:p.x,y:p.y+18}}
+function portUsed(st,id,i){return st.links.some(function(l){return (l.a===id&&l.pa===i)||(l.b===id&&l.pb===i)})}
+function portFits(n,i,o){var p=portList(n)[i];if(!p)return false;if(p.k==="wan")return o.type==="isp";if(p.k==="lan")return o.type!=="isp";return true}
+function freePort(st,n,o){var ps=portList(n);for(var i=0;i<ps.length;i++)if(portFits(n,i,o)&&!portUsed(st,n.id,i))return i;return -1}
+function fullMsg(n,o){
+  if(n.type==="router")return o.type==="isp"?"El router ya tiene su cable al ISP en el puerto WAN.":"El router solo tiene "+rLan(n)+" puertos LAN y ya están ocupados. ¿Qué aparato reparte la red por cable?";
+  if(n.type==="switch")return "Ese switch ya tiene los "+SWPORTS+" puertos ocupados (uno se gasta subiendo al router).";
+  if(n.type==="isp")return "El ISP no tiene más puertos libres.";
+  return n.name+" ya tiene su cable.";
+}
+function normPorts(st){st.links.forEach(function(l){var a=nodeBy(st,l.a),b=nodeBy(st,l.b);if(!a||!b)return;if(l.pa==null)l.pa=freePort(st,a,b);if(l.pb==null)l.pb=freePort(st,b,a)})}
+function inetWhy(st,T){
+  var R=routerOf(st),I=ispOf(st);
+  if(!R||!I||!linked(st,I.id,R.id))return "🔌 Tu router no tiene cable con el ISP (puerto WAN azul): tu casa no tiene salida a internet.";
+  if(T&&T.id!==I.id&&!linked(st,T.id,I.id))return "🔌 «"+T.name+"» no tiene cable con el ISP: no se puede llegar.";
+  return null;
+}
+function pathTo(st,id){
+  var R=routerOf(st);if(!R)return null;
+  var n=nodeBy(st,id);if(!n)return null;
+  if(isWl(n))return wifiOk(st,n)==="ok"?[id,R.id]:null;
+  if(isOut(n)){var I=ispOf(st);if(!I||!linked(st,I.id,R.id))return null;if(n.id===I.id)return [I.id,R.id];return linked(st,id,I.id)?[id,I.id,R.id]:null}
+  if(linked(st,id,R.id))return [id,R.id];
+  if(n.type==="switch")return null;
+  for(var i=0;i<st.links.length;i++){
+    var l=st.links[i],o=l.a===id?l.b:(l.b===id?l.a:null);
+    if(o==null)continue;
+    var on=nodeBy(st,o);
+    if(on&&on.type==="switch"&&linked(st,o,R.id))return [id,o,R.id];
+  }
+  return null;
+}
+function eff(n,st){
+  if(isHost(n)&&n.auto){
+    var r=routerOf(st);
+    if(r&&r.dhcp&&r.dhcp.on&&pathTo(st,n.id)){
+      var autos=st.nodes.filter(function(x){return isHost(x)&&x.auto}).sort(function(a,b){return a.id-b.id});
+      return {ip:"192.168.1."+(100+autos.indexOf(n)),gw:GW,dns:r.dhcp.dns||"",auto:true};
+    }
+    return {ip:"",gw:"",dns:"",auto:true,none:true};
+  }
+  return {ip:n.ip||"",gw:n.gw||"",dns:n.dns||""};
+}
+function dupIp(st,P,ip){
+  var c=canon(ip),f=null;
+  if(!c)return null;
+  st.nodes.forEach(function(o){
+    if(f||o.id===P.id)return;
+    if(o.type==="router"&&canon(o.ip)===c)f=o;
+    else if(isHost(o)&&canon(eff(o,st).ip)===c)f=o;
+  });
+  return f;
+}
+function checkLink(st,A,B,wa,wb){
+  function E(t){return {err:t}}
+  if(A.id===B.id)return E("Elige dos aparatos distintos.");
+  if(isWl(A)||isWl(B))return E((isWl(A)?A:B).name+" se conecta por WiFi: no lleva cable. Selecciónalo para elegir la red.");
+  if(linked(st,A.id,B.id))return E("Esos dos ya están conectados.");
+  var ta=A.type,tb=B.type;
+  if(ta==="router"&&tb==="router")return E("Solo hay un router.");
+  if(ta==="isp"||tb==="isp"){var o=ta==="isp"?B:A;if(o.type!=="router"&&!isOut(o))return E("Tu red solo sale a internet por el router: este cable va del puerto WAN (azul) del router al ISP.")}
+  else if(isOut(A)||isOut(B)){var o2=isOut(A)?A:B;return E(o2.name+" está en internet: su cable va al ISP, no a tu red.")}
+  else if(ta!=="router"&&tb!=="router"){
+    if(ta==="switch"&&tb==="switch")return E("Los switches se unen al router, no entre ellos.");
+    if(ta!=="switch"&&tb!=="switch")return E("Aquí los cables van siempre al router o a un switch.");
+  }
+  function pick(n,o,w){
+    if(w!=null){
+      var p=portList(n)[w];if(!p)return fullMsg(n,o);
+      if(portUsed(st,n.id,w))return "Ese puerto ya está ocupado: usa otro libre.";
+      if(!portFits(n,w,o))return p.k==="wan"?"Ese es el puerto WAN (azul): solo sirve para ir al ISP.":"Ese puerto es LAN: para ir al ISP usa el puerto WAN (azul) del router.";
+      return w;
+    }
+    var f=freePort(st,n,o);return f<0?fullMsg(n,o):f;
+  }
+  var pa=pick(A,B,wa),pb=pick(B,A,wb);
+  if(typeof pa==="string")return E(pa);
+  if(typeof pb==="string")return E(pb);
+  return {pa:pa,pb:pb};
+}
+
+/* ---------- el viaje del paquete (simulación) ---------- */
+function rev(a){return a.slice().reverse()}
+function simReq(st,rq){
+  var steps=[],P=nodeBy(st,rq.pc),R=routerOf(st);
+  function S(route,msg,kind){steps.push({route:route,msg:msg,kind:kind})}
+  function F(route,msg){steps.push({route:route,msg:msg,kind:"fail"});return {ok:false,steps:steps}}
+  if(rq.attack&&R){
+    var H=nodeBy(st,rq.from),fw=R.fw||{};
+    var hp=H?pathTo(st,H.id):null;
+    if(!hp)return {ok:true,steps:[{route:[],msg:"🛡️ El desconocido no tiene camino hasta tu router.",kind:"page"}]};
+    S(hp,"📨 Un desconocido de internet manda un paquete a la IP pública de tu casa ("+W.pub+"). Nadie de tu casa se lo ha pedido.","q");
+    if(fw.dmz){
+      var Tg=null;st.nodes.forEach(function(n){if(n.name===fw.dmz)Tg=n});
+      if(Tg){S([R.id,Tg.id],"↪️ El router se lo pasa a «"+Tg.name+"» porque está configurado para reenviarle TODO lo que llegue de internet.","req");return F([Tg.id],"😱 El desconocido ha llegado hasta «"+Tg.name+"». Quita el reenvío en el router.")}
+    }
+    if(!fw.on)return F([R.id],"🔓 El cortafuegos del router está apagado: deja entrar el paquete y el desconocido intenta colarse en la configuración del router.");
+    S([R.id],"🛡️ El cortafuegos lo bloquea: nadie de tu casa lo había pedido. Tu red está a salvo.","page");
+    return {ok:true,steps:steps};
+  }
+  if(!P||!R)return F([],"Falta el PC o el router.");
+  var e=eff(P,st),pp=pathTo(st,P.id);
+  if(!pp){
+    if(isWl(P)){
+      var why=wifiOk(st,P),rw=R.wifi||{};
+      if(why==="off")return F([P.id],"📶 El router tiene el WiFi apagado: "+P.name+" no encuentra tu red.");
+      if(why==="nossid")return F([P.id],"📶 "+P.name+" no está conectado a ninguna red WiFi. Selecciónalo y elige la red de casa.");
+      if(why==="ssid")return F([P.id],P.ssid===W.vecino?"📶 "+P.name+" está conectado a «"+P.ssid+"», la red del vecino. Sus paquetes no pasan por tu router.":"📶 "+P.name+" busca la red «"+P.ssid+"» y no existe. La WiFi de tu router se llama «"+rw.ssid+"».");
+      return F([P.id],"🔑 "+P.name+" tiene mal la contraseña del WiFi. El router no le deja entrar.");
+    }
+    var sw=null;st.links.forEach(function(l){var o=l.a===P.id?l.b:(l.b===P.id?l.a:null),on=o!=null?nodeBy(st,o):null;if(on&&on.type==="switch")sw=on});
+    if(sw)return F([P.id,sw.id],"🔌 El switch de "+P.name+" no tiene cable con el router. El paquete se queda en el switch.");
+    return F([P.id],"🔌 "+P.name+" no tiene cable hasta el router. El paquete no puede salir.");
+  }
+  if(e.none)return F([P.id],"🤷 "+P.name+" está en modo automático pero el router no reparte IP (DHCP apagado). Se queda sin IP.");
+  var ic=ipOk(e.ip);
+  if(ic!=="ok")return F([P.id],"🔢 "+P.name+": "+IPMSG[ic]);
+  var dp0=dupIp(st,P,e.ip);
+  if(dp0)return F([P.id],"⚠️ La IP "+e.ip+" de "+P.name+" ya la tiene «"+dp0.name+"». Dos aparatos con la misma IP se pisan.");
+  if(rq.peer){
+    var T2=null;st.nodes.forEach(function(x){if(x.name===rq.peer)T2=x});
+    if(!T2)return F([P.id],"No existe "+rq.peer+".");
+    var pt=pathTo(st,T2.id),e2=eff(T2,st);
+    if(!pt)return F([T2.id],"🔌 "+T2.name+" no está conectado a la red: el ping no le llega.");
+    if(ipOk(e2.ip)!=="ok")return F([T2.id],"🔢 "+T2.name+" no tiene una IP válida: no puede contestar.");
+    var go=(pp.length===3&&pt.length===3&&pp[1]===pt[1])?[P.id,pp[1],T2.id]:pp.concat(rev(pt).slice(1));
+    S(go,"✉️ "+P.name+" manda un ping a "+T2.name+" ("+e2.ip+"). Está en tu misma red: no hace falta salir a internet.","req");
+    S(rev(go),"↩️ "+T2.name+" contesta. ¡Ha llegado!","page");
+    return {ok:true,steps:steps};
+  }
+  if(canon(e.gw)!==GW)return F([P.id],e.gw?"🚪 La puerta de enlace "+e.gw+" no es el router ("+GW+"). El paquete se entrega a quien no es.":"🚪 Falta la puerta de enlace: "+P.name+" no sabe por dónde salir de la red.");
+  var dest=rq.ip;
+  if(rq.name){
+    if(!e.dns)return F([P.id],"📖 Falta el DNS: "+P.name+" no sabe a quién preguntar dónde vive "+rq.name+". Los routers solo entienden números.");
+    S(pp,"❓ "+P.name+" pregunta a "+e.dns+": «¿cuál es la IP de "+rq.name+"?»","q");
+    var D=null;
+    st.nodes.forEach(function(n){if(n.type==="dns"&&canon(n.ip)===canon(e.dns))D=n});
+    if(!D)return F([R.id],"🔎 El router busca "+e.dns+" y no hay ningún DNS con esa IP. Nadie contesta.");
+    var dp=pathTo(st,D.id);
+    if(!dp)return F([R.id],inetWhy(st,D));
+    S(rev(dp),"📖 La pregunta sale a internet y llega al DNS","q");
+    var en=null;
+    D.agenda.forEach(function(a){if(a.name===rq.name&&!en)en=a});
+    if(!en||!(en.ip||"").trim())return F([D.id],"📕 El DNS mira su agenda y no tiene "+rq.name+" apuntado. No sabe contestar.");
+    S(dp.concat(rev(pp).slice(1)),"📗 El DNS contesta: «"+rq.name+" vive en "+en.ip+"»","a");
+    dest=en.ip;
+  }
+  S(pp,"✉️ "+P.name+" pide la página a "+dest+" (la manda a la puerta de enlace)","req");
+  var T=null;
+  st.nodes.forEach(function(n){if(n.type==="server"&&canon(n.ip)===canon(dest))T=n});
+  if(!T)return F([R.id],"🔎 El router busca "+dest+" y no hay ningún servidor con ese número.");
+  var tp=pathTo(st,T.id);if(!tp)return F([R.id],inetWhy(st,T));
+  var nat=ST.cur>=3&&W;
+  S(rev(tp),nat?"➡️ El router cambia la IP privada "+e.ip+" por la pública de casa ("+W.pub+") y entrega la petición a «"+T.name+"» (NAT)":"➡️ El router entrega la petición a «"+T.name+"»","req");
+  if(rq.name&&T.site!==rq.name&&T.fake)return F([T.id],"😈 Ha cargado una página igualita a "+rq.name+", pero viene de "+T.ip+", que NO es la IP del banco. ¡Es una web falsa para robar contraseñas! Tu DNS ("+e.dns+") te ha engañado.");
+  if(rq.name&&T.site!==rq.name)return F([T.id],"😵 Has llegado a «"+T.name+"», no a "+rq.name+". El DNS tenía apuntada la IP equivocada.");
+  S(tp.concat(rev(pp).slice(1)),nat?"🌐 «"+T.name+"» devuelve la página a "+W.pub+" y el router se la pasa a "+P.name+" ("+e.ip+"). ¡Ha llegado!":"🌐 «"+T.name+"» devuelve la página. ¡Ha llegado!","page");
+  return {ok:true,steps:steps};
+}
+
+/* ---------- niveles ---------- */
+var nid;
+function N(type,name,x,y,o){var n={id:nid++,type:type,name:name,x:x,y:y,ip:"",gw:"",dns:"",auto:false,agenda:[],fixed:true},k;for(k in o)n[k]=o[k];return n}
+function L(a,b,id){return {id:id,a:a.id,b:b.id}}
+function srv(site,y,w){return N("server",site,850,y,{ip:w.sip[site],site:site})}
+function inst(w){return N("server","Web del instituto",850,290,{ip:w.sip["mi-instituto.es"],site:"mi-instituto.es"})}
+function dnsN(agenda,o){var d=N("dns","DNS",850,95,{ip:DNSIP,outside:true,agenda:agenda||[]}),k;for(k in o)d[k]=o[k];return d}
+function place(list){
+  var n=list.length,cols=n>5?2:1,rows=Math.ceil(n/cols);
+  list.forEach(function(p,i){
+    var c=cols===1?0:i%2,row=cols===1?i:Math.floor(i/2);
+    p.x=cols===1?130:(c===0?100:250);
+    p.y=rows===1?290:110+row*(380/(rows-1));
+  });
+}
+function mkPcs(n,fn){var a=[];for(var i=0;i<n;i++)a.push(N("pc","PC "+(i+1),0,0,fn(i)));place(a);return a}
+function agendaAll(w){return SITES.map(function(s){return {name:s,ip:w.sip[s]}})}
+function rm(links,a,b){return links.filter(function(l){return !((l.a===a.id&&l.b===b.id)||(l.a===b.id&&l.b===a.id))})}
+function build(k,w){
+  nid=1;var nodes=[],links=[],lid=1,r,pc,p2,d,sy,sr,si,sb,pcs,sw,mv,bb;
+  r=N("router","Router",400,290,{ip:GW});var isp=N("isp","Tu ISP",705,290,{});
+  if(k===1){
+    pc=N("pc","PC",130,170,{ip:"192.168.1.20",gw:GW,wants:["peer:PC 2","ip"]});p2=N("pc","PC 2",130,410,{ip:"192.168.1.21",gw:GW});si=inst(w);
+    nodes=[r,pc,p2,si];links=[L(isp,si,lid++)];
+  }else if(k===2){
+    r.ports=2;si=inst(w);
+    pcs=mkPcs(8,function(i){return {ip:"192.168.1."+(21+i),gw:GW,wants:["ip"]}});
+    nodes=[r,si].concat(pcs);links=[L(isp,si,lid++)];
+  }else if(k===3){
+    pc=N("pc","PC",130,170,{wants:["peer:PC de al lado","ip"]});p2=N("pc","PC de al lado",130,410,{ip:w.p2,gw:GW});si=inst(w);
+    nodes=[r,pc,p2,si];links=[L(pc,r,lid++),L(p2,r,lid++),L(isp,si,lid++)];
+  }else if(k===4){
+    si=inst(w);
+    pcs=mkPcs(4,function(i){return {wants:["ip"]}});
+    pcs[0].ip=w.p2;pcs[0].gw=GW;
+    pcs[1].ip=w.p2;pcs[1].gw=GW;
+    pcs[2].ip="192.168.0.30";pcs[2].gw="192.168.0.1";
+    pcs[3].ip="192.168.1.40";pcs[3].gw="";
+    nodes=[r,si].concat(pcs);links=[L(isp,si,lid++)];
+    pcs.forEach(function(p){links.push(L(p,r,lid++))});
+  }else if(k===5){
+    pc=N("pc","PC",130,290,{ip:"192.168.1.20",gw:GW,wants:["youtube.com"]});
+    d=dnsN([]);sy=srv("youtube.com",260,w);
+    nodes=[r,pc,d,sy];links=[L(pc,r,lid++),L(isp,sy,lid++)];
+  }else if(k===6){
+    pc=N("pc","PC",130,290,{ip:"192.168.1.21",gw:GW,dns:DNSIP,wants:SITES.slice()});
+    d=dnsN([]);
+    sy=srv("youtube.com",215,w);sr=srv("roblox.com",335,w);si=srv("mi-instituto.es",455,w);
+    nodes=[r,pc,d,sy,sr,si];
+    links=[L(pc,r,lid++),L(d,isp,lid++),L(isp,sy,lid++),L(isp,sr,lid++)];
+  }else if(k===7){
+    r.dhcp={on:false,dns:""};
+    d=dnsN([{name:"youtube.com",ip:w.sip["youtube.com"]}]);
+    sy=srv("youtube.com",260,w);
+    r.ports=6;pcs=mkPcs(5,function(i){return i===3?{wants:["youtube.com"]}:{}});
+    nodes=[r,d,sy].concat(pcs);links=[L(d,isp,lid++),L(isp,sy,lid++)];
+    pcs.forEach(function(p,i){if(i!==3)links.push(L(p,r,lid++))});
+  }else if(k===8){
+    r.dhcp={on:false,dns:""};
+    d=dnsN([{name:"youtube.com",ip:w.sip["youtube.com"]}]);
+    sy=srv("youtube.com",260,w);
+    r.ports=6;pcs=mkPcs(6,function(i){return i>=4?{wants:["youtube.com"]}:{}});
+    pcs[4].name="PC Profe";pcs[4].ip="192.168.1.100";pcs[4].gw=GW;pcs[4].dns=DNSIP;
+    pcs[5].name="PC Dirección";pcs[5].ip="192.168.1.101";pcs[5].gw=GW;pcs[5].dns=DNSIP;
+    nodes=[r,d,sy].concat(pcs);links=[L(d,isp,lid++),L(isp,sy,lid++)];
+    pcs.forEach(function(p){links.push(L(p,r,lid++))});
+  }else if(k===9){
+    r.dhcp={on:true,dns:DNSIP};r.wifi={on:true,ssid:w.ssid,sec:"open",pass:"",admin:"admin"};
+    pc=N("pc","PC",130,140,{ip:"192.168.1.20",gw:GW,dns:DNSIP,wants:["youtube.com"]});
+    mv=N("movil","Móvil",130,300,{auto:true,ssid:"",wpass:"",wants:["youtube.com"]});
+    bb=N("iot","Bombilla",130,455,{auto:true,ssid:w.vecino,wpass:"",wants:["app-bombilla.es"]});
+    d=dnsN([{name:"youtube.com",ip:w.sip["youtube.com"]},{name:"app-bombilla.es",ip:w.sip["app-bombilla.es"]}],{locked:true});
+    sy=srv("youtube.com",235,w);sb=srv("app-bombilla.es",375,w);
+    nodes=[r,pc,mv,bb,d,sy,sb];
+    links=[L(pc,r,lid++),L(d,isp,lid++),L(isp,sy,lid++),L(isp,sb,lid++)];
+  }else if(k===10){
+    pc=N("pc","PC",130,290,{ip:"192.168.1.20",gw:GW,dns:w.fake.dns,wants:["mi-banco.es"]});
+    d=dnsN([{name:"youtube.com",ip:w.sip["youtube.com"]},{name:"mi-banco.es",ip:w.sip["mi-banco.es"]}],{locked:true});
+    var fd=N("dns","DNS desconocido",880,215,{ip:w.fake.dns,outside:true,locked:true,agenda:[{name:"mi-banco.es",ip:w.fake.web},{name:"youtube.com",ip:w.sip["youtube.com"]}]});
+    sb=srv("mi-banco.es",335,w);
+    var fk=N("server","web desconocida",880,455,{ip:w.fake.web,site:"falsa",fake:true});
+    nodes=[r,pc,d,fd,sb,fk];
+    links=[L(pc,r,lid++),L(d,isp,lid++),L(fd,isp,lid++),L(isp,sb,lid++),L(isp,fk,lid++)];
+  }else if(k===11){
+    r.fw={on:false,dmz:"PC 1"};
+    pcs=mkPcs(2,function(i){return {ip:"192.168.1."+(21+i),gw:GW,dns:DNSIP,wants:["youtube.com"]}});
+    d=dnsN([{name:"youtube.com",ip:w.sip["youtube.com"]}]);sy=srv("youtube.com",260,w);
+    var hk=N("hacker","Desconocido",880,440,{ip:w.hk,outside:true,attack:true});
+    nodes=[r,d,sy,hk].concat(pcs);
+    links=[L(d,isp,lid++),L(isp,sy,lid++),L(hk,isp,lid++)];
+    pcs.forEach(function(p){links.push(L(p,r,lid++))});
+  }else if(k===12){
+    pc=N("pc","PC",130,290,{ip:"192.168.1.21",gw:GW,dns:DNSIP,wants:SITES.slice()});
+    d=dnsN(agendaAll(w));
+    sy=srv("youtube.com",215,w);sr=srv("roblox.com",335,w);si=srv("mi-instituto.es",455,w);
+    p2=N("pc","PC de al lado",130,470,{ip:w.p2,gw:GW,dns:DNSIP});
+    nodes=[r,pc,d,sy,sr,si,p2];
+    links=[L(pc,r,lid++),L(p2,r,lid++),L(d,isp,lid++),L(isp,sy,lid++),L(isp,sr,lid++),L(isp,si,lid++)];
+    w.fA.forEach(function(f){
+      if(f===1)links=rm(links,pc,r);
+      if(f===2)pc.dns="8.8.4.4";
+      if(f===3)d.agenda.forEach(function(a){if(a.name==="roblox.com")a.ip=w.sip["youtube.com"]});
+      if(f===4)pc.gw="192.168.1.10";
+      if(f===5)links=rm(links,isp,si);
+      if(f===6)links=rm(links,d,isp);
+      if(f===7)d.agenda=d.agenda.filter(function(a){return a.name!=="youtube.com"});
+    });
+  }else{
+    r.ports=4;r.dhcp={on:true,dns:DNSIP};r.wifi={on:true,ssid:w.ssid,sec:"wpa2",pass:w.wpass,admin:"Admin-"+w.wpass};
+    sw=N("switch","Switch",270,210,{});
+    var a1=N("pc","PC 1",100,110,{ip:"192.168.1.21",gw:GW,dns:DNSIP,wants:SITES.slice()});
+    var a2=N("pc","PC 2",100,310,{ip:"192.168.1.22",gw:GW,dns:DNSIP,wants:["youtube.com"]});
+    var a3=N("pc","PC 3",130,470,{auto:true,wants:["youtube.com"]});
+    mv=N("movil","Móvil",300,470,{auto:true,ssid:w.ssid,wpass:w.wpass,wants:["youtube.com"]});
+    d=dnsN(agendaAll(w));
+    sy=srv("youtube.com",215,w);sr=srv("roblox.com",335,w);si=srv("mi-instituto.es",455,w);
+    nodes=[r,sw,a1,a2,a3,mv,d,sy,sr,si];
+    links=[L(sw,r,lid++),L(a1,sw,lid++),L(a2,sw,lid++),L(a3,r,lid++),L(d,isp,lid++),L(isp,sy,lid++),L(isp,sr,lid++),L(isp,si,lid++)];
+    w.fF.forEach(function(f){
+      if(f===1)links=rm(links,a1,sw);
+      if(f===2)links=rm(links,sw,r);
+      if(f===3)a1.dns="8.8.4.4";
+      if(f===4)a2.gw="192.168.1.10";
+      if(f===5)d.agenda.forEach(function(a){if(a.name==="roblox.com")a.ip=w.sip["youtube.com"]});
+      if(f===6)d.agenda=d.agenda.filter(function(a){return a.name!=="mi-instituto.es"});
+      if(f===7)links=rm(links,d,isp);
+      if(f===8)r.dhcp.on=false;
+      if(f===9)a2.ip=a1.ip;
+      if(f===10)mv.wpass=w.wpass.toLowerCase();
+      if(f===11)r.wifi.on=false;
+    });
+  }
+  nodes.splice(1,0,isp);if(k!==1)links.push(L(r,isp,lid++));
+  return {nodes:nodes,links:links,nid:nid,lid:lid};
+}
+function reqs(st,base){
+  var out=[],src=base||st;
+  src.nodes.filter(function(n){return isHost(n)&&n.wants}).sort(function(a,b){return a.id-b.id}).forEach(function(p){
+    var auto=p.type==="iot";
+    p.wants.forEach(function(wn){
+      var rq={pc:p.id,key:p.name+">"+wn,auto:auto};
+      if(wn==="ip"){var s=null;src.nodes.forEach(function(n){if(n.type==="server"&&!s)s=n});rq.ip=s.ip;rq.short=p.name+": ping a la web del instituto ("+s.ip+")"}
+      else if(wn.indexOf("peer:")===0){rq.peer=wn.slice(5);rq.short=p.name+": ping a "+rq.peer}
+      else{rq.name=wn;rq.short=auto?p.name+" → "+wn+" (se comprueba sola)":p.name+": ping "+wn}
+      rq.label=rq.short;out.push(rq);
+    });
+  });
+  src.nodes.filter(function(n){return n.attack}).forEach(function(h){out.push({attack:true,from:h.id,key:"attack",short:"El desconocido no entra",label:"Un desconocido intenta entrar desde internet"})});
+  return out;
+}
+function runAll(st,base){
+  var rs=reqs(st,base).map(function(q){var r=simReq(st,q);r.label=q.label;return r});
+  return {results:rs,allOk:rs.length>0&&rs.every(function(r){return r.ok})};
+}
+function Q(ask,right,wrong,why){return {ask:ask,right:right,wrong:wrong,why:why}}
+var LV={
+ 1:{tab:"1 Cable",title:"Primer paquete",story:"Quieres que tu PC hable con el PC 2 y con la web del instituto, que está en internet. A internet se llega a través de tu proveedor (ISP). Primero, cables. Luego lo compruebas con ping: manda un paquetito de prueba y espera a que le contesten.",
+    goal:"1) Une con cable los dos PC a los puertos amarillos (LAN) del router, y el puerto azul (WAN) del router con tu ISP. 2) Selecciona el PC y en su consola escribe ping y la IP del PC 2. 3) Haz lo mismo con la IP de la web.",hint:"Las IP están escritas debajo de cada aparato. Ejemplo: ping 192.168.1.21",
+    q:Q("Tu PC quiere llegar a una web de internet. ¿Qué aparato saca el paquete fuera de tu red?","El router, que reenvía el paquete hacia fuera de casa",["El switch, que reparte los cables entre los PC de la red", "El DNS, que guarda en una agenda las direcciones de las webs", "El servidor, que recibe y reparte todos los paquetes de casa"],"El router es la puerta de tu red: recibe los paquetes y los reenvía hacia su destino.")},
+ 2:{tab:"2 Switch",btn:true,title:"Faltan puertos",story:"El router solo tiene 2 puertos de cable y hay 8 PC. Cada switch tiene 5 puertos, pero uno lo gasta subiendo al router.",add:{sw:2},
+    goal:"➕ Añade los switches que necesites, únelos al router y conecta los 8 PC. Mira el contador de puertos de cada aparato. Luego pulsa ▶ Comprobar los 8 PC.",hint:"Dos switches, cada uno con su cable al router y 4 PC colgando.",
+    q:Q("Un switch tiene 5 puertos y uno sube al router. ¿Cuántos PC caben en él?","4 PC, porque uno de los 5 puertos sube al router",["5 PC, porque cada puerto del switch admite un PC", "3 PC, porque otro puerto se reserva para el DNS", "6 PC, porque un switch siempre amplía los puertos"],"De 5 puertos, uno va al router: quedan 4 para los PC.")},
+ 3:{tab:"3 Tu IP",title:"Tu dirección",story:"Tu PC no tiene IP ni puerta de enlace. Sin eso el paquete no sabe quién eres ni por dónde salir.",clsQ:true,
+    goal:"1) En la consola de tu PC escribe set ip 192.168.1.algo (distinta a la del PC de al lado) y set puerta con la IP del router. Compruébalo con ipconfig. 2) Haz ping al PC de al lado y a la web del instituto. Fíjate en el registro: el router cambia tu IP privada por la pública.",hint:"La puerta de enlace es la IP del router. Está escrita en el router. Escribe help en la consola para ver ejemplos.",
+    q:Q("Tu PC manda un paquete a una web que está fuera de tu red. ¿A qué IP se lo entrega primero?","A la puerta de enlace, que es la IP del router de tu red",["Directamente a la IP del servidor de la web", "A la IP del DNS que tenga configurado", "A la IP del PC que tiene más cerca"],"Todo lo que va fuera de la red se entrega primero a la puerta de enlace, que es el router.")},
+ 4:{tab:"4 IP rotas",title:"Cuatro PC rotos",story:"Cuatro PC tienen la configuración mal. Cada uno tiene un fallo distinto.",
+    goal:"Selecciona cada PC, usa ipconfig para ver qué tiene mal y arréglalo con set ip o set puerta. Cada PC tiene que hacer ping a la web del instituto.",hint:"Hay una IP repetida, una de otra red y una puerta de enlace que falta.",
+    q:Q("Un PC tiene la IP 192.168.0.30 y la red es 192.168.1.x. ¿Qué pasa con ese PC?","Está en otra red y el router no lo reconoce",["Va más rápido, porque su número es más pequeño", "Comparte IP con el router y se pisan los dos", "Solo le falla el DNS, lo demás va bien"],"La parte de red de la IP (192.168.1) debe coincidir con la del router; si no, es como vivir en otra calle.")},
+ 5:{tab:"5 DNS",title:"El nombre no basta",story:"Ahora quieres abrir youtube.com, pero los routers solo entienden números. Hace falta un DNS. No está en tu casa: vive en internet, igual que las webs.",
+    goal:"1) Prueba ping youtube.com y mira qué pasa. 2) Conecta el DNS al ISP. 3) En la consola del PC: set dns con la IP del DNS. 4) En la consola del DNS: add youtube.com y la IP de su servidor. 5) Comprueba con nslookup youtube.com y ping youtube.com.",hint:"La IP del DNS está escrita en él. El número de YouTube está escrito en su servidor. Ejemplo en el DNS: add youtube.com 203.0.113.99",
+    q:Q("Escribes roblox.com y tu PC no sabe a qué IP ir. ¿A quién pregunta?","Al DNS, que traduce el nombre en una IP",["Al switch, que conoce todos los cables de la red", "Al router, que guarda dentro todas las webs", "Al servidor, que se inventa una IP si no la sabe"],"El DNS es la agenda de internet: tú dices el nombre y él te da el número. No tiene por qué estar en tu casa: suele estar en internet.")},
+ 6:{tab:"6 Agenda",title:"La agenda del DNS",story:"El DNS ya existe, pero su agenda está vacía. Hay 3 webs y tienes que llegar a las tres.",
+    goal:"En la consola del DNS apunta las 3 webs con add (nombre e IP). Luego, desde el PC, haz ping a cada web. Ojo: puede que algún servidor no tenga cable.",hint:"Selecciona el DNS: su agenda sale nada más abrirlo. Copia la IP que ves en cada servidor.",
+    q:Q("En la agenda del DNS, roblox.com apunta a la IP de YouTube. ¿Qué ves al abrir roblox.com?","La web de YouTube, aunque escribas roblox",["Un error de cable, porque el router no encuentra el DNS", "La web de Roblox, porque el router corrige el apunte", "Nada: el DNS se apaga solo al detectar el error"],"El DNS manda: si su agenda se equivoca, te lleva donde ella dice.")},
+ 7:{tab:"7 DHCP",allDhcp:true,title:"Todo automático",story:"Hay 5 PC sin configurar. Escribir a mano la IP, la puerta y el DNS de cada uno es un rollo: que lo haga el router.",
+    goal:"Activa el DHCP del router (con la IP del DNS). Luego escribe ipconfig /renew en la consola de cada PC. Al final, comprueba con ping youtube.com desde el PC 4. Ojo: alguno puede no tener cable.",hint:"Router → activa DHCP y escribe la IP del DNS. Luego, en cada PC: ipconfig /renew. Puedes comprobarlo con ipconfig.",
+    q:Q("Enciendes un PC nuevo y trae IP, puerta de enlace y DNS sin tocar nada. ¿Quién se lo ha dado?","El DHCP del router, que los reparte a cada PC",["El switch, que se los pasa por el cable al enchufarlo", "El servidor de la web, que los manda al conectarse", "El propio PC, que se los inventa cada vez que arranca"],"El DHCP del router reparte a cada aparato su IP, la puerta de enlace y el DNS.")},
+ 8:{tab:"8 Rango",allIp:true,title:"IP fijas y DHCP",story:"El DHCP reparte IP desde la .100, pero dos PC del colegio ya tienen IP fijas.",
+    goal:"Los PC del reparto: ipconfig /renew. Los dos PC con IP fija (Profe y Dirección) chocan con el reparto: cámbiales la IP y haz ping youtube.com desde los dos.",hint:"El reparto empieza en la .100. Pon a los PC de IP fija una IP fuera del reparto con set ip, por ejemplo 192.168.1.20.",
+    q:Q("Un PC tiene IP fija 192.168.1.100 y el DHCP empieza a repartir desde la .100. ¿Qué puede pasar?","Que otro PC reciba esa IP y los dos se pisen",["Que el DNS deje de contestar a todos los PC", "Que el router se quede sin puertos libres de cable", "Que la puerta de enlace cambie de número sola"],"Las IP fijas deben quedar fuera del reparto del DHCP, o dos aparatos acabarán con el mismo número.")},
+ 9:{tab:"9 WiFi",title:"WiFi segura",sec:true,story:"En casa hay un móvil y una bombilla inteligente (IoT) que se conectan por WiFi, sin cable. El router acaba de llegar de la tienda: WiFi abierta y contraseña de fábrica.",
+    goal:"1) Conecta el móvil y la bombilla a la WiFi de casa. 2) Protege la red: WPA2 o WPA3, una contraseña WiFi fuerte y una contraseña nueva para configurar el router. 3) Comprueba con ping youtube.com desde el PC y desde el móvil. La bombilla se comprueba sola.",hint:"Selecciona el router para ver su WiFi. Si cambias la contraseña WiFi, tendrás que ponérsela también al móvil y a la bombilla.",
+    q:Q("Vas a configurar la WiFi de casa. ¿Qué opción protege mejor la red?","WPA3 o WPA2 con una contraseña larga y difícil de adivinar",["Dejarla abierta y ocultar el nombre de la red", "WEP, porque es el cifrado más antiguo y probado", "WPA2 con la contraseña 12345678, fácil de recordar"],"Una red abierta deja entrar a cualquiera y WEP se rompe en minutos. WPA2 y WPA3 cifran, pero solo protegen si la contraseña es difícil de adivinar.")},
+ 10:{tab:"10 DNS falso",title:"¿Es mi banco?",story:"Quieres entrar en mi-banco.es. La página carga, pero algo no cuadra: alguien ha cambiado el DNS de tu PC por uno trampa.",
+    goal:"Investiga con la consola del PC: ipconfig (¿qué DNS usas?) y nslookup mi-banco.es (¿qué IP te da?). Compara con la IP del servidor de verdad, cambia a un DNS de confianza con set dns y haz ping mi-banco.es.",hint:"La IP de verdad del banco está escrita en su servidor. El DNS de confianza es el 8.8.8.8.",
+    q:Q("¿Cómo puedes descubrir que tu DNS te manda a una web falsa?","Con nslookup: comparo la IP que me da con la IP real de la web",["Haciendo ping al router: si contesta, todo es seguro", "Con ipconfig /renew, que borra las webs falsas", "Mirando que el cable del PC esté bien enchufado"],"Un DNS trampa te da una IP falsa. nslookup te enseña qué IP te está dando, y puedes comprobar si es la buena.")},
+ 11:{tab:"11 Cortafuegos",title:"Visitas no invitadas",story:"La IP pública de tu casa se ve desde internet. Un desconocido va probando IP en busca de redes mal protegidas. Alguien dejó el cortafuegos apagado y el router reenviando todo lo de internet al PC 1 «para jugar online».",
+    goal:"Tus 2 PC tienen que hacer ping youtube.com. Luego pulsa 🕵️ Que lo intente el desconocido: no debe poder entrar. Revisa la seguridad del router.",hint:"Activa el cortafuegos y quita el reenvío (ponlo en «Nadie»).",
+    q:Q("Con el cortafuegos activado, tu PC abre YouTube sin problema. ¿Por qué la respuesta de YouTube sí entra?","Porque tu PC la había pedido: el router lo recuerda y deja pasar la respuesta",["Porque el cortafuegos solo bloquea los paquetes que salen de casa", "Porque YouTube tiene una IP privada como la de tu PC", "Porque los paquetes de webs famosas no pasan por el router"],"El router apunta lo que piden tus aparatos (NAT) y deja entrar solo las respuestas. Lo que llega sin que nadie lo pida, el cortafuegos lo bloquea.")},
+ 12:{tab:"12 Averías",title:"¿Quién ha roto internet?",nowarn:true,story:"Ayer funcionaba todo. Hoy no abre nada. Hay 3 averías distintas escondidas.",
+    goal:"Haz ping desde el PC a las 3 webs y mira dónde se para el paquete. Arregla esa avería y vuelve a probar, hasta que lleguen las 3.",hint:"Cada mensaje te dice dónde se rompe: cable, IP, puerta de enlace, DNS o agenda. ipconfig te enseña la configuración y ping hasta dónde llegas.",
+    q:Q("El paquete llega al router pero el mensaje dice «no hay ningún servidor con ese número». ¿Qué revisas?","La IP que el DNS tiene apuntada para esa web",["El cable que sale del PC hasta el router de casa", "La puerta de enlace que tiene configurada el PC", "Si el PC está en modo automático o en manual"],"Si el paquete ya llegó al router, el cable y la puerta de enlace funcionan: falla el número de destino.")},
+ 13:{tab:"13 Final",title:"La red del instituto",nowarn:true,story:"Switch, DNS, DHCP y WiFi funcionando juntos... hasta hoy. Hay 5 averías mezcladas.",
+    goal:"Haz ping a las webs desde cada aparato y mira dónde se para. Usa ipconfig, nslookup y ping para encontrar cada avería y repara hasta completar todas las comprobaciones.",hint:"Empieza por lo que falla primero y vuelve a enviar. Un mismo arreglo puede cambiar el mensaje del siguiente. Prueba ping 192.168.1.1 y ping youtube.com desde cada aparato.",
+    q:Q("Un PC colgado del switch no abre nada, pero el que está en el mismo switch sí. ¿Qué es lo más probable?","Algo propio de ese PC: su cable, su IP o su DNS",["Que el router entero se ha apagado sin avisar", "Que el switch ha dejado de funcionar para todos", "Que internet se ha caído para toda la casa"],"Si su vecino de switch funciona, el switch y el router están bien: el fallo está en ese PC.")}
+};
+
+
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ---------- estado general ---------- */
+var ST={student:"",seedName:"",cur:1,lv:{}},W=null,misMin=false;
+var sel=null,pending=null,drag=null,cab=null,busy=false,failNode=null,saveT=null,hintOn={};
+function CS(){return ST.lv[ST.cur]}
+function ensure(k){if(!ST.lv[k]){var b=build(k,W);b.passed=false;b.solved=null;b.ans=null;b.cls={};b.done={};normPorts(b);ST.lv[k]=b}return ST.lv[k]}
+function snapshot(){return {tool:"viaje-paquete",version:VERSION,student:ST.student,seedName:ST.seedName,cur:ST.cur,lv:clone(ST.lv)}}
+function queueSave(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(snapshot()))}catch(e){}},300)}
+function nota(){
+  var tot=0;
+  for(var k=1;k<=NL;k++){var l=ST.lv[k];if(l&&l.passed){tot+=7;if(l.ans==="right")tot+=3;else if(typeof l.qScore==="number")tot+=3*l.qScore}}
+  return Math.round(tot/NL*10)/10;
+}
+function toast(t,good){var m=$("msg");m.textContent=t;m.className="msg "+(good?"good":"bad")}
+function hasDhcp(st){var r=routerOf(st);return !!(r&&r.dhcp)}
+
+/* ---------- dibujo ---------- */
+var Wd=118,Hd=70;
+function cablePath(st,l){
+  var a=nodeBy(st,l.a),b=nodeBy(st,l.b);if(!a||!b)return null;
+  var p1=portPos(a,l.pa),s1=portStub(a,l.pa),p2=portPos(b,l.pb),s2=portStub(b,l.pb);
+  return {d:"M"+p1.x+" "+p1.y+" L"+s1.x+" "+s1.y+" L"+s2.x+" "+s2.y+" L"+p2.x+" "+p2.y,mx:(s1.x+s2.x)/2,my:(s1.y+s2.y)/2};
+}
+function markup(){
+  var st=CS(),out="";normPorts(st);
+  out+='<rect x="15" y="15" width="575" height="530" rx="14" fill="#f5f5f4" stroke="#a8a29e" stroke-width="3"/>';
+  out+='<text x="30" y="42" font-size="17" font-weight="700" fill="#78716c" font-family="system-ui,Arial,sans-serif">🏠 Tu red · IP privadas</text>';
+  out+='<rect x="615" y="15" width="370" height="530" rx="14" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="3"/>';
+  out+='<text x="630" y="42" font-size="17" font-weight="700" fill="#0369a1" font-family="system-ui,Arial,sans-serif">☁️ Internet · IP públicas</text>';
+  st.links.forEach(function(l){
+    var c=cablePath(st,l);if(!c)return;
+    var s=sel&&sel.kind==="link"&&sel.id===l.id;
+    out+='<path d="'+c.d+'" fill="none" stroke="'+(s?"#2563eb":"#111")+'" stroke-width="'+(s?7:5)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+    out+='<path data-link="'+l.id+'" d="'+c.d+'" fill="none" stroke="transparent" stroke-width="22" style="cursor:pointer"/>';
+  });
+  var R=routerOf(st);
+  st.nodes.forEach(function(n){
+    if(!isWl(n)||!R||!pathTo(st,n.id))return;
+    out+='<line x1="'+n.x+'" y1="'+n.y+'" x2="'+R.x+'" y2="'+R.y+'" stroke="#0284c7" stroke-width="4" stroke-dasharray="4 9" stroke-linecap="round"/>';
+  });
+  st.nodes.forEach(function(n){
+    var e=eff(n,st),isSel=sel&&sel.kind==="node"&&sel.id===n.id,isP=pending===n.id,isF=failNode===n.id,w=nW(n);
+    var fill=n.type==="router"?"#FFE600":(n.type==="dns"?"#C4B5FD":(n.type==="server"?"#BAE6FD":(n.type==="switch"?"#BBF7D0":(isWl(n)?"#E0F2FE":(n.type==="hacker"?"#FECACA":(n.type==="isp"?"#FED7AA":"#fff"))))));
+    var stroke=isF?"#dc2626":(isSel?"#2563eb":(isP?"#f97316":"#111"));
+    var x=n.x-w/2,y=n.y-Hd/2;
+    out+='<g data-node="'+n.id+'" style="cursor:grab">';
+    out+='<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+w+'" height="'+Hd+'" rx="9" fill="#111"/>';
+    out+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+Hd+'" rx="9" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+((isSel||isP||isF)?5:3)+'"/>';
+    out+='<text x="'+n.x+'" y="'+(y+25)+'" font-size="21" text-anchor="middle">'+ICON[n.type]+'</text>';
+    var nm=n.name.length>17?n.name.slice(0,16)+"…":n.name;
+    out+='<text x="'+n.x+'" y="'+(y+44)+'" font-size="12" font-weight="700" font-family="system-ui,Arial,sans-serif" text-anchor="middle">'+esc(nm)+'</text>';
+    var ipt="",ic="#15803d";
+    if(n.type==="switch"){ipt="puertos "+cnt(st,n.id)+"/"+SWPORTS;ic="#44403c"}
+    else if(n.type==="isp"){ipt="proveedor";ic="#9a3412"}
+    else if(isHost(n)){ipt=n.auto?(e.none?"sin IP":e.ip):(n.ip||"IP ?");if(n.auto&&e.none)ic="#b91c1c";else if(n.auto)ic="#0369a1";else if(!n.auto&&ipOk(n.ip)!=="ok")ic="#78716c"}
+    else ipt=n.ip||"IP ?";
+    out+='<text x="'+n.x+'" y="'+(y+60)+'" font-size="12" font-weight="700" font-family="ui-monospace,Consolas,monospace" text-anchor="middle" fill="'+ic+'">'+esc(ipt)+'</text>';
+    if(n.type==="router"&&n.wifi)out+='<text x="'+n.x+'" y="'+(y-8)+'" font-size="13" font-weight="700" font-family="system-ui,Arial,sans-serif" text-anchor="middle" fill="#0369a1">📶 '+esc(n.wifi.on?n.wifi.ssid:"WiFi apagado")+(n.wifi.on&&n.wifi.sec==="open"?" 🔓":"")+'</text>';
+    if(n.type==="router"&&ST.cur>=3)out+='<text x="'+n.x+'" y="'+(y+Hd+40)+'" font-size="12" font-weight="700" font-family="ui-monospace,Consolas,monospace" text-anchor="middle" fill="#0369a1">🌍 pública '+esc(W.pub)+'</text>';
+    if(!LV[ST.cur].nowarn&&n.type!=="router"&&R&&!pathTo(st,n.id))out+='<text x="'+(x+w-5)+'" y="'+(y+4)+'" font-size="18" text-anchor="middle">⚠️</text>';
+    out+='</g>';
+  });
+  st.nodes.forEach(function(n){
+    portList(n).forEach(function(p,i){
+      var P=portPos(n,i),used=portUsed(st,n.id,i),act=(pending===n.id&&pendP===i)||(cab&&cab.from===n.id&&cab.fp===i),wan=p.k==="wan";
+      var bw=wan?18:22,bh=wan?24:18,col=act?"#f97316":(used?"#a8a29e":(wan?"#38bdf8":"#fde047"));
+      out+='<g data-port="'+n.id+'" data-pi="'+i+'" style="cursor:crosshair"><title>'+(wan?"Puerto WAN: hacia el ISP (internet)":(p.k==="lan"?"Puerto LAN: hacia tu red":"Puerto de red"))+(used?" · ocupado":" · arrastra para sacar un cable")+'</title>'
+        +(wan?'<rect x="'+(P.x-18)+'" y="'+(P.y-13)+'" width="36" height="26" fill="transparent"/>':'<rect x="'+(P.x-13)+'" y="'+(P.y-18)+'" width="26" height="36" fill="transparent"/>')
+        +'<rect x="'+(P.x-bw/2)+'" y="'+(P.y-bh/2)+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+col+'" stroke="#111" stroke-width="2.5"/>'
+        +(wan?'<rect x="'+(P.x-2)+'" y="'+(P.y-6)+'" width="5" height="12" fill="#111"/>':'<rect x="'+(P.x-6)+'" y="'+(P.y-1)+'" width="12" height="5" fill="#111"/>')+'</g>';
+    });
+    if(n.type==="router"){var wp=portPos(n,rLan(n));out+='<text x="'+(wp.x+12)+'" y="'+(wp.y-14)+'" font-size="11" font-weight="700" font-family="system-ui,Arial,sans-serif" fill="#0369a1">WAN</text>'}
+  });
+  if(sel&&sel.kind==="link"){
+    var l=null;st.links.forEach(function(q){if(q.id===sel.id)l=q});
+    var c=l&&cablePath(st,l);
+    if(c){var mx=c.mx,my=c.my-26;
+      out+='<g data-del="'+l.id+'" style="cursor:pointer"><title>Quitar este cable</title><circle cx="'+mx+'" cy="'+my+'" r="18" fill="#fee2e2" stroke="#b91c1c" stroke-width="4"/><text x="'+mx+'" y="'+(my+8)+'" font-size="22" text-anchor="middle">🗑️</text></g>';}
+  }
+  out+='<g id="pk"></g>';
+  return out;
+}
+function drawSvg(){if(!CS()){$("svg").innerHTML="";return}$("svg").innerHTML=markup()}
+function tabOpen(k){return k===1||(ST.lv[k-1]&&ST.lv[k-1].passed&&!!ST.lv[k-1].ans)}
+function drawTabs(){
+  var h="";
+  for(var k=1;k<=NL;k++){
+    var open=tabOpen(k),l=ST.lv[k];
+    var done=l&&l.passed&&l.ans;
+    h+='<button class="btn'+(k===ST.cur?" on":"")+'" data-tab="'+k+'" title="'+esc(LV[k].tab)+'"'+(open?"":" disabled")+(done&&k!==ST.cur?' style="background:#bbf7d0"':'')+'>'+(k===ST.cur?LV[k].tab:(open?k:"🔒"+k))+'</button>';
+  }
+  $("tabs").innerHTML=h;
+}
+function goalHtml(g){
+  var parts=g.split(/\s*\d\)\s+/).filter(function(x){return x.trim()});
+  if(parts.length<2)return '<p>'+g+'</p>';
+  return '<ol>'+parts.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ol>';
+}
+function drawMis(){
+  var k=ST.cur,l=LV[k],c=CS(),h='<div class="misText"><h2>Nivel '+k+' · '+l.title+(c.passed?" ✅":"")+'</h2>'+(misMin?'':'<p class="story">'+l.story+'</p><div class="goal"><b>🎯 Qué hacer</b>'+goalHtml(l.goal)+'</div>');
+  c.done=c.done||{};
+  var cks=reqs(c).map(function(rq){var d=!!c.done[rq.key];return '<span class="ck'+(d?" ok":"")+'">'+(d?"✅":"⬜")+' '+esc(rq.short)+'</span>'});
+  if(l.allDhcp||l.allIp){var id=!ipProblems(c,k).length;cks.push('<span class="ck'+(id?" ok":"")+'">'+(id?"✅":"⬜")+(l.allDhcp?' Todos los PC con IP del DHCP':' Todos los PC con IP y ninguna repetida')+'</span>')}
+  if(l.sec){var sd=!secProblems(c).length;cks.push('<span class="ck'+(sd?" ok":"")+'">'+(sd?"✅":"⬜")+' Red WiFi segura</span>')}
+  h+='<div class="checks"><b>✔ Comprobaciones</b>'+cks.join("")+'</div>';
+  if(hintOn[k])h+='<p class="hint">💡 '+l.hint+'</p>';
+  h+='</div><div class="misBtns'+(misMin?" row":"")+'"><button class="btn" id="bHint">💡 Pista</button><button class="btn" id="bReset">↺ Empezar de nuevo</button><button class="btn" id="bMin">'+(misMin?"📄 Ver el texto":"📄 Ocultar el texto")+'</button></div>';
+  $("mis").innerHTML=h;
+  $("bHint").onclick=function(){hintOn[k]=!hintOn[k];drawMis()};
+  $("bMin").onclick=function(){misMin=!misMin;drawMis()};
+  $("bReset").onclick=function(){if(busy)return;var o=ST.lv[k],b=build(k,W);b.passed=o.passed;b.solved=o.solved;b.ans=o.ans;b.cls=o.cls||{};b.cmds=o.cmds||[];b.tries=o.tries||0;b.done={};normPorts(b);ST.lv[k]=b;sel=null;pending=null;failNode=null;drawAll();queueSave()};
+  var add=l.add||{};
+  $("bSend").classList.toggle("hidden",!l.btn);
+  $("bAttack").classList.toggle("hidden",!c.nodes.some(function(n){return n.attack}));
+  $("bAddSw").classList.toggle("hidden",!(add.sw&&c.nodes.filter(function(n){return n.type==="switch"}).length<add.sw));
+  var nn=nota();$("nota").textContent=nn;$("notaH").textContent=nn;$("bar").style.width=(nn*10)+"%";
+}
+function tl(k,v,cls){return '<div class="tl"><span class="tk">'+k+'</span><span class="tv '+(cls||"")+'">'+v+'</span></div>'}
+function drawSel(){
+  var st=CS(),box=$("cSel"),n=sel&&sel.kind==="node"?nodeBy(st,sel.id):null,h;
+  if(!n){box.innerHTML='<div class="empty">👆 Pulsa un aparato para ver su información.<br><br>En los <b>PC</b> y en el <b>DNS</b> puedes escribir órdenes en su consola.</div>';return}
+  var e=eff(n,st);
+  h='<div class="th">'+ICON[n.type]+' '+esc(n.name)+'</div>';
+  if(n.type==="router"){
+    h+=tl("Tipo","router: la puerta de tu red")+tl("IP privada",n.ip)+(ST.cur>=3?tl("IP pública",esc(W.pub)+" (te la da tu ISP)"):"")+tl("Puertos LAN",lanCnt(st,n.id)+"/"+rLan(n)+" ocupados")+tl("Puerto WAN",(function(){var I=ispOf(st);return I&&linked(st,I.id,n.id)?"conectado al ISP":"libre: falta el cable al ISP"})());
+    if(n.dhcp){
+      h+='<div class="ts">── DHCP ──</div>';
+      h+='<label class="lab"><input type="checkbox" id="fdhcp"'+(n.dhcp.on?" checked":"")+'> DHCP activado (reparte IP desde la .100)</label>';
+      h+='<label class="lab" for="fdhcpdns">DNS que reparte</label><input type="text" id="fdhcpdns" maxlength="15" placeholder="IP del DNS" value="'+esc(n.dhcp.dns)+'"'+(n.dhcp.on?"":" disabled")+'>';
+    }
+    if(n.wifi){
+      var wf=n.wifi,off=!wf.on;
+      h+='<div class="ts">── WiFi ──</div>';
+      h+='<label class="lab"><input type="checkbox" id="fwifi"'+(wf.on?" checked":"")+'> WiFi activada</label>';
+      h+='<label class="lab" for="fssid">Nombre de la red (SSID)</label><input type="text" id="fssid" maxlength="24" value="'+esc(wf.ssid)+'"'+(off?" disabled":"")+'>';
+      h+='<label class="lab" for="fsec">Seguridad</label><select id="fsec"'+(off?" disabled":"")+'>'+[["open","Abierta (sin contraseña)"],["wep","WEP"],["wpa2","WPA2"],["wpa3","WPA3"]].map(function(o){return '<option value="'+o[0]+'"'+(wf.sec===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select>';
+      h+='<label class="lab" for="fwpass">Contraseña WiFi</label><input type="text" id="fwpass" maxlength="32" value="'+esc(wf.pass)+'"'+(off||wf.sec==="open"?" disabled":"")+' placeholder="'+(wf.sec==="open"?"red abierta: no tiene":"8 caracteres o más")+'">';
+      h+='<label class="lab" for="fadmin">Contraseña para configurar el router</label><input type="text" id="fadmin" maxlength="32" value="'+esc(wf.admin)+'">';
+      h+='<div class="tx">Es la que pide el router para entrar a cambiar todo esto. No es la del WiFi.</div>';
+    }
+    if(n.fw){
+      h+='<div class="ts">── Seguridad ──</div>';
+      h+='<label class="lab"><input type="checkbox" id="ffw"'+(n.fw.on?" checked":"")+'> Cortafuegos activado</label><div class="tx">Bloquea lo que llega de internet sin que nadie de casa lo haya pedido.</div>';
+      h+='<label class="lab" for="fdmz">Reenviar TODO lo que llegue de internet a:</label><select id="fdmz"><option value="">Nadie</option>'+st.nodes.filter(isHost).map(function(x){return '<option'+(n.fw.dmz===x.name?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select>';
+    }
+    if(!n.dhcp&&!n.wifi&&!n.fw)h+='<div class="tx">Recibe los paquetes de tu red y los reenvía hacia internet a través de tu proveedor (ISP). Aquí no hay nada que configurar.</div>';
+  }else if(n.type==="isp"){
+    h+=tl("Tipo","proveedor de internet (ISP)")+tl("Ejemplos","Movistar, Digi, Vodafone...")+'<div class="tx">Une el router de tu casa (su puerto WAN azul) con el resto de internet. También le da a tu casa su IP pública'+(ST.cur>=3?' ('+esc(W.pub)+')':'')+'. No se configura desde aquí.</div>';
+  }else if(n.type==="switch"){
+    h+=tl("Tipo","switch")+tl("Puertos",cnt(st,n.id)+"/"+SWPORTS+" ocupados")+'<div class="tx">Convierte un puerto del router en varios: uno sube al router y '+(SWPORTS-1)+' son para aparatos. No necesita IP ni se configura.</div>';
+  }else if(n.type==="server"){
+    h+=tl("Tipo","servidor web")+tl("Web",esc(n.site==="falsa"?"(¿?)":n.site))+tl("IP pública",esc(n.ip))+'<div class="tx">Aquí vive una web. Solo contesta a quien le pide la página: no se configura desde aquí.</div>';
+  }else if(n.type==="hacker"){
+    h+=tl("Tipo","desconocido de internet")+tl("IP pública",esc(n.ip))+'<div class="tx">Va probando IP públicas en busca de redes mal protegidas.</div>';
+  }else if(isHost(n)){
+    if(isWl(n)){
+      var Rr=routerOf(st),nets=[];
+      if(Rr&&Rr.wifi&&Rr.wifi.on&&Rr.wifi.ssid)nets.push(Rr.wifi.ssid);
+      if(nets.indexOf(W.vecino)<0)nets.push(W.vecino);
+      if(n.ssid&&nets.indexOf(n.ssid)<0)nets.push(n.ssid);
+      h+='<div class="tx">Se conecta por WiFi, sin cable. La IP se la da el DHCP del router.</div>';
+      h+='<label class="lab" for="fnet">Red WiFi</label><select id="fnet"><option value="">(ninguna)</option>'+nets.map(function(x){return '<option'+(n.ssid===x?" selected":"")+'>'+esc(x)+'</option>'}).join("")+'</select>';
+      h+='<label class="lab" for="fnpass">Contraseña WiFi</label><input type="text" id="fnpass" maxlength="32" value="'+esc(n.wpass||"")+'">';
+    }
+    if(n.type==="iot")h+=tl("IP",esc(e.none?"(ninguna)":(e.ip||"(ninguna)")))+tl("Puerta",esc(e.gw||"(ninguna)"))+tl("DNS",esc(e.dns||"(ninguno)"))+'<div class="tx">La bombilla no tiene pantalla ni consola: se configura sola por DHCP.</div>';
+    else h+=conHtml(n);
+  }else if(n.type==="dns"){
+    h+=tl("Tipo","servidor DNS (vive en internet)")+tl("IP pública",esc(n.ip));
+    h+=conHtml(n);
+  }
+  if(!n.fixed)h+='<p><button class="btn danger sm" id="pdel">🗑️ Quitar aparato</button></p>';
+  box.innerHTML=h;
+  function after(){checkDone(false);drawSvg();drawMis();queueSave()}
+  var f;
+  if((f=$("fdhcp")))f.onchange=function(){n.dhcp.on=this.checked;drawSel();after()};
+  if((f=$("fdhcpdns")))f.oninput=function(){n.dhcp.dns=this.value.trim();after()};
+  if((f=$("fwifi")))f.onchange=function(){n.wifi.on=this.checked;drawSel();after()};
+  if((f=$("fssid")))f.oninput=function(){n.wifi.ssid=this.value.trim();after()};
+  if((f=$("fsec")))f.onchange=function(){n.wifi.sec=this.value;drawSel();after()};
+  if((f=$("fwpass")))f.oninput=function(){n.wifi.pass=this.value;after()};
+  if((f=$("fadmin")))f.oninput=function(){n.wifi.admin=this.value;after()};
+  if((f=$("fnet")))f.onchange=function(){n.ssid=this.value;drawSel();after()};
+  if((f=$("fnpass")))f.oninput=function(){n.wpass=this.value;after()};
+  if((f=$("ffw")))f.onchange=function(){n.fw.on=this.checked;after()};
+  if((f=$("fdmz")))f.onchange=function(){n.fw.dmz=this.value;after()};
+  if((f=$("conIn")))conBind(f,n,st);
+  if((f=$("pdel")))f.onclick=function(){st.nodes=st.nodes.filter(function(x){return x.id!==n.id});st.links=st.links.filter(function(l){return l.a!==n.id&&l.b!==n.id});sel=null;drawAll();queueSave()};
+}
+
+/* ---------- consola ---------- */
+var CON={},HIST={},JOURNEY=null;
+function conKey(n){return ST.cur+":"+n.id}
+function isIpStr(v){var m=(v||"").match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);return !!m&&+m[1]<=255&&+m[2]<=255&&+m[3]<=255&&+m[4]<=255}
+function isPriv(ip){var m=ip.split(".").map(Number);return m[0]===10||(m[0]===192&&m[1]===168)||(m[0]===172&&m[1]>=16&&m[1]<=31)}
+function linkUp(st,P){
+  if(isWl(P)){var w=wifiOk(st,P);return w==="ok"?null:(w==="pass"?"la contraseña del WiFi está mal":(w==="off"?"el WiFi del router está apagado":"no estás conectado a la WiFi de casa"))}
+  if(pathTo(st,P.id))return null;
+  return cnt(st,P.id)===0?"no tienes cable":"tu cable no llega hasta el router";
+}
+function selfCheck(st,P,e){
+  var lu=linkUp(st,P);if(lu)return "medios desconectados: "+lu+".";
+  if(e.none||!e.ip)return "no tienes IP. "+(P.auto?"El DHCP no te ha dado ninguna.":"Ponla con set ip.");
+  var ic=ipOk(e.ip);if(ic!=="ok")return "tu IP no vale. "+IPMSG[ic];
+  var d=dupIp(st,P,e.ip);if(d)return "conflicto de IP: «"+d.name+"» tiene tu misma IP ("+e.ip+").";
+  return null;
+}
+function lookup(st,P,e,name){
+  if(!e.dns)return {err:"No tienes DNS configurado: no sabes a quién preguntar. Usa set dns."};
+  if(canon(e.gw)!==GW)return {err:"No llegas al DNS "+e.dns+": tu puerta de enlace ("+(e.gw||"ninguna")+") no es el router."};
+  var R=routerOf(st),D=null;st.nodes.forEach(function(n){if(n.type==="dns"&&canon(n.ip)===canon(e.dns))D=n});
+  if(!D)return {err:"El DNS "+e.dns+" no contesta: no hay ningún DNS con esa IP."};
+  var iw=inetWhy(st,D);if(iw)return {err:"El DNS "+e.dns+" no contesta. "+iw.replace("🔌 ","")};
+  var en=null;D.agenda.forEach(function(a){if(!en&&a.name===name&&(a.ip||"").trim())en=a});
+  if(!en)return {err:"El DNS no conoce "+name+": no lo tiene en su agenda."};
+  return {D:D,ip:canon(en.ip)};
+}
+function pingIp(st,P,e,ip){
+  var R=routerOf(st);ip=canon(ip);
+  if(ip===canon(e.ip))return {ok:true,t:"Respuesta desde "+ip+" (eres tú)"};
+  if(ip.indexOf("192.168.1.")===0){
+    var T=null;
+    if(ip===GW)T=R;else st.nodes.forEach(function(n){if(!T&&isHost(n)&&n.id!==P.id&&canon(eff(n,st).ip)===ip)T=n});
+    if(!T)return {ok:false,t:"Tiempo de espera agotado: nadie en tu red tiene la IP "+ip+"."};
+    if(T!==R&&!pathTo(st,T.id))return {ok:false,t:"Tiempo de espera agotado: «"+T.name+"» tiene esa IP pero no está conectado."};
+    return {ok:true,t:"Respuesta desde "+ip+": tiempo=1ms ("+T.name+")"};
+  }
+  if(isPriv(ip))return {ok:false,t:"Tiempo de espera agotado: "+ip+" es una IP privada de otra red. No se puede llegar a ella desde aquí."};
+  if(canon(e.gw)!==GW)return {ok:false,t:"Tiempo de espera agotado: "+ip+" está fuera de tu red y tu puerta de enlace ("+(e.gw||"ninguna")+") no es el router."};
+  var iw0=inetWhy(st,null);if(iw0&&ip!==canon(W.pub))return {ok:false,t:"Tiempo de espera agotado. "+iw0.replace("🔌 ","")};
+  if(ip===canon(W.pub))return {ok:true,t:"Respuesta desde "+ip+": tiempo=1ms (tu propio router, por su IP pública)"};
+  var O=null;st.nodes.forEach(function(n){if(!O&&isOut(n)&&canon(n.ip)===ip)O=n});
+  if(!O)return {ok:false,t:"Tiempo de espera agotado: en internet no hay nadie con la IP "+ip+"."};
+  var iw2=inetWhy(st,O);if(iw2)return {ok:false,t:"Tiempo de espera agotado. "+iw2.replace("🔌 ","")};
+  return {ok:true,t:"Respuesta desde "+ip+": tiempo=24ms ("+O.name+")"};
+}
+var HELPTXT=[
+ ["Para MIRAR:","wa"],
+ ["  ipconfig              tu IP, puerta de enlace y DNS"],
+ ["  ping 192.168.1.1      ¿llego a esa IP?"],
+ ["  ping youtube.com      ¿llego a esa web?"],
+ ["  nslookup youtube.com  preguntar al DNS la IP de una web"],
+ ["Para CAMBIAR:","wa"],
+ ["  set ip 192.168.1.20"],
+ ["  set puerta 192.168.1.1"],
+ ["  set dns 8.8.8.8"],
+ ["  ipconfig /renew       pedir la configuración al DHCP"],
+ ["Otros: cls borra la pantalla · flecha ↑ repite comandos","dim"]
+];
+function runCmd(st,n,raw){
+  var L=[],parts=raw.trim().split(/\s+/),cmd=(parts[0]||"").toLowerCase(),a1=(parts[1]||"").toLowerCase(),a2=parts[2]||"";
+  function o(t,c){L.push([c||"",t])}
+  var e=eff(n,st),R=routerOf(st);
+  if(n.type==="dns")return runDns(st,n,parts,cmd);
+  if(cmd==="help"||cmd==="ayuda"||cmd==="?"){HELPTXT.forEach(function(x){o(x[0],x[1])});return L}
+  if(cmd==="cls"||cmd==="clear")return "cls";
+  if(cmd==="ipconfig"){
+    if(!a1||a1==="/all"){
+      o((isWl(n)?"Adaptador Wi-Fi":"Adaptador Ethernet")+":");
+      var lu=linkUp(st,n);
+      if(lu&&(isWl(n)||cnt(st,n.id)===0)){o("   Estado . . . . . . . : medios desconectados ("+lu+")","er");return L}
+      if(isWl(n))o("   Red WiFi . . . . . . : "+n.ssid);
+      o("   DHCP . . . . . . . . : "+(n.auto?"sí (automático)":"no (manual)"));
+      o("   Dirección IP . . . . : "+(e.ip||"(ninguna)"),e.ip?"":"er");
+      o("   Máscara de subred. . : "+(e.ip?"255.255.255.0":"(ninguna)"));
+      o("   Puerta de enlace . . : "+(e.gw||"(ninguna)"),e.gw?"":"er");
+      if(ST.cur>=5)o("   Servidor DNS . . . . : "+(e.dns||"(ninguno)"),e.dns?"":"er");
+      return L;
+    }
+    if(a1==="/renew"){
+      if(!R||!R.dhcp){o("En esta red no hay DHCP. Configura a mano con set ip, set puerta y set dns.","er");return L}
+      n.auto=true;var e2=eff(n,st),lu2=linkUp(st,n);
+      if(e2.none){o("❌ Nadie te contesta: "+(lu2?"no llegas al router ("+lu2+").":"el DHCP del router está apagado."),"er");o("Te quedas en automático, pero sin IP.","wa")}
+      else{o("✅ El DHCP del router te ha dado:","ok");o("   IP "+e2.ip+" · puerta "+e2.gw+" · DNS "+(e2.dns||"(ninguno)"),"ok")}
+      return L;
+    }
+    o("No conozco «ipconfig "+parts[1]+"». Usa ipconfig o ipconfig /renew.","er");return L;
+  }
+  if(cmd==="ping"||cmd==="nslookup"){
+    if(!parts[1]){o(cmd==="ping"?"Falta a quién. Ejemplo: ping 192.168.1.1 o ping youtube.com":"Falta el nombre. Ejemplo: nslookup youtube.com","er");return L}
+    var t=parts[1].toLowerCase();
+    if(/^[\d.]+$/.test(t)&&!isIpStr(t)){o("«"+parts[1]+"» no es una IP: son 4 números del 0 al 255 separados por puntos.","er");return L}
+    if(cmd==="ping")JOURNEY=matchTask(st,n,t);
+    if(cmd==="nslookup"&&isIpStr(t)){o("nslookup es para nombres como youtube.com, no para IP.","er");return L}
+    var sc=selfCheck(st,n,e);if(sc){o("Error: "+sc,"er");return L}
+    if(cmd==="nslookup"){
+      o("Servidor DNS: "+(e.dns||"(ninguno)"));
+      var lk=lookup(st,n,e,t);
+      if(lk.err)o("*** "+lk.err,"er");else{o("Nombre:    "+t);o("Dirección: "+lk.ip,"ok")}
+      return L;
+    }
+    var ip=t;
+    if(!isIpStr(t)){var lk2=lookup(st,n,e,t);if(lk2.err){o("No se encuentra "+t+". "+lk2.err,"er");return L}ip=lk2.ip;o("Haciendo ping a "+t+" ["+ip+"]:")}
+    else o("Haciendo ping a "+canon(t)+":");
+    var pr=pingIp(st,n,e,ip);o((pr.ok?"✅ ":"❌ ")+pr.t,pr.ok?"ok":"er");
+    return L;
+  }
+  if(cmd==="set"){
+    if(isWl(n)){o(n.name+" coge su IP solo, por DHCP. Para cambiar de WiFi usa el panel de arriba.","er");return L}
+    if(!a1){o("¿Qué quieres cambiar? Usa set ip, set puerta o set dns.","er");return L}
+    var field={ip:"ip",puerta:"gw",gateway:"gw",gw:"gw",enlace:"gw",dns:"dns"}[a1];
+    if(!field){o("No conozco «set "+parts[1]+"». Puedes usar set ip, set puerta o set dns.","er");return L}
+    var ex={ip:"set ip 192.168.1.20",gw:"set puerta 192.168.1.1",dns:"set dns 8.8.8.8"}[field];
+    if(field==="dns"&&ST.cur<5){o("Todavía no hay DNS en esta red.","er");return L}
+    if(!a2){o("Falta "+{ip:"la IP",gw:"la IP de la puerta de enlace",dns:"la IP del DNS"}[field]+". Ejemplo: "+ex,"er");return L}
+    if(parts.length>3){o("Sobra algo al final. Ejemplo: "+ex,"er");return L}
+    if(!isIpStr(a2)){o("«"+a2+"» no es una IP: son 4 números del 0 al 255 separados por puntos. Ejemplo: "+ex,"er");return L}
+    var v=canon(a2);
+    if(n.auto){n.auto=false;o("Pasas a modo manual: ya no usas el DHCP.","wa")}
+    n[field]=v;
+    o("✅ "+{ip:"IP",gw:"Puerta de enlace",dns:"DNS"}[field]+" cambiada a "+v+".","ok");
+    if(field==="ip"){var sk=ipOk(v);if(sk!=="ok")o("⚠️ "+IPMSG[sk],"wa");else{var dd=dupIp(st,n,v);if(dd)o("⚠️ Cuidado: «"+dd.name+"» ya tiene esa IP.","wa")}if(!n.gw)o("Recuerda poner también la puerta de enlace (set puerta).","wa")}
+    return L;
+  }
+  o("No conozco «"+parts[0]+"». Escribe help para ver los comandos.","er");
+  return L;
+}
+function matchTask(st,n,t){
+  var tk=null;
+  reqs(st).forEach(function(rq){
+    if(tk||rq.pc!==n.id||rq.auto||rq.attack)return;
+    if(rq.name&&!isIpStr(t)&&rq.name===t)tk=rq;
+    else if(rq.ip&&isIpStr(t)&&canon(rq.ip)===canon(t))tk=rq;
+    else if(rq.peer&&isIpStr(t)){var pn=null;st.nodes.forEach(function(x){if(x.name===rq.peer)pn=x});if(pn&&canon(eff(pn,st).ip)===canon(t))tk=rq}
+  });
+  return tk;
+}
+function dnsBanner(n){
+  var h='<div class="ok">📖 Servidor DNS '+esc(n.ip)+'</div><div>Agenda (nombre → IP):</div>';
+  if(!n.agenda.length)h+='<div class="er">   (vacía: no conoce ninguna web)</div>';
+  n.agenda.forEach(function(a){h+='<div>   '+esc(a.name)+' → '+esc(a.ip||"(sin IP)")+'</div>'});
+  h+=n.locked?'<div class="dim">🔒 Este DNS no es tuyo: solo puedes mirar.</div>':'<div class="dim">Apuntar: add youtube.com 203.0.113.99 · Borrar: del youtube.com · help</div>';
+  return h;
+}
+function runDns(st,n,parts,cmd){
+  var L=[];function o(t,c){L.push([c||"",t])}
+  var nm=(parts[1]||"").toLowerCase(),ip=parts[2]||"";
+  if(cmd==="help"||cmd==="ayuda"||cmd==="?"){o("Comandos del DNS:","wa");o("  agenda                          ver la agenda");o("  add youtube.com 203.0.113.99    apuntar una web y su IP");o("  del youtube.com                 borrar un apunte");o("  cls                             borrar la pantalla","dim");return L}
+  if(cmd==="cls"||cmd==="clear")return "cls";
+  if(cmd==="agenda"){if(!n.agenda.length)o("(vacía)","er");n.agenda.forEach(function(a){o("   "+a.name+" → "+(a.ip||"(sin IP)"))});return L}
+  if(cmd==="add"||cmd==="del"){
+    if(n.locked){o("🔒 Este DNS no es tuyo: no puedes cambiar su agenda.","er");return L}
+    var ex=cmd==="add"?"add youtube.com 203.0.113.99":"del youtube.com";
+    if(!nm){o("Falta el nombre de la web. Ejemplo: "+ex,"er");return L}
+    if(!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(nm)){o("«"+parts[1]+"» no parece el nombre de una web. Ejemplo: "+ex,"er");return L}
+    var i,f=-1;for(i=0;i<n.agenda.length;i++)if(n.agenda[i].name===nm)f=i;
+    if(cmd==="del"){if(f<0){o(nm+" no está en la agenda.","er");return L}n.agenda.splice(f,1);o("🗑️ Borrado: "+nm,"ok");return L}
+    if(!ip){o("Falta la IP. Ejemplo: "+ex,"er");return L}
+    if(parts.length>3){o("Sobra algo al final. Ejemplo: "+ex,"er");return L}
+    if(!isIpStr(ip)){o("«"+ip+"» no es una IP: son 4 números del 0 al 255 separados por puntos.","er");return L}
+    if(f>=0){n.agenda[f].ip=canon(ip);o("✏️ Cambiado: "+nm+" → "+canon(ip),"ok")}
+    else{n.agenda.push({name:nm,ip:canon(ip)});o("✅ Apuntado: "+nm+" → "+canon(ip),"ok")}
+    return L;
+  }
+  if(cmd==="ping"||cmd==="ipconfig"||cmd==="nslookup"||cmd==="set"){o("Esto es el servidor DNS: aquí solo se maneja la agenda (agenda, add, del). Los ping se hacen desde un PC.","er");return L}
+  o("No conozco «"+parts[0]+"». En el DNS puedes usar: agenda, add, del, help.","er");return L;
+}
+function conHtml(n){
+  var b=CON[conKey(n)]||[];
+  return '<div class="con"><div class="conOut" id="conOut">'+(n.type==="dns"?dnsBanner(n)+b.join(""):b.length?b.join(""):'<div class="dim">💻 Consola de '+esc(n.name)+'. Escribe help y pulsa Intro.</div>')+'</div><div class="conRow"><span>'+esc(n.name)+'&gt;</span><input id="conIn" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Consola"></div></div>';
+}
+function conBind(f,n,st){
+  var co=$("conOut");if(co)co.scrollTop=co.scrollHeight;
+  var k=conKey(n),hs=HIST[k]=HIST[k]||[],hi=hs.length;
+  f.onkeydown=function(ev){
+    if(ev.key==="ArrowUp"){if(hi>0){hi--;this.value=hs[hi]}ev.preventDefault();return}
+    if(ev.key==="ArrowDown"){if(hi<hs.length){hi++;this.value=hs[hi]||""}ev.preventDefault();return}
+    if(ev.key!=="Enter"||busy)return;
+    var raw=this.value.trim();this.value="";if(!raw)return;
+    hs.push(raw);hi=hs.length;
+    var c=CS();c.cmds=c.cmds||[];c.cmds.push(n.name+"> "+raw);if(c.cmds.length>500)c.cmds.shift();
+    var res=runCmd(st,n,raw),buf=CON[k]=CON[k]||[];
+    if(res==="cls")CON[k]=[];
+    else{buf.push('<div class="cm">'+esc(n.name)+'&gt; '+esc(raw)+'</div>');res.forEach(function(r){buf.push('<div class="'+r[0]+'">'+esc(r[1])+'</div>')});if(buf.length>300)buf.splice(0,buf.length-300)}
+    drawSel();checkDone(false);drawSvg();drawMis();queueSave();
+    var ni=$("conIn");if(ni)ni.focus();
+    if(JOURNEY){var rq=JOURNEY;JOURNEY=null;runJourney(rq)}
+  };
+}
+
+/* ---------- pregunta al terminar el nivel ---------- */
+function qOptions(k){
+  var q=LV[k].q,items=[{key:"right",t:q.right}].concat(q.wrong.map(function(t,i){return {key:"w"+i,t:t}}));
+  return shuffled(items,rng(hash(norm(ST.seedName)+"q"+k)));
+}
+function fillCls(){
+  var k=ST.cur,c=CS(),box=$("qBody"),h,done=!!c.ans;
+  h='<p class="good" style="font-size:18px;margin:0 0 8px"><b>🎉 ¡Nivel '+k+' superado!</b></p>';
+  h+='<p style="margin:0 0 8px;line-height:1.5">🌍 Tu casa tiene <b>una IP pública</b>: la del router (<span class="ip">'+esc(W.pub)+'</span>), que te da tu <b>proveedor de internet (ISP)</b>. Dentro de casa cada aparato usa una <b>IP privada</b>, que nunca sale a internet.</p>';
+  h+='<p style="margin:0 0 10px;line-height:1.5">Solo hay <b>3 familias de IP privadas</b>:<br>· <span class="ip">10.x.x.x</span><br>· <span class="ip">172.16.x.x</span> hasta <span class="ip">172.31.x.x</span> (el 2º número entre 16 y 31)<br>· <span class="ip">192.168.x.x</span><br>Todas las demás son públicas.</p>';
+  h+='<p style="margin:0 0 6px"><b>❓ ¿Privada o pública?</b></p>';
+  W.cls.forEach(function(it,i){
+    var v=(c.cls||{})[i]||"",ok=v===it.kind;
+    h+='<div class="clsQ'+(done?(ok?" ok":" no"):"")+'"><span class="ip">'+it.ip+'</span><select data-cq="'+i+'"'+(done?" disabled":"")+'><option value="">¿?</option><option value="priv"'+(v==="priv"?" selected":"")+'>Privada</option><option value="pub"'+(v==="pub"?" selected":"")+'>Pública</option></select>'+(done?'<span>'+(ok?"✅":"❌")+' '+esc(clsWhy(it))+'</span>':'')+'</div>';
+  });
+  if(done){
+    var n=Math.round((c.qScore||0)*4);
+    h+='<p class="'+(n===4?"good":"bad")+'"><b>'+n+' de 4 correctas.</b></p><p style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" id="qNext">Siguiente nivel ▶</button> <button class="btn" id="qClose">Seguir mirando este nivel</button></p>';
+  }else h+='<p><button class="btn go" id="qCheck" disabled>Comprobar</button></p><p class="hint">Elige una opción en las 4. Solo hay un intento.</p>';
+  box.innerHTML=h;
+  var sels=box.querySelectorAll("[data-cq]");
+  Array.prototype.forEach.call(sels,function(sl){sl.onchange=function(){c.cls=c.cls||{};c.cls[+this.getAttribute("data-cq")]=this.value;$("qCheck").disabled=W.cls.some(function(it,i){return !c.cls[i]})}});
+  var qc=$("qCheck");if(qc)qc.disabled=W.cls.some(function(it,i){return !(c.cls||{})[i]});
+  if(qc)qc.onclick=function(){var n=0;W.cls.forEach(function(it,i){if(c.cls[i]===it.kind)n++});c.qScore=n/4;c.ans=n===4?"right":"w0";fillCls();drawTabs();drawMis();queueSave()};
+  var nx=$("qNext");if(nx)nx.onclick=function(){$("dlgQ").close();ST.cur=k+1;ensure(ST.cur);sel=null;pending=null;failNode=null;$("log").innerHTML=LOGPH;$("msg").textContent="";drawAll();queueSave()};
+  var cl=$("qClose");if(cl)cl.onclick=function(){$("dlgQ").close()};
+}
+function fillQ(){
+  if(LV[ST.cur].clsQ)return fillCls();
+  var k=ST.cur,c=CS(),q=LV[k].q,box=$("qBody"),h;
+  h='<p class="good" style="font-size:18px;margin:0 0 8px"><b>🎉 ¡Nivel '+k+' superado!</b></p><p style="margin:0 0 8px"><b>❓ '+q.ask+'</b></p>';
+  qOptions(k).forEach(function(o){
+    var cls="opt";
+    if(c.ans){if(o.key==="right")cls+=" ok";else if(o.key===c.ans)cls+=" no"}
+    h+='<button class="'+cls+'" data-key="'+o.key+'"'+(c.ans?" disabled":"")+'>'+esc(o.t)+'</button>';
+  });
+  if(c.ans){
+    h+='<p class="'+(c.ans==="right"?"good":"bad")+'"><b>'+(c.ans==="right"?"✅ ¡Bien!":"❌ No era esa.")+'</b> '+q.why+'</p><p style="display:flex;gap:8px;flex-wrap:wrap">';
+    h+=(k<NL?'<button class="btn go" id="qNext">Siguiente nivel ▶</button>':'<b>🏁 ¡Has terminado todos los niveles! Descarga tu .json y entrégalo.</b>')+' <button class="btn" id="qClose">Seguir mirando este nivel</button></p>';
+  }else h+='<p class="hint">Contesta para pasar al siguiente nivel. Solo hay un intento.</p>';
+  box.innerHTML=h;
+  Array.prototype.forEach.call(box.querySelectorAll("[data-key]"),function(b){b.onclick=function(){if(c.ans)return;c.ans=this.getAttribute("data-key");fillQ();drawTabs();drawMis();queueSave()}});
+  var nx=$("qNext");if(nx)nx.onclick=function(){$("dlgQ").close();ST.cur=k+1;ensure(ST.cur);sel=null;pending=null;failNode=null;$("log").innerHTML=LOGPH;$("msg").textContent="";drawAll();queueSave()};
+  var cl=$("qClose");if(cl)cl.onclick=function(){$("dlgQ").close()};
+}
+function openQ(){
+  var c=CS();if(!c||!c.passed||c.ans||busy)return;
+  fillQ();var d=$("dlgQ");if(!d.open)d.showModal();
+}
+function drawAll(){drawTabs();drawMis();drawSvg();drawSel();openQ()}
+
+/* ---------- animación del viaje ---------- */
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function fast(){return $("fast").checked}
+function dur(){return window.__instant?0:(fast()?160:600)}
+function pause(ms){return window.__instant?0:(fast()?Math.round(ms/4):ms)}
+function hop(a,b,emoji){
+  return new Promise(function(res){
+    var st=CS(),A=nodeBy(st,a),B=nodeBy(st,b),g=$("pk"),ms=dur();
+    if(!A||!B||!g||ms===0){res();return}
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("font-size","28");t.setAttribute("text-anchor","middle");t.textContent=emoji;g.appendChild(t);
+    var t0=performance.now();
+    (function f(now){var p=Math.min(1,(now-t0)/ms);t.setAttribute("x",A.x+(B.x-A.x)*p);t.setAttribute("y",A.y+(B.y-A.y)*p+10);if(p<1)requestAnimationFrame(f);else{if(t.parentNode)t.parentNode.removeChild(t);res()}})(t0);
+  });
+}
+var EM={q:"❓",a:"📗",req:"✉️",page:"🌐"};
+var LOGPH='<p class="small">Haz ping desde la consola de un PC y aquí verás por dónde pasa el paquete.</p>';
+async function playOne(r){
+  var c=CS(),log=$("log");
+  var ph=log.querySelector("p.small");if(ph)ph.remove();
+  while(log.children.length>=8)log.removeChild(log.firstElementChild);
+  function nodeLbl(id){var n=nodeBy(c,id);return n?ICON[n.type]+" "+n.name:"?"}
+  log.insertAdjacentHTML("beforeend",'<div class="rec"><span class="rl">'+esc(r.label)+':</span></div>');
+  var row=log.lastElementChild,last=null;
+  function add(id,good,tip){
+    if(id==null)return;
+    if(id===last&&row.lastElementChild&&row.lastElementChild.classList.contains("chip")){var ch=row.lastElementChild;if(!good){ch.className="chip no";ch.textContent=nodeLbl(id)+" ❌"}ch.title=tip;return}
+    if(last!==null)row.insertAdjacentHTML("beforeend",'<span class="arr">→</span>');
+    row.insertAdjacentHTML("beforeend",'<span class="chip'+(good?"":" no")+'" title="'+esc(tip)+'">'+esc(nodeLbl(id))+(good?" ✅":" ❌")+'</span>');
+    last=id;log.scrollTop=log.scrollHeight;
+  }
+  if(r.steps.length&&r.steps[0].route.length)add(r.steps[0].route[0],true,r.steps[0].msg);
+  for(var j=0;j<r.steps.length;j++){
+    var s=r.steps[j];
+    if(s.kind==="fail"){
+      failNode=s.route.length?s.route[s.route.length-1]:null;
+      if(failNode!=null)add(failNode,false,s.msg);
+      row.insertAdjacentHTML("beforeend",'<div class="why">'+esc(s.msg)+'</div>');log.scrollTop=log.scrollHeight;
+      drawSvg();if(pause(700))await sleep(pause(700));
+    }else{
+      if(s.route.length===1)add(s.route[0],true,s.msg);
+      for(var h=0;h+1<s.route.length;h++){await hop(s.route[h],s.route[h+1],EM[s.kind]||"✉️");add(s.route[h+1],true,s.msg)}
+      if(pause(200))await sleep(pause(200));
+    }
+  }
+  if(r.ok)row.insertAdjacentHTML("beforeend",'<span class="done">🎉 ¡Llega!</span>');
+  log.scrollTop=log.scrollHeight;
+  return r.ok;
+}
+async function runJourney(rq){
+  if(busy)return;
+  var c=CS();busy=true;failNode=null;drawSvg();c.tries=(c.tries||0)+1;
+  var r=simReq(c,rq);r.label=rq.short;
+  var ok=await playOne(r);
+  c.done=c.done||{};if(ok)c.done[rq.key]=true;
+  busy=false;
+  await checkDone(true);
+  drawSvg();drawMis();queueSave();
+  var ni=$("conIn");if(ni)ni.focus();
+}
+function ipProblems(c,k){
+  var out=[],pcs=c.nodes.filter(function(n){return n.type==="pc"});
+  pcs.forEach(function(n){
+    var e=eff(n,c);
+    if(LV[k].allDhcp&&!n.auto)out.push("🎟️ "+n.name+" todavía no usa el DHCP: escribe ipconfig /renew en su consola.");
+    else if(e.none||ipOk(e.ip)!=="ok")out.push("🔢 "+n.name+" no tiene una IP válida."+(n.auto?" ¿Llega su cable al router? ¿Está el DHCP activado?":" Escribe ipconfig /renew en su consola."));
+    else{var d=dupIp(c,n,e.ip);if(d&&d.id>n.id)out.push("⚠️ "+n.name+" y "+d.name+" tienen la misma IP ("+e.ip+").")}
+  });
+  return out;
+}
+function extraChecks(c,k){
+  var out=[];
+  if(LV[k].cls){
+    var empty=W.cls.some(function(it,i){return !(c.cls||{})[i]});
+    if(empty)out.push("🧩 Falta clasificar las IP (elige Privada o Pública en cada una).");
+    else W.cls.forEach(function(it,i){if(c.cls[i]!==it.kind)out.push("🧩 "+it.ip+" "+clsWhy(it))});
+  }
+  if(LV[k].sec)out=out.concat(secProblems(c));
+  if(LV[k].allDhcp||LV[k].allIp)out=out.concat(ipProblems(c,k));
+  return out;
+}
+async function checkDone(show){
+  var k=ST.cur,c=CS();if(!c||busy)return;
+  c.done=c.done||{};
+  var ts=reqs(c),manual=true,all=true,autoFail=null;
+  ts.forEach(function(rq){
+    var ok=simReq(c,rq).ok;
+    if(rq.auto){if(ok)c.done[rq.key]=true;else{delete c.done[rq.key];if(!autoFail)autoFail=rq}}
+    else{if(c.done[rq.key]&&!ok)delete c.done[rq.key];if(!c.done[rq.key])manual=false}
+    if(!c.done[rq.key])all=false;
+  });
+  if(c.passed)return;
+  if(show&&manual&&autoFail){busy=true;var r=simReq(c,autoFail);r.label=autoFail.short;await playOne(r);busy=false}
+  if(!all)return;
+  var ex=extraChecks(c,k);
+  if(!ex.length){
+    c.passed=true;c.solved={nodes:clone(c.nodes),links:clone(c.links),cls:clone(c.cls||{})};
+    toast("🎉 ¡Nivel superado!",true);drawAll();queueSave();return;
+  }
+  if(show){
+    var log=$("log");
+    ex.forEach(function(t){log.insertAdjacentHTML("beforeend",'<div class="rec"><div class="why">'+esc(t)+'</div></div>')});
+    log.scrollTop=log.scrollHeight;
+    toast(LV[k].sec?"📶 Los paquetes llegan, pero tu red aún no es segura.":(LV[k].cls?"🧩 Todo llega, pero revisa la clasificación.":"🔎 El ping llega, pero falta algo: mira el registro."));
+  }
+}
+async function send(){
+  if(busy)return;
+  var c=CS();busy=true;failNode=null;sel=null;pending=null;$("msg").textContent="";drawSvg();drawSel();
+  c.tries=(c.tries||0)+1;c.done=c.done||{};
+  var ts=reqs(c).filter(function(q){return !q.attack&&!q.auto});
+  for(var i=0;i<ts.length;i++){
+    var r=simReq(c,ts[i]);r.label=ts[i].short;
+    var ok=await playOne(r);if(ok)c.done[ts[i].key]=true;
+    if(!ok)break;
+  }
+  busy=false;await checkDone(true);
+  if(!c.passed)toast("❌ Todavía no. Mira dónde se para (pasa el ratón por cada paso para ver más).");
+  drawAll();queueSave();
+}
+async function attack(){
+  if(busy)return;
+  var c=CS(),rq=reqs(c).filter(function(q){return q.attack})[0];if(!rq)return;
+  await runJourney(rq);
+  if(!c.passed&&!(c.done||{})[rq.key])toast("😱 El desconocido ha entrado. Revisa la seguridad del router.");
+}
+
+/* ---------- ratón: puertos, arrastrar y cables ---------- */
+var pendP=null;
+function pt(e){var svg=$("svg"),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function tryLink(a,pa,b,pb){
+  var st=CS(),A=nodeBy(st,a),B=nodeBy(st,b);pending=null;pendP=null;
+  if(!A||!B){drawSvg();return}
+  normPorts(st);
+  var res=checkLink(st,A,B,pa,pb);
+  if(res.err){toast("❌ "+res.err);drawSvg();return}
+  st.links.push({id:st.lid++,a:a,b:b,pa:res.pa,pb:res.pb});
+  toast("✅ Cable puesto.",true);checkDone(false);drawAll();queueSave();
+}
+function removePrev(){var p=$("prev");if(p&&p.parentNode)p.parentNode.removeChild(p)}
+$("svg").addEventListener("pointerdown",function(e){
+  if(busy||!CS())return;
+  var st=CS(),t=e.target,del=t.closest("[data-del]"),port=t.closest("[data-port]"),g=t.closest("[data-node]"),l=t.closest("[data-link]");
+  if(del){var id=+del.getAttribute("data-del");st.links=st.links.filter(function(x){return x.id!==id});sel=null;checkDone(false);drawAll();queueSave();toast("🗑️ Cable quitado.",true);return}
+  if(port){
+    var pid=+port.getAttribute("data-port"),pi=+port.getAttribute("data-pi");
+    if(pending!=null&&pending!==pid){tryLink(pending,pendP,pid,pi);return}
+    var n0=nodeBy(st,pid),P=portPos(n0,pi);cab={from:pid,fp:pi,moved:false,sx:e.clientX,sy:e.clientY};sel=null;
+    try{$("svg").setPointerCapture(e.pointerId)}catch(x){}
+    var pl=document.createElementNS("http://www.w3.org/2000/svg","line");
+    pl.setAttribute("id","prev");pl.setAttribute("x1",P.x);pl.setAttribute("y1",P.y);pl.setAttribute("x2",P.x);pl.setAttribute("y2",P.y);
+    pl.setAttribute("stroke","#f97316");pl.setAttribute("stroke-width","6");pl.setAttribute("stroke-dasharray","10 8");pl.setAttribute("stroke-linecap","round");pl.setAttribute("pointer-events","none");
+    $("svg").appendChild(pl);drawSel();return;
+  }
+  if(g){
+    var nid2=+g.getAttribute("data-node");
+    if(pending!=null&&pending!==nid2){tryLink(pending,pendP,nid2,null);return}
+    var n=nodeBy(st,nid2),q=pt(e);pending=null;pendP=null;sel={kind:"node",id:n.id};drag={id:n.id,dx:q.x-n.x,dy:q.y-n.y};
+    try{$("svg").setPointerCapture(e.pointerId)}catch(x){}
+    drawSvg();drawSel();return;
+  }
+  pending=null;pendP=null;
+  if(l){sel={kind:"link",id:+l.getAttribute("data-link")};drawSvg();drawSel()}
+  else{sel=null;drawSvg();drawSel()}
+});
+$("svg").addEventListener("pointermove",function(e){
+  if(cab){
+    if(Math.abs(e.clientX-cab.sx)+Math.abs(e.clientY-cab.sy)>8)cab.moved=true;
+    var q=pt(e),p=$("prev");if(p){p.setAttribute("x2",q.x);p.setAttribute("y2",q.y)}
+    return;
+  }
+  if(!drag)return;var n=nodeBy(CS(),drag.id);if(!n)return;var q2=pt(e);
+  var hw=nW(n)/2+(n.type==="router"?26:8),out=isOut(n),x0=out?615+hw:15+hw,x1=out?985-hw:590-hw;
+  n.x=Math.max(x0,Math.min(x1,q2.x-drag.dx));n.y=Math.max(85,Math.min(545-Hd/2-26,q2.y-drag.dy));drawSvg();
+});
+function endPtr(e){
+  if(drag){drag=null;queueSave()}
+  if(cab){
+    var from=cab.from,fp=cab.fp,moved=cab.moved;cab=null;removePrev();
+    var el=document.elementFromPoint(e.clientX,e.clientY),tp=el&&el.closest?el.closest("[data-port]"):null,tn=el&&el.closest?el.closest("[data-node]"):null;
+    var to=tp?+tp.getAttribute("data-port"):(tn?+tn.getAttribute("data-node"):null),ti=tp?+tp.getAttribute("data-pi"):null;
+    if(moved&&to!=null&&to!==from)tryLink(from,fp,to,ti);
+    else if(!moved||to===from){pending=from;pendP=fp;drawSvg();toast("Ahora pulsa el aparato (o el puerto) al que quieres llegar.",true)}
+    else{pending=null;pendP=null;drawSvg()}
+  }
+}
+$("svg").addEventListener("pointerup",endPtr);
+$("svg").addEventListener("pointercancel",function(){if(cab){cab=null;removePrev()}drag=null;drawSvg()});
+
+/* ---------- botones ---------- */
+function freeSpot(st,spots){
+  for(var i=0;i<spots.length;i++){
+    var s=spots[i];
+    if(st.nodes.every(function(n){return Math.abs(n.x-s[0])>150||Math.abs(n.y-s[1])>100}))return s;
+  }
+  return spots[0];
+}
+$("bSend").onclick=send;$("bAttack").onclick=attack;
+$("bAddSw").onclick=function(){
+  if(busy)return;var st=CS(),s=freeSpot(st,[[430,100],[430,480],[290,100],[290,480]]);
+  var n={id:st.nid++,type:"switch",name:"Switch "+(st.nodes.filter(function(x){return x.type==="switch"}).length+1),x:s[0],y:s[1],ip:"",gw:"",dns:"",auto:false,agenda:[],fixed:false};
+  st.nodes.push(n);sel={kind:"node",id:n.id};drawAll();queueSave();
+};
+$("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("[data-tab]");if(!b||busy)return;
+  ST.cur=+b.getAttribute("data-tab");ensure(ST.cur);sel=null;pending=null;failNode=null;
+  $("log").innerHTML=LOGPH;$("msg").textContent="";
+  drawAll();queueSave();
+});
+$("dlgQ").addEventListener("cancel",function(e){var c=CS();if(c&&c.passed&&!c.ans)e.preventDefault()});
+var HELP=[["📖 Consola del DNS","Al seleccionar el DNS ves su agenda. add youtube.com 203.0.113.99 apunta una web; del youtube.com la borra."],["💻 Consola","Selecciona un PC y escribe: ipconfig (ver tu configuración), ping 192.168.1.1 o ping youtube.com (¿llego?), nslookup youtube.com (preguntar al DNS), set ip / set puerta / set dns (cambiar) e ipconfig /renew (pedir IP al DHCP). Escribe help para ver ejemplos."],["📦 Paquete","Un trocito de información que viaja por la red, como una carta."],["🔌 Cables","Arrastra desde un puerto (un hueco) hasta otro aparato o hasta un puerto concreto. Amarillo = puerto LAN, para tu red. Azul = puerto WAN del router, para ir al ISP. Pulsa un cable para borrarlo."],["🌐 Router","La puerta de tu red: recibe los paquetes y los manda hacia donde van."],["🔀 Switch","Convierte un puerto del router en varios. Uno de sus puertos se gasta subiendo al router."],["🔢 IP privada","Número de cada aparato dentro de casa. Solo hay 3 familias: 10.x.x.x · 172.16.x.x a 172.31.x.x (el 2º número entre 16 y 31, por ejemplo 172.26.74.122) · 192.168.x.x. Nunca dos iguales en la misma casa."],["🌍 IP pública","La que se ve desde internet: la del router de tu casa y la de cada web. Es única en todo internet."],["🏢 ISP","Tu proveedor de internet (Movistar, Digi, Vodafone...). El puerto WAN del router va al ISP, y del ISP salen los caminos a todas las webs. También le da a tu router su IP pública."],["🚪 Puerta de enlace","La IP del router. Por ahí sale todo lo que va fuera de tu red."],["📖 DNS","La agenda de internet: traduce youtube.com en el número donde vive. Vive en internet (por ejemplo 8.8.8.8), no en tu casa."],["🔁 NAT","Al salir a internet, el router cambia la IP privada del aparato por la IP pública de casa. Cuando vuelve la respuesta, se la pasa al aparato correcto."],["📶 WiFi","Red sin cable. Tiene un nombre (SSID) y debe ir cifrada con WPA2 o WPA3 y una contraseña fuerte. Abierta o WEP = insegura."],["💡 IoT","Aparatos cotidianos conectados a internet: bombillas, relojes, altavoces... Muchos vienen con contraseñas de fábrica que hay que cambiar."],["🖥️ Servidor","El ordenador de internet donde vive una web."],["🎟️ DHCP","El router reparte solo la IP, la puerta de enlace y el DNS. Empieza por la .100: las IP fijas deben quedar fuera. En la consola: ipconfig /renew."],["🛡️ Cortafuegos","Bloquea lo que llega de internet sin que nadie lo haya pedido. Las respuestas a lo que tú pides sí entran."],["😈 DNS falso","Un DNS trampa te da la IP de una web falsa. Compruébalo con nslookup: si la IP no es la de la web de verdad, desconfía."]];
+$("cards").innerHTML=HELP.map(function(c){return "<div><b>"+c[0]+"</b>"+c[1]+"</div>"}).join("");
+$("bHelp").onclick=function(){$("dlg").showModal()};$("dClose").onclick=function(){$("dlg").close()};
+$("bClear").onclick=function(){if(!confirm("¿Borrar todo el avance?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+$("bJson").onclick=function(){
+  var blob=new Blob([JSON.stringify(Object.assign(snapshot(),{score:nota(),date:new Date().toISOString()}),null,1)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Viaje_paquete_"+norm(ST.student).replace(/ /g,"_")+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+};
+function loadMsg(t){$("startMsg").textContent=t;toast(t)}
+$("bLoad").onclick=function(){$("file").click()};
+$("bFull").onclick=function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}};
+$("bWho").onclick=function(e){e.stopPropagation();$("menu").classList.toggle("hidden")};
+$("menu").addEventListener("click",function(e){e.stopPropagation()});
+document.addEventListener("click",function(){$("menu").classList.add("hidden")});
+$("bSave").onclick=function(){if(!ST.student)return;$("bJson").click();toast("💾 Partida guardada en tu carpeta de descargas.",true)};
+$("bLoad0").onclick=function(){$("startMsg").textContent="";$("file").click()};
+$("file").onchange=function(){
+  var f=this.files[0];if(!f)return;var fr=new FileReader();
+  fr.onload=function(){
+    var o;try{o=JSON.parse(fr.result);if(o.tool!=="viaje-paquete"||o.version!==VERSION||!o.lv||!o.student)throw 0}catch(e){loadMsg("❌ Ese archivo no es de esta versión del juego.");return}
+    var had=ST.student&&Object.keys(ST.lv).some(function(k){return ST.lv[k]&&ST.lv[k].passed});
+    if(had&&!confirm("Cargar esta partida reemplaza la que tienes ahora. ¿Seguro?"))return;
+    applyState(o);toast("✅ Partida cargada: "+ST.student,true);
+  };
+  fr.readAsText(f);this.value="";
+};
+function applyState(o){
+  ST.student=o.student||"";ST.seedName=o.seedName||norm(ST.student);ST.cur=o.cur||1;ST.lv={};
+  for(var k in o.lv){ST.lv[k]=o.lv[k];if(!ST.lv[k].cls)ST.lv[k].cls={}}
+  W=world(ST.seedName);
+  for(var k2 in ST.lv){var L0=ST.lv[k2];if(L0&&L0.nodes&&!L0.nodes.some(function(n){return n.type==="isp"})){var nb=build(+k2,W);["passed","solved","ans","cls","cmds","tries","qScore"].forEach(function(f){if(L0[f]!==undefined)nb[f]=L0[f]});nb.done={};normPorts(nb);ST.lv[k2]=nb}}for(var i=1;i<=ST.cur;i++)ensure(i);
+  $("start").classList.add("hidden");$("who").textContent=ST.student;
+  sel=null;pending=null;drawAll();queueSave();
+}
+
+/* ---------- inicio ---------- */
+$("nm").oninput=function(){$("bStart").disabled=this.value.trim().length<3};
+$("nm").onkeydown=function(e){if(e.key==="Enter"&&!$("bStart").disabled)$("bStart").click()};
+$("bStart").onclick=function(){
+  var v=$("nm").value.trim();if(v.length<3)return;
+  ST.student=v;ST.seedName=norm(v);ST.cur=1;ST.lv={};W=world(ST.seedName);ensure(1);
+  $("start").classList.add("hidden");$("who").textContent=v;drawAll();queueSave();
+};
+
+/* ---------- arranque ---------- */
+try{var raw=localStorage.getItem(KEY);if(raw){var o0=JSON.parse(raw);if(o0&&o0.tool==="viaje-paquete"&&o0.version===VERSION&&o0.student)applyState(o0)}}catch(e){}
+if(!ST.student){$("nm").focus();}
+window.__v={normPorts:function(x){return normPorts(x)},busy:function(){return busy},attack:function(){return attack()},checkDone:function(x){return checkDone(x)},ST:function(){return ST},W:function(){return W},build:build,world:world,runAll:runAll,simReq:simReq,checkLink:checkLink,send:send,drawAll:drawAll,ensure:ensure,LV:LV,NL:NL,nota:nota,snapshot:snapshot,CS:CS,pathTo:pathTo,clsOk:clsOk,setCur:function(k){ST.cur=k;ensure(k);sel=null;drawAll()}};
+
+})();
+</script>
+</body>
+</html>
