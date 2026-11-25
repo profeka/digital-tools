@@ -5455,6 +5455,14 @@ asegurarExt = function (p) {
   return r;
 };
 
+
+/* PARTE 19 · La reflexión del JSON con punto al final de cada frase */
+const _comp19 = componerConcl;
+componerConcl = function (p) {
+  _comp19(p);
+  p.reflexion = (p.concl || []).map(t => t.trim()).filter(Boolean).map(t => /[.!?…]$/.test(t) ? t : t + ".").join(" ");
+};
+
 </script>
 </body>
 </html>

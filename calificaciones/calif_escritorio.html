@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corrector · Escritorio Cliente (SdA3)</title>
+<style>
+  :root { --am: #FFE600; --ci: #00F0FF; --li: #A3E635; --ro: #FF6B8B; --na: #FF8A3D; --vi: #C4B5FD; --cr: #F6F3EB; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--cr); color: #000; font-size: 14px; }
+  .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+  header { background: #000; color: var(--am); padding: 12px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: .03em; }
+  header .sub { color: #fff; font-size: 12px; opacity: .8; }
+  .spacer { flex: 1; }
+  .btn { border: 3px solid #000; background: #fff; box-shadow: 3px 3px 0 #000; font-weight: 800; padding: 7px 12px; cursor: pointer; font-size: 13px; font-family: inherit; color: #000; }
+  .btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #000; }
+  .btn:active { transform: translate(3px, 3px); box-shadow: none; }
+  .btn.am { background: var(--am); } .btn.ci { background: var(--ci); } .btn.li { background: var(--li); } .btn.ro { background: var(--ro); } .btn.sm { padding: 3px 8px; font-size: 12px; box-shadow: 2px 2px 0 #000; }
+  header .btn { box-shadow: 3px 3px 0 var(--am); border-color: var(--am); }
+  .card { background: #fff; border: 3px solid #000; box-shadow: 5px 5px 0 #000; padding: 14px; }
+  .tag { display: inline-block; background: #000; color: var(--am); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; margin-bottom: 8px; }
+  main { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(480px, 1.35fr); gap: 18px; padding: 18px; align-items: start; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  #drop { border: 3px dashed #000; background: #fff; padding: 18px; text-align: center; font-weight: 700; cursor: pointer; }
+  #drop.over { background: var(--am); }
+  #motor { margin-top: 10px; font-size: 12px; font-weight: 700; padding: 6px 9px; border: 2px solid #000; }
+  #mensajes { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { border: 2px solid #000; padding: 5px 8px; font-size: 12px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 6px 7px; border-bottom: 2px solid #000; font-size: 13px; vertical-align: top; }
+  th { background: #000; color: var(--am); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; position: sticky; top: 0; }
+  #lista tbody tr { cursor: pointer; }
+  #lista tbody tr:hover { background: #FFF9D2; }
+  #lista tbody tr.sel { background: var(--am); }
+  .nota { font-weight: 900; font-size: 15px; }
+  .chip { display: inline-block; border: 2px solid #000; padding: 0 5px; font-size: 11px; font-weight: 800; background: #fff; margin: 1px 2px 1px 0; white-space: nowrap; }
+  .ok { background: var(--li); } .ko { background: var(--ro); } .warn { background: var(--am); } .neu { background: #fff; }
+  .filtros { display: flex; gap: 10px; align-items: center; margin: 10px 0; flex-wrap: wrap; font-size: 13px; font-weight: 700; }
+  .filtros input[type=search] { border: 3px solid #000; padding: 6px 8px; font-weight: 700; flex: 1; min-width: 150px; font-family: inherit; }
+  .scroll { max-height: calc(100vh - 330px); overflow: auto; border: 3px solid #000; }
+  #detalle .vacio { text-align: center; padding: 40px 10px; font-weight: 700; opacity: .6; }
+  .cab { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+  .cab h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
+  .big { font-size: 34px; font-weight: 900; line-height: 1; border: 3px solid #000; padding: 8px 12px; box-shadow: 4px 4px 0 #000; background: var(--li); text-align: center; }
+  .big small { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+  .sec { margin-top: 16px; }
+  .apart input { width: 70px; border: 2px solid #000; padding: 3px 5px; font-weight: 800; font-family: inherit; font-size: 13px; }
+  .just { border: 3px solid #000; padding: 10px; margin-bottom: 10px; background: #FFF4F6; }
+  .just.acep { background: #F2FBE4; } .just.rech { background: #f1f1f1; }
+  .just .frase { font-weight: 700; margin: 6px 0; }
+  .just .porque { background: #fff; border: 2px solid #000; padding: 6px 8px; font-style: italic; }
+  .just .porque.sinresp { color: #b00020; font-style: normal; font-weight: 700; }
+  .just .acc { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .btn.on { outline: 3px solid #000; outline-offset: 1px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  .kv { font-size: 13px; line-height: 1.55; }
+  .kv b { font-weight: 800; }
+  textarea { width: 100%; border: 3px solid #000; padding: 8px; font-family: inherit; font-size: 13px; font-weight: 600; min-height: 70px; }
+  .peq { font-size: 12px; opacity: .75; font-weight: 600; }
+  .aviso { border: 3px solid #000; background: var(--am); padding: 8px 10px; font-weight: 800; font-size: 13px; margin-top: 10px; }
+  .aviso.ro { background: var(--ro); }
+  .lic-libre { background: var(--li); } .lic-gratis { background: var(--ci); } .lic-propietario { background: var(--ro); }
+  details summary { cursor: pointer; font-weight: 800; }
+  #fileIn, #sesionIn { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>✅ Corrector · Escritorio Cliente</h1><div class="sub">SdA3 · Ciencias de la Computación 1º Bach · carga los JSON que entregan los alumnos</div></div>
+  <span class="spacer"></span>
+  <button class="btn am" onclick="document.getElementById('fileIn').click()">📂 Cargar entregas</button>
+  <button class="btn ci" onclick="exportarCSV()">📊 Exportar notas (CSV)</button>
+  <button class="btn" onclick="guardarSesion()">💾 Guardar sesión</button>
+  <button class="btn" onclick="document.getElementById('sesionIn').click()">📥 Abrir sesión</button>
+  <button class="btn ro" onclick="borrarTodo()">🗑️ Vaciar</button>
+  <input type="file" id="fileIn" accept=".json,application/json" multiple onchange="leerArchivos(this.files); this.value=''">
+  <input type="file" id="sesionIn" accept=".json,application/json" onchange="abrirSesion(this.files[0]); this.value=''">
+</header>
+
+<main>
+  <section>
+    <div class="card">
+      <div class="tag">1 · Entregas</div>
+      <div id="drop" onclick="document.getElementById('fileIn').click()">Arrastra aquí los archivos <span class="mono">sda3_escritorio_cliente_….json</span><br><span class="peq">o haz clic para elegirlos (puedes seleccionar muchos a la vez)</span></div>
+      <div id="motor" class="warn">⏳ Cargando el simulador para recalcular las notas…</div>
+      <div id="mensajes"></div>
+      <div class="filtros">
+        <input type="search" id="buscar" placeholder="Buscar alumno o cliente…" oninput="pintarLista()">
+        <label><input type="checkbox" id="soloPend" onchange="pintarLista()"> Solo con justificaciones por revisar</label>
+      </div>
+      <div class="scroll">
+        <table id="lista">
+          <thead><tr><th>Alumno</th><th>Cliente</th><th>Auto</th><th>Final</th><th>Revisar</th><th>Verificación</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="peq" id="resumen" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card" id="detalle"><div class="vacio">Elige una entrega de la lista para corregirla.</div></div>
+  </section>
+</main>
+
+<script>
+/* =====================================================================
+   Datos y persistencia
+   ===================================================================== */
+const CLAVE = "calif_escritorio_v1";
+let ENTREGAS = {};          // clave -> {carnet, recalc, verif, rev: {just: {motivo: 'si'|'no'}, manual: {apartado: n}, comentario}}
+let SEL = null;
+let ORDEN = [];
+let motor = null;
+
+const APARTADOS = [
+  {k: "hardware", n: "Hardware: diagnóstico y mejora", max: 3},
+  {k: "sistema", n: "Sistema operativo y compatibilidad", max: 2},
+  {k: "programas_licencias", n: "Tareas del cliente cubiertas", max: 2},
+  {k: "presupuesto", n: "Presupuesto", max: 1},
+  {k: "conclusion", n: "Conclusión del técnico", max: 2}
+];
+/* qué devuelve aceptar cada justificación */
+const EFECTO = {
+  necesidad:   {ap: "hardware", txt: "Devuelve 1,5 en Hardware (problema del cliente)"},
+  ram:         {ap: "hardware", txt: "Cuenta para devolver 1,5 en Hardware (RAM, disco y gráfica)"},
+  disco:       {ap: "hardware", txt: "Cuenta para devolver 1,5 en Hardware (RAM, disco y gráfica)"},
+  gpu:         {ap: "hardware", txt: "Cuenta para devolver 1,5 en Hardware (RAM, disco y gráfica)"},
+  presupuesto: {ap: "presupuesto", txt: "Devuelve 1 en Presupuesto"},
+  tareas:      {ap: "programas_licencias", txt: "Devuelve los 2 puntos de Tareas"},
+  complejidad: {ap: null, txt: "Quita el tope de 9,5"},
+  diez:        {ap: null, txt: "Sin efecto en la nota (solo para valorar)"}
+};
+const NOM_MOTIVO = {necesidad: "Problema del cliente", ram: "RAM", disco: "Disco", gpu: "Gráfica", presupuesto: "Presupuesto", tareas: "Tareas sin cubrir", complejidad: "Complejidad", diez: "Menos de 10 programas"};
+
+function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(ENTREGAS)); } catch (e) { aviso("No se ha podido guardar en el navegador (¿demasiadas entregas?). Usa «Guardar sesión».", "ko"); } }
+function cargar() { try { ENTREGAS = JSON.parse(localStorage.getItem(CLAVE) || "{}") || {}; } catch (e) { ENTREGAS = {}; } }
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const r2 = x => Math.round(x * 100) / 100;
+const num = x => (Math.round(x * 100) / 100).toLocaleString("es-ES");
+const eur = x => num(x) + " €";
+function aviso(t, cls) { const m = document.getElementById("mensajes"); m.insertAdjacentHTML("afterbegin", `<div class="msg ${cls || "neu"}">${t}</div>`); while (m.children.length > 6) m.lastChild.remove(); }
+function claveDe(c) { return (c.alumno || "?").trim().toLowerCase() + "|" + ((c.detalle || {}).cliente || {}).id; }
+
+/* =====================================================================
+   Motor: el propio simulador en un iframe oculto para recalcular la nota
+   ===================================================================== */
+function estadoMotor(ok, txt) {
+  const m = document.getElementById("motor");
+  m.className = ok ? "ok" : "warn";
+  m.textContent = txt;
+}
+function cargarMotor() {
+  const f = document.createElement("iframe");
+  f.src = "../escritorio_cliente.html"; f.style.display = "none"; f.setAttribute("aria-hidden", "true");
+  let listo = false;
+  f.onload = () => {
+    try {
+      const w = f.contentWindow;
+      if (typeof w.evalProy === "function" && typeof w.puntuar === "function") {
+        motor = w; listo = true;
+        estadoMotor(true, "✅ Simulador cargado: cada nota se recalcula a partir de la partida del alumno (así se detecta si alguien ha tocado el JSON).");
+        Object.values(ENTREGAS).forEach(recalcular); guardar(); pintarLista(); pintarDetalle();
+      } else throw 0;
+    } catch (e) {
+      estadoMotor(false, "⚠️ No se puede recalcular aquí (abre el corrector desde GitHub Pages, no como archivo suelto). Se usa la nota que viene en el JSON.");
+    }
+  };
+  document.body.appendChild(f);
+  setTimeout(() => { if (!listo && !motor) estadoMotor(false, "⚠️ El simulador no ha cargado. Se usa la nota que viene en el JSON."); }, 20000);
+}
+function recalcular(e) {
+  if (!motor || !e.carnet.detalle || !e.carnet.detalle.proyecto) return;
+  try {
+    const p = motor.JSON.parse(JSON.stringify(e.carnet.detalle.proyecto));
+    motor.asegurarExt(p); if (motor.normalizarExtras) motor.normalizarExtras(p);
+    const ev = motor.evalProy(p), n = motor.puntuar(p, ev);
+    e.recalc = JSON.parse(JSON.stringify(n));
+    const g = e.carnet.detalle.puntuacion || {};
+    const difs = APARTADOS.filter(a => Math.abs((g[a.k] || 0) - (n[a.k] || 0)) > 0.01).map(a => a.n);
+    if (Math.abs((g.total || 0) - n.total) > 0.01) difs.push("Total");
+    e.verif = difs.length ? {ok: false, txt: "La nota guardada no coincide con la recalculada en: " + difs.join(", ")} : {ok: true, txt: "La nota del JSON coincide con la recalculada"};
+  } catch (err) {
+    e.verif = {ok: null, txt: "No se ha podido recalcular (" + (err && err.message || err) + ")"};
+  }
+}
+
+/* =====================================================================
+   Carga de archivos
+   ===================================================================== */
+function leerArchivos(files) {
+  [...files].forEach(f => {
+    const rd = new FileReader();
+    rd.onload = () => {
+      let c;
+      try { c = JSON.parse(rd.result); } catch (e) { aviso(`❌ ${esc(f.name)}: no es un JSON válido.`, "ko"); return; }
+      if (c && c.carnet === "sda3_escritorio_cliente" && c.detalle) return añadir(c, f.name);
+      if (c && c.studentName && Array.isArray(c.installedApps)) { aviso(`⚠️ ${esc(f.name)}: es una partida guardada de ${esc(c.studentName)}, no la entrega. El alumno tiene que pulsar «Entregar y descargar carnet».`, "warn"); return; }
+      if (c && c.entregas && c.app === "calif_escritorio") return abrirSesionObj(c);
+      aviso(`❌ ${esc(f.name)}: no es una entrega del Escritorio Cliente.`, "ko");
+    };
+    rd.readAsText(f);
+  });
+}
+function añadir(c, nombreArchivo) {
+  const k = claveDe(c), prev = ENTREGAS[k];
+  if (prev && new Date(prev.carnet.fecha) > new Date(c.fecha)) { aviso(`ℹ️ ${esc(c.alumno)}: ya tenías una entrega más reciente; se mantiene esa.`, "neu"); return; }
+  const e = {carnet: c, archivo: nombreArchivo, recalc: null, verif: null, rev: prev ? prev.rev : {just: {}, manual: {}, comentario: ""}};
+  if (prev) {
+    const motivos = (c.detalle.conclusion_guiada && c.detalle.conclusion_guiada.justificaciones || []).map(j => j.motivo);
+    Object.keys(e.rev.just).forEach(m => { if (!motivos.includes(m)) delete e.rev.just[m]; });
+    e.rev.manual = {};
+  }
+  recalcular(e);
+  ENTREGAS[k] = e;
+  aviso(`${prev ? "🔁 Actualizada" : "✅ Cargada"}: ${esc(c.alumno)} · ${esc(c.detalle.cliente.nombre)}`, "ok");
+  guardar(); pintarLista();
+  if (!SEL) { SEL = k; pintarDetalle(); } else if (SEL === k) pintarDetalle();
+}
+
+/* =====================================================================
+   Cálculo de la nota final
+   ===================================================================== */
+function justifs(e) { return (e.carnet.detalle.conclusion_guiada && e.carnet.detalle.conclusion_guiada.justificaciones) || []; }
+function base(e) { return e.recalc || e.carnet.detalle.puntuacion || {}; }
+function notaFinal(e) {
+  const b = base(e), rev = e.rev, acep = m => rev.just[m] === "si", js = justifs(e), ms = js.map(j => j.motivo);
+  const ap = {};
+  APARTADOS.forEach(a => ap[a.k] = b[a.k] || 0);
+  /* hardware: 1,5 por el problema del cliente + 1,5 por RAM/disco/gráfica */
+  if (ms.includes("necesidad") && acep("necesidad")) ap.hardware = Math.min(3, ap.hardware + 1.5);
+  const tec = ms.filter(m => ["ram", "disco", "gpu"].includes(m));
+  if (tec.length && tec.every(acep)) ap.hardware = Math.min(3, ap.hardware + 1.5);
+  if (ms.includes("presupuesto") && acep("presupuesto")) ap.presupuesto = 1;
+  if (ms.includes("tareas") && acep("tareas")) ap.programas_licencias = 2;
+  const devuelto = {}; APARTADOS.forEach(a => devuelto[a.k] = r2(ap[a.k] - (b[a.k] || 0)));
+  APARTADOS.forEach(a => { const m = rev.manual[a.k]; if (m !== undefined && m !== "" && !isNaN(m)) ap[a.k] = Math.max(0, Math.min(a.max, +m)); });
+  let total = r2(APARTADOS.reduce((s, a) => s + ap[a.k], 0));
+  const comp = b.complejidad || (e.carnet.detalle.complejidad || {});
+  const tope = comp.se_pasa && !(ms.includes("complejidad") && acep("complejidad"));
+  if (tope) total = Math.min(total, 9.5);
+  return {ap, devuelto, total: r2(total), tope};
+}
+function pendientes(e) { return justifs(e).filter(j => EFECTO[j.motivo] && EFECTO[j.motivo].ap !== undefined && !e.rev.just[j.motivo] && j.motivo !== "diez").length; }
+
+/* =====================================================================
+   Lista
+   ===================================================================== */
+function pintarLista() {
+  const q = (document.getElementById("buscar").value || "").toLowerCase(), solo = document.getElementById("soloPend").checked;
+  const arr = Object.entries(ENTREGAS).sort((a, b) => (a[1].carnet.alumno || "").localeCompare(b[1].carnet.alumno || "", "es"));
+  const tb = document.querySelector("#lista tbody");
+  const filas = arr.filter(([k, e]) => (!q || (e.carnet.alumno + " " + e.carnet.detalle.cliente.nombre).toLowerCase().includes(q)) && (!solo || pendientes(e) > 0));
+  ORDEN = filas.map(([k]) => k);
+  tb.innerHTML = filas.map(([k, e], i) => {
+    const f = notaFinal(e), b = base(e), pend = pendientes(e);
+    const ver = e.verif ? (e.verif.ok === true ? `<span class="chip ok" title="${esc(e.verif.txt)}">✓ verificada</span>` : e.verif.ok === false ? `<span class="chip ko" title="${esc(e.verif.txt)}">⚠ no coincide</span>` : `<span class="chip warn" title="${esc(e.verif.txt)}">?</span>`) : `<span class="chip neu" title="Sin recalcular">—</span>`;
+    return `<tr class="${k === SEL ? "sel" : ""}" onclick="elegir(ORDEN[${i}])">
+      <td><b>${esc(e.carnet.alumno)}</b><br><span class="peq">${new Date(e.carnet.fecha).toLocaleDateString("es-ES")} · ${e.carnet.intentos || 0} entrega(s)</span></td>
+      <td>${esc(e.carnet.detalle.cliente.codigo)}<br><span class="peq">${esc(e.carnet.detalle.cliente.nombre)}</span></td>
+      <td class="mono">${num(b.total || 0)}</td>
+      <td class="nota">${num(f.total)}</td>
+      <td>${pend ? `<span class="chip warn">${pend} por revisar</span>` : `<span class="chip ok">al día</span>`}</td>
+      <td>${ver}</td></tr>`;
+  }).join("") || `<tr><td colspan="6" class="peq" style="text-align:center;padding:20px">${arr.length ? "Ninguna entrega coincide con el filtro." : "Aún no has cargado entregas."}</td></tr>`;
+  const n = arr.length, media = n ? arr.reduce((s, [, e]) => s + notaFinal(e).total, 0) / n : 0;
+  const pend = arr.filter(([, e]) => pendientes(e) > 0).length;
+  document.getElementById("resumen").textContent = n ? `${n} entregas · media ${num(media)} · ${pend} con justificaciones por revisar` : "";
+}
+function elegir(k) { SEL = k; pintarLista(); pintarDetalle(); }
+
+/* =====================================================================
+   Detalle de una entrega
+   ===================================================================== */
+function pintarDetalle() {
+  const box = document.getElementById("detalle"), e = ENTREGAS[SEL];
+  if (!e) { box.innerHTML = `<div class="vacio">Elige una entrega de la lista para corregirla.</div>`; return; }
+  const c = e.carnet, d = c.detalle, b = base(e), f = notaFinal(e), js = justifs(e), g = d.puntuacion || {};
+  const cg = d.conclusion_guiada || {}, comp = d.complejidad || {}, disco = d.disco || {}, so = d.sistema_operativo || {};
+  const mej = [];
+  if (d.mejoras && d.mejoras.ram) mej.push(`RAM ×${Math.pow(2, d.mejoras.ram)} (${d.hardware_final.ram_gb} GB)`);
+  if (d.disco_comprado) mej.push(`Disco nuevo ${d.disco_comprado.capacidad_gb >= 1000 ? d.disco_comprado.capacidad_gb / 1000 + " TB" : d.disco_comprado.capacidad_gb + " GB"} ${d.disco_comprado.tipo} (${eur(d.disco_comprado.precio)})`);
+  else if (d.mejoras && d.mejoras.ssd) mej.push("HDD → SSD");
+  if (d.mejoras && d.mejoras.gpu) mej.push("Gráfica dedicada");
+
+  const filasAp = APARTADOS.map(a => {
+    const dev = f.devuelto[a.k], man = e.rev.manual[a.k];
+    return `<tr class="apart"><td>${a.n}</td><td class="mono">${num(b[a.k] || 0)}</td>
+      <td class="mono">${dev ? `<span class="chip ok">+${num(dev)}</span>` : "—"}</td>
+      <td><input type="number" step="0.25" min="0" max="${a.max}" placeholder="—" value="${man !== undefined ? esc(man) : ""}" onchange="ajustar('${a.k}', this.value)" title="Escribe una nota para este apartado si quieres cambiarla a mano"></td>
+      <td class="mono"><b>${num(f.ap[a.k])}</b> / ${a.max}</td></tr>`;
+  }).join("");
+
+  const tarjetasJ = js.length ? js.map(j => {
+    const ef = EFECTO[j.motivo] || {txt: ""}, est = e.rev.just[j.motivo], vacio = !(j.porque || "").trim();
+    const botones = j.motivo === "diez"
+      ? `<button class="btn sm ${est === "si" ? "li on" : ""}" onclick="decidir('${j.motivo}','si')">👍 Bien razonado</button><button class="btn sm ${est === "no" ? "ro on" : ""}" onclick="decidir('${j.motivo}','no')">👎 Flojo</button>`
+      : `<button class="btn sm ${est === "si" ? "li on" : ""}" onclick="decidir('${j.motivo}','si')">✅ Me convence</button><button class="btn sm ${est === "no" ? "ro on" : ""}" onclick="decidir('${j.motivo}','no')">❌ No me convence</button>`;
+    return `<div class="just ${est === "si" ? "acep" : est === "no" ? "rech" : ""}">
+      <span class="chip ${est ? (est === "si" ? "ok" : "neu") : "warn"}">${esc(NOM_MOTIVO[j.motivo] || j.motivo)}</span> <span class="peq">${esc(ef.txt)}</span>
+      <div class="frase">${esc(j.frase)} porque…</div>
+      <div class="porque ${vacio ? "sinresp" : ""}">${vacio ? "(No lo ha justificado)" : esc(j.porque)}</div>
+      <div class="acc">${botones}${est ? `<button class="btn sm" onclick="decidir('${j.motivo}',null)">↺</button>` : ""}</div></div>`;
+  }).join("") : `<div class="peq">No tiene nada que justificar: ha cumplido todos los límites.</div>`;
+
+  const progs = (d.programas || []).map(p => `<tr><td>${esc(p.nombre)}${p.fuera_de_catalogo ? ` <span class="chip vi" style="background:var(--vi)">fuera</span>` : ""}${p.fuente ? `<br><span class="peq">${esc(p.fuente)}</span>` : ""}</td><td><span class="chip lic-${esc(p.licencia)}">${esc(p.licencia)}</span></td><td class="peq">${esc(p.justificacion || "")}</td></tr>`).join("");
+  const tareas = (d.tareas || []).map(t => `<div>${t.cubierta_por ? "✅" : "⬜"} ${esc(t.tarea)}${t.cubierta_por ? ` <span class="peq">· ${esc(t.cubierta_por)}</span>` : ""}</div>`).join("");
+  const motivosC = (comp.motivos || []).map(m => `<div class="peq">+${m.pts} · ${esc(m.n)}: ${esc(m.por)}</div>`).join("");
+
+  box.innerHTML = `
+    <div class="cab">
+      <div style="flex:1;min-width:220px">
+        <div class="tag">2 · Corrección</div>
+        <h2>${esc(c.alumno)}</h2>
+        <div class="kv">Cliente: <b>${esc(d.cliente.nombre)}</b> (${esc(d.cliente.codigo)}) · ${new Date(c.fecha).toLocaleString("es-ES")} · ${c.intentos || 0} entrega(s) · ${c.completado ? '<span class="chip ok">revisión completa</span>' : '<span class="chip warn">entregó con puntos pendientes</span>'}</div>
+        <div class="peq">Archivo: ${esc(e.archivo || "")}${c.criterios ? " · Criterios: " + c.criterios.map(esc).join(", ") : ""}</div>
+      </div>
+      <div class="big">${num(f.total)}<small>nota final</small></div>
+    </div>
+    ${e.verif && e.verif.ok === false ? `<div class="aviso ro">⚠️ ${esc(e.verif.txt)}. Se usa la recalculada (nota del JSON: ${num(g.total || 0)}). Puede ser que el alumno haya editado el archivo, o que entregara con una versión anterior del simulador.</div>` : ""}
+    ${e.verif && e.verif.ok === null ? `<div class="aviso">${esc(e.verif.txt)}. Se usa la nota del JSON.</div>` : ""}
+    ${f.tope ? `<div class="aviso">🧩 Se pasa de complejidad (${comp.puntos}/${comp.limite}): la nota máxima es 9,5 salvo que aceptes su justificación.</div>` : ""}
+
+    <div class="sec"><div class="tag">Nota por apartados</div>
+      <table><thead><tr><th>Apartado</th><th>Auto</th><th>Devuelto</th><th>A mano</th><th>Final</th></tr></thead><tbody>${filasAp}</tbody></table>
+      <div class="peq" style="margin-top:4px">«Devuelto» se rellena solo cuando aceptas una justificación. «A mano» sustituye la nota de ese apartado.</div>
+    </div>
+
+    <div class="sec"><div class="tag">Justificaciones (${js.length})</div>${tarjetasJ}</div>
+
+    <div class="sec"><div class="tag">Conclusión del técnico</div>
+      <div class="kv"><b>Programas:</b> ${d.n_libres || 0} libres, ${d.n_gratis_cerrados || 0} gratis cerrados y ${d.n_propietarios || 0} propietarios porque… <i>${esc(cg.programas_porque || "—")}</i></div>
+      <div class="kv"><b>Hardware:</b> ${mej.length ? "Ha cambiado " + esc(mej.join(", ")) : "No ha cambiado piezas"} porque… <i>${esc(cg.hardware_porque || "—")}</i></div>
+    </div>
+
+    <div class="sec grid2">
+      <div><div class="tag">Equipo y coste</div><div class="kv">
+        <b>Sistema:</b> ${esc(so.nombre || "—")} <span class="chip lic-${esc(so.licencia)}">${esc(so.licencia || "")}</span><br>
+        <b>Mejoras:</b> ${mej.length ? esc(mej.join(" · ")) : "ninguna"}<br>
+        <b>RAM final:</b> ${d.hardware_final ? d.hardware_final.ram_gb + " GB" : "—"} · <b>Disco:</b> ${disco.total_gb != null ? `${num(disco.total_gb)} de ${disco.capacidad_gb} GB <span class="peq">(sus archivos: ${disco.archivos_cliente_gb} GB)</span>` : esc(d.hardware_final && d.hardware_final.disco)}<br>
+        <b>Coste:</b> ${eur((d.coste || {}).total || 0)} de ${eur(d.cliente.presupuesto || 0)} <span class="peq">(sistema ${eur((d.coste || {}).so || 0)} · programas ${eur((d.coste || {}).apps || 0)} · piezas ${eur((d.coste || {}).mejoras || 0)})</span></div></div>
+      <div><div class="tag">Tareas y complejidad</div><div class="kv">${tareas || "—"}
+        <div style="margin-top:6px"><b>Complejidad:</b> ${comp.puntos != null ? `${comp.puntos} / ${comp.limite}` : "—"} ${comp.se_pasa ? '<span class="chip ko">se pasa</span>' : ""}</div>${motivosC}</div></div>
+    </div>
+
+    <div class="sec"><details><summary>📦 Programas instalados (${(d.programas || []).length}) y por qué los instaló</summary>
+      <table style="margin-top:6px"><thead><tr><th>Programa</th><th>Licencia</th><th>Su frase</th></tr></thead><tbody>${progs}</tbody></table></details></div>
+
+    <div class="sec"><div class="tag">Comentario para el alumno</div>
+      <textarea oninput="comentar(this.value)" placeholder="Opcional: se exporta en el CSV">${esc(e.rev.comentario || "")}</textarea></div>
+
+    <div class="sec" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn am" onclick="siguiente(1)">Siguiente ➜</button>
+      <button class="btn" onclick="siguiente(-1)">⬅ Anterior</button>
+      <span class="spacer"></span>
+      <button class="btn ro sm" onclick="quitar()">Quitar esta entrega</button>
+    </div>`;
+}
+function decidir(m, v) { const e = ENTREGAS[SEL]; if (!e) return; if (v) e.rev.just[m] = v; else delete e.rev.just[m]; guardar(); pintarDetalle(); pintarLista(); }
+function ajustar(k, v) { const e = ENTREGAS[SEL]; if (!e) return; if (v === "") delete e.rev.manual[k]; else e.rev.manual[k] = Math.max(0, +v); guardar(); pintarDetalle(); pintarLista(); }
+function comentar(v) { const e = ENTREGAS[SEL]; if (!e) return; e.rev.comentario = v; guardar(); }
+function siguiente(d) {
+  if (!ORDEN.length) return;
+  const i = ORDEN.indexOf(SEL);
+  SEL = ORDEN[i < 0 ? 0 : (i + d + ORDEN.length) % ORDEN.length];
+  pintarLista(); pintarDetalle();
+}
+function quitar() { if (!SEL || !confirm("¿Quitar esta entrega del corrector?")) return; delete ENTREGAS[SEL]; SEL = null; guardar(); pintarLista(); pintarDetalle(); }
+function borrarTodo() { if (!confirm("¿Vaciar el corrector? Se borran todas las entregas y tus decisiones. (Guarda antes la sesión si quieres conservarlas.)")) return; ENTREGAS = {}; SEL = null; guardar(); pintarLista(); pintarDetalle(); }
+
+/* =====================================================================
+   Exportar
+   ===================================================================== */
+function descargar(nombre, texto, tipo) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([texto], {type: tipo})); a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function exportarCSV() {
+  const arr = Object.values(ENTREGAS).sort((a, b) => (a.carnet.alumno || "").localeCompare(b.carnet.alumno || "", "es"));
+  if (!arr.length) return aviso("No hay entregas que exportar.", "warn");
+  const n = x => String(r2(x || 0)).replace(".", ",");
+  const q = s => '"' + String(s == null ? "" : s).replace(/"/g, '""').replace(/\r?\n/g, " ") + '"';
+  const cab = ["Alumno", "Cliente", "Fecha", "Entregas", ...APARTADOS.map(a => a.n + " (auto)"), "Nota auto", ...APARTADOS.map(a => a.n + " (final)"), "Tope 9,5", "Nota final", "Justificaciones aceptadas", "Justificaciones rechazadas", "Sin revisar", "Verificación", "Comentario"];
+  const filas = arr.map(e => {
+    const b = base(e), f = notaFinal(e), js = justifs(e);
+    const acc = js.filter(j => e.rev.just[j.motivo] === "si").map(j => NOM_MOTIVO[j.motivo] || j.motivo).join(", ");
+    const rec = js.filter(j => e.rev.just[j.motivo] === "no").map(j => NOM_MOTIVO[j.motivo] || j.motivo).join(", ");
+    const sin = js.filter(j => !e.rev.just[j.motivo]).map(j => NOM_MOTIVO[j.motivo] || j.motivo).join(", ");
+    const ver = e.verif ? (e.verif.ok === true ? "Coincide" : e.verif.ok === false ? "NO coincide" : "Sin verificar") : "Sin verificar";
+    return [q(e.carnet.alumno), q(e.carnet.detalle.cliente.nombre), q(new Date(e.carnet.fecha).toLocaleString("es-ES")), e.carnet.intentos || 0,
+      ...APARTADOS.map(a => n(b[a.k])), n(b.total), ...APARTADOS.map(a => n(f.ap[a.k])), f.tope ? "Sí" : "No", n(f.total), q(acc), q(rec), q(sin), q(ver), q(e.rev.comentario)].join(";");
+  });
+  descargar(`notas_escritorio_cliente_${new Date().toISOString().slice(0, 10)}.csv`, "﻿" + [cab.map(q).join(";"), ...filas].join("\r\n"), "text/csv;charset=utf-8");
+}
+function guardarSesion() {
+  descargar(`sesion_correccion_escritorio_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({app: "calif_escritorio", version: 1, fecha: new Date().toISOString(), entregas: ENTREGAS}, null, 1), "application/json");
+}
+function abrirSesion(f) {
+  if (!f) return; const rd = new FileReader();
+  rd.onload = () => { try { abrirSesionObj(JSON.parse(rd.result)); } catch (e) { aviso("❌ Ese archivo no es una sesión del corrector.", "ko"); } };
+  rd.readAsText(f);
+}
+function abrirSesionObj(o) {
+  if (!o || o.app !== "calif_escritorio" || !o.entregas) return aviso("❌ Ese archivo no es una sesión del corrector.", "ko");
+  const n = Object.keys(o.entregas).length;
+  if (Object.keys(ENTREGAS).length && !confirm(`La sesión trae ${n} entregas. ¿Mezclarlas con las que ya tienes? (Si una entrega está en los dos sitios, se queda la de la sesión.)`)) return;
+  Object.assign(ENTREGAS, o.entregas);
+  Object.values(ENTREGAS).forEach(recalcular);
+  guardar(); pintarLista(); pintarDetalle(); aviso(`✅ Sesión abierta: ${n} entregas.`, "ok");
+}
+
+/* =====================================================================
+   Arrastrar y soltar · inicio
+   ===================================================================== */
+const drop = document.getElementById("drop");
+["dragenter", "dragover"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if (ev === "drop" || e.target === drop) drop.classList.remove("over"); }));
+document.addEventListener("drop", e => { if (e.dataTransfer && e.dataTransfer.files.length) leerArchivos(e.dataTransfer.files); });
+document.addEventListener("keydown", e => { if (e.target.closest("input, textarea")) return; if (e.key === "ArrowDown" || e.key === "j") { siguiente(1); e.preventDefault(); } if (e.key === "ArrowUp" || e.key === "k") { siguiente(-1); e.preventDefault(); } });
+
+cargar(); pintarLista(); pintarDetalle(); cargarMotor();
+</script>
+</body>
+</html>
