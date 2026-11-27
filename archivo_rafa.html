@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Servidor de Rafa · consola</title>
+<style id="neo-base">
+:root{
+  --ink:#111;--paper:#fff7e0;--white:#fff;--yellow:#ffe14d;--orange:#ff8a3d;--cyan:#6ee7f9;
+  --lime:#a3e635;--pink:#ff7ab8;--violet:#c4b5fd;--muted:#555;--highlight:#fff3cc;--zebra:#fffaf0;
+  --disabled-bg:#ddd;--disabled-ink:#777;--term-bg:#0b0b0b;--term-ink:#e5e5e5;
+  --bw:3px;--bw-thick:4px;--bw-thin:2px;
+  --shadow:6px 6px 0 #111;--shadow-sm:4px 4px 0 #111;--shadow-xs:3px 3px 0 #111;--shadow-modal:10px 10px 0 #111;
+  --font:'Trebuchet MS','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --mono:ui-monospace,'Cascadia Code','SFMono-Regular',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(#11111122 1px,transparent 1px);background-size:18px 18px;line-height:1.5;font-size:16px}
+h1,h2,h3,h4{font-weight:900;text-transform:uppercase;letter-spacing:-.4px;line-height:1.15;margin:0 0 10px}
+h1{font-size:clamp(1.5rem,4vw,2.2rem)}h2{font-size:clamp(1.25rem,3vw,1.6rem)}h3{font-size:1.1rem}
+a{color:var(--ink);font-weight:800;text-underline-offset:3px}a:hover{background:var(--yellow)}
+code{font-family:var(--mono);font-size:.9em;border:var(--bw-thin) solid var(--ink);background:#fff;padding:0 4px}
+.topbar{background:var(--yellow);border-bottom:var(--bw-thick) solid var(--ink);padding:12px 20px}
+.topbar .in{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:48px;height:48px;display:grid;place-items:center;font-size:26px;background:#fff;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-xs)}
+.topbar .t{font-weight:900;text-transform:uppercase;font-size:1.2rem}
+.topbar .sub{font-size:.85rem;font-weight:700}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+.grid{display:grid;gap:18px}.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.spacer{flex:1}
+.card{background:#fff;border:var(--bw) solid var(--ink);box-shadow:var(--shadow);padding:18px}
+.card.violet{background:var(--violet)}.card.yellow{background:var(--yellow)}.card.ink{background:var(--ink);color:#fff}
+.btn{font-family:var(--font);font-weight:900;text-transform:uppercase;letter-spacing:.3px;font-size:1rem;
+  border:var(--bw) solid var(--ink);background:#fff;color:var(--ink);padding:10px 18px;box-shadow:var(--shadow-sm);
+  cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+.btn:active{transform:translate(4px,4px);box-shadow:none}
+.btn.primary{background:var(--orange)}.btn.secondary{background:var(--cyan)}.btn.success{background:var(--lime)}
+.btn.danger{background:var(--pink)}.btn.yellow{background:var(--yellow)}.btn.sm{font-size:.8rem;padding:6px 10px}
+.btn:disabled{background:var(--disabled-bg);color:var(--disabled-ink);box-shadow:none;cursor:not-allowed;transform:none}
+label{font-weight:800;display:block;margin-bottom:4px}
+input[type=text],input[type=password],select{font-family:var(--font);font-size:1rem;border:var(--bw) solid var(--ink);border-radius:0;padding:9px 12px;background:#fff;width:100%}
+input:focus,select:focus{outline:none;box-shadow:4px 4px 0 var(--orange)}
+:focus-visible{outline:4px solid var(--violet);outline-offset:2px}
+.pill{display:inline-flex;gap:6px;align-items:center;border:var(--bw) solid var(--ink);background:#fff;padding:3px 10px;font-size:.85rem;font-weight:800;box-shadow:var(--shadow-xs)}
+.pill.lime{background:var(--lime)}.pill.cyan{background:var(--cyan)}.pill.violet{background:var(--violet)}.pill.orange{background:var(--orange)}
+.note{border:var(--bw) solid var(--ink);padding:10px 14px;background:var(--cyan);font-weight:700}
+.note.ok{background:var(--lime)}.note.warn{background:var(--yellow)}.note.error{background:var(--pink)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:-3px;position:relative;z-index:1}
+.tab{font-family:var(--font);font-weight:900;text-transform:uppercase;letter-spacing:.3px;border:var(--bw) solid var(--ink);background:#fff;padding:8px 14px;cursor:pointer}
+.tab.on{background:var(--yellow);border-bottom-color:var(--yellow)}
+.tab:disabled{background:var(--disabled-bg);color:var(--disabled-ink);cursor:not-allowed}
+.panel{border:var(--bw) solid var(--ink);background:#fff;box-shadow:var(--shadow);padding:16px}
+.term{background:var(--term-bg);color:var(--term-ink);font-family:var(--mono);font-size:.9rem;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:14px;white-space:pre-wrap;word-break:break-word}
+.term .p{color:var(--lime)}.term .e{color:var(--pink)}.term .y{color:var(--yellow)}.term .c{color:var(--cyan)}
+.hidden{display:none!important}
+.toast{position:fixed;right:16px;bottom:16px;background:var(--lime);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:10px 16px;font-weight:900;z-index:50}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+@media (max-width:600px){.card{padding:14px}}
+</style>
+<style>
+/* propios de la consola */
+#termOut{min-height:280px;max-height:52vh;overflow:auto}
+.termline{display:flex;gap:8px;background:var(--term-bg);border:var(--bw) solid var(--ink);border-top:0;padding:8px 14px}
+.termline span{color:var(--lime);font-family:var(--mono);font-size:.9rem;white-space:nowrap}
+.termline input{flex:1;background:transparent;border:0;color:var(--term-ink);font-family:var(--mono);font-size:.9rem;padding:0;width:auto}
+.termline input:focus{box-shadow:none}
+.bios{background:#0000a8;color:#e5e5e5;font-family:var(--mono);font-size:.92rem;border:var(--bw) solid var(--ink);box-shadow:var(--shadow-sm);padding:16px;min-height:340px;white-space:pre-wrap}
+.bios.black{background:var(--term-bg)}
+.bios .hl{background:#e5e5e5;color:#0000a8}
+.bios .w{color:#fff;font-weight:700}.bios .yl{color:#ffff55}.bios .rd{color:#ff7ab8}.bios .gr{color:#a3e635}
+.bios button{font-family:var(--mono);font-size:.9rem;background:#e5e5e5;color:#0000a8;border:2px solid #fff;padding:2px 8px;cursor:pointer;margin:2px}
+.bios button:hover{background:#ffff55}
+.bios input{font-family:var(--mono);font-size:.92rem;width:4.2em;padding:1px 4px;border:2px solid #fff;background:#0000a8;color:#fff}
+.bios .btabs{display:flex;gap:0;margin:-16px -16px 12px;background:#e5e5e5}
+.bios .btabs button{border:0;margin:0;background:#e5e5e5;color:#0000a8;padding:4px 14px;font-weight:700}
+.bios .btabs button.on{background:#0000a8;color:#fff}
+.bootlist{list-style:none;padding:0;margin:8px 0}
+.bootlist li{display:flex;gap:10px;align-items:center;padding:2px 0}
+.postit{background:var(--yellow);border:var(--bw) solid var(--ink);box-shadow:var(--shadow-xs);padding:12px 14px;font-family:'Comic Sans MS','Segoe Print',var(--font);transform:rotate(-1deg)}
+.postit:nth-child(even){transform:rotate(1deg);background:#fff3cc}
+.tree{list-style:none;padding-left:0;margin:0}
+.tree li{border:var(--bw-thin) solid var(--ink);background:#fff;padding:10px 12px;margin-bottom:10px}
+.tree .msg{font-family:var(--mono);background:var(--term-bg);color:var(--term-ink);padding:2px 6px;display:inline-block;margin:2px 0}
+.keybox{font-family:var(--mono);font-size:1.4rem;font-weight:900;letter-spacing:3px;background:#fff;border:var(--bw) solid var(--ink);padding:6px 12px;display:inline-block;box-shadow:var(--shadow-xs)}
+.hintlist li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="in">
+  <div class="logo">🗄️</div>
+  <div><div class="t">Servidor de Rafa</div><div class="sub" id="subtitle">Consola de técnicos · acceso restringido</div></div>
+  <div class="spacer"></div>
+  <div class="row" id="whoPills"></div>
+</div></header>
+
+<main class="wrap">
+  <!-- LOGIN -->
+  <section id="login" class="grid g2">
+    <div class="card">
+      <h2>🔐 Acceso de técnico</h2>
+      <p>Escribe el usuario y la contraseña de tu tarjeta de credenciales. Tus compañeros/as tienen otras distintas: <b>cada uno entra solo en su ordenador</b>.</p>
+      <div class="grid" style="gap:12px">
+        <div><label for="lu">Usuario</label><input id="lu" type="text" autocomplete="off" placeholder="p. ej. CPU Azul"></div>
+        <div><label for="lp">Contraseña</label><input id="lp" type="password" autocomplete="off"></div>
+        <div class="row"><button class="btn primary" id="btnLogin">ENTRAR ➔</button>
+          <label class="btn sm" style="margin:0">📂 CARGAR PARTIDA<input type="file" id="loadFile" accept=".json" class="hidden"></label></div>
+        <div id="loginMsg"></div>
+      </div>
+    </div>
+    <div class="card violet">
+      <h3>Mensaje recibido</h3>
+      <p><i>Este trimestre habéis trabajado como técnicos: habéis montado equipos y preparado escritorios para clientes. Alguien ha estado mirando.</i></p>
+      <p><b>“Necesito técnicos de confianza. Hay un servidor viejo en un garaje y nadie sabe abrirlo. Os he dejado una cuenta a cada uno.”</b></p>
+      <p style="text-align:right;font-weight:900">— R.</p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="app" class="hidden">
+    <div class="tabs" id="tabs"></div>
+    <div class="panel" id="views">
+      <div data-view="terminal"></div>
+      <div data-view="servidor"></div>
+      <div data-view="manual"></div>
+      <div data-view="tiendas"></div>
+      <div data-view="llaves"></div>
+    </div>
+  </section>
+</main>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+const DATA = {"salt":"nullbyte-2012-35724a10011f","iter":150000,"users":[{"s":"zvPuwq41M3/TYAL3inM1xw==","iv":"3b+cMzuia9tojLkm","ct":"mpLrgEdpVLhINYN1/R5yWID9LLZ4JP99qGdCTs9IkCSJA4pH5HG8Z9NOz6Wbvf44H2RvNKIWmdik3y1VPMGfyii/FeHu1tdiSImhYASJ7F1nLKWYtiarNkm3cu9DUzJMFRlxUuYicO9PFLql7Gv32EsRRMGllo93ic37n/VYUE/22kzrezzGxhHY42FXZkALKcl6G7fmr9Z3EIfsepv8JkrpPINVr+8yiuPMuVf1c6FN7tibh43aJasJmq2+NEwo895ks8G2uSg/MBiJeYYKZOClexJpqp67EXcCcbORzl7lXups+wSVQqvOLvV5FLInGBLpmBhJ4yxPKucZdjG4H/txMV18VXyBpQqK3C5TwVjq+znw296OsGz2GLC2K6b3GjUpL3lDuXEbY6EyGKPl3aWQwfyY5KZQq1y8YuVsNINoDK7H5XKo0YUUExbUdx56gDY5Q3npAR++8fxhl7g9KcfGR4IVtMDGB68CLpk3Rt4AJAoHIihgJ0+zxB73OuTOoO+7xKt+MRZNVz2Ec0yTWbvEsfv7pEWO/7YztAzz3L9zPVqF23dCdnDInCAQH431YF23IQosXDx0TDVe0PjzggPw0XpqGvF2c3vO4XHpye3eowRkC7jyYA04Dd21ff07tpqC1eISwW06pX6hVkGQv6zv8j07fb4le3SeJes2ORp8HCxXxMrH8vxnLS1aIVhi6g3jbRSmbZK8uIsNt678YdrGosPDRprnUTawP1y5mPbIeYostXF6lc+/uInMbNq4x/IgYCpwRXz30urwZSG01YdDikYJ1DPoO3KmhZ2IliBi14tEd2yiNdLpHYIpQT6WMVoBOJD7fOcd+gZgH7TgXAOMCU27OZjaUr8hzUChWsIzljQ973+I+0rTfs3hbHdaagIECHmbBFiBZTewNglNcxtdsLH2dONL5cm8plzw5CTy73uwtrHSEU3GqlNd8l9X1wnPfJUdCwSx0qJ2wR/3JVsfKkOzzt5r9O9xxxsdudSLC9xjfoVn3WmS+dwPRMKK9j9PgsZgkDT7Ew3rY+EY+ZLbxQHdmKnxVgiebtJSsYch33hvL7CYu/670/vpVTLUpuqYgFSj4AMNQ+5/H6k=","id":"b0a22fe0f463f502"},{"s":"JtRGXRQCxFbdNxwt9XR33Q==","iv":"O0TzNTuDLd+1f/RI","ct":"O1lh1uYKhvPGoXvKxgcKFB84KXf1Xx1TAZV0JOoZQCjDVDMOgK1Yo7fUFeoJyxV7vtX9zDiz1qLCmTmIUQH7vc+qrac6IT5UAbR6BKd7ADAL9H/NRIHxBs1TE5SdbR+YYR6l3wTC6Fn5ixN5dOZXWesgtLqfJ64Di5qPN8I33lTt3hdIX8GYwoFsvNGCv9+LfSEu3xrKpCvXDi/SaPKdneNK/kEPjsgjfBNeyK7Z6mvRkm4lftNSVn65M2VLvegX7SytdzYy2KavkhYmhq5bvWyRkmoW1QHLA1eMwiMZc3USL/hKO7K5NABtXJboX6alU2hi9oKCCZ/egNakbIJ2HKygb+OixKYlErBu0E7UsLldrePgVBzE331JGOd/W/y1tGcXxmULgeV5g0PbtA7PxcrfHHnI3Kf1j8Lzcj3xyboR/J8BffcW/prs6CfgoO1L9C0h3oqvfdkvvQiQFT1NDQpTYePuinDz7UIhi8kCCHygR/iBn1em4R1+s4r5aqWGzWAdM7KBj+SS1jWwnzvL3YdyQnDO9GZmstcvZG2AogqeSae2TFtMWqAXqo3Popnl0CwhTIWRnVtMrUXXyImsT9exn2ELJM7yNem3B5tPT92JG3yl1L9tv+qZuaMymyUsqxZWYMfeKbjVZ6KXPePpnkeRmVlkcV344x+pe/2qru0Pf6AVA1yJLS+WztVFgRV9Txa4SHdtJ/M8rDtVzGG4wS5NY/h159r4Z1ldVJBV+uovKAN/Io+bIImrXJ8CxF6aB0MySXr4SoJYh/FwJRhHVYtBzblsR0POfcknPXfrwICx13+c45VJJfWhOkq83LK92r/2801l/IlNKLS26NseXfVif4RJzWf/upuRBKBW1JCudy/dhG/0WlUKpRxeC8xoESwtq7oKc+Fhrcq+LIMQNH8+71Ns+cHahJoXFreO+kyH4pC3QVbi7IA4U2R6cR3XfFo904EIOfsmDaPgFf+5aziuOkWP2TjF77TVickYxaXZjCT0N+rFGoErh8kbJ2uo2wd63anxCBC/aXq4584BOZ5h+SDqHef1itpxT+0usT8uX5yGChtse2ut721F7fLcoYZcapHDQwmRePYvxLcGQYjo2Ai1NoAPmQ==","id":"629c4ef43624532c"},{"s":"PC4r5qrl7hq5oHW+U5IPZA==","iv":"RPM/vkIa2F/8JDhY","ct":"dS9Sw4B8IxLpKwwegRDu1XbfuUtfpexcIjbD9VQWrkkU4blWr3AqCGssRqs93twJ2Xa99QLQQ55Abul1V3M9BOt3Y/SpL+WQEMiwEprOxL30ZgDfGnGRL2/kWtvbHY56gKV0G7xHY4LicCJpZTTpAPMrt4FaogM+MiFyP3hMx1P6oLzR/SOClhSJPHmO7mpGYcnDUp4gd9x9+3OfaiF/tBAQb/W1HcA1aPKuw8/dLSlpuB0JSR2xA8i/QfMZcgxHHw/6JHky0rt3ODaSR+XhMjTbEcPdvG7UvMcAlgzO79gGvaGqm06nGXZSLbyRc8U6jQozMM72XBdL5UgJbWq2heNtoyM7qt1MmQKmlLcdMoVsDf+bpJLMLlueErsSeOv+QXgWu0J+E7vf36VxIXu664WdmfowcztQdkweSKYvYkJWg+k5L72DVBa0ISQb9v+nmHdBw2UC78HW8ps2F587wWVnCb+6uMyJhT87Zkp0BtuKvH3KXnJ9odVG+TZDs8BKI94qFIJal5rL/Z7NNz3nfFKf/eQW4/7efmO7t31ZbbtFuP/QOZjAkxFNzu5d1seNDZxlwLvLDWEx2cq0KzF8N+NrFvXTKSeGGnicBxz64Qr8PQ7j0jXNrpSvDfjkESj1DDX+ZyihDcjLpzba4NVkWcNDZb89Ctv0vqn5e0f9vz9vTDgX9V6GWKBfAhA3yXgM2jhULrOcjcNADmdF80bNDvNrHmo98AzLCYtHQE+tgn8BlKnowSzHH9vk/vZpTLbmUeR9ZJdlnl/YeDTwcUceL1CNdV2d1/MHG1+2sZACzLUEGrQvaTJKS3eTs9qTFv1PgIsRAaBG81vxnN8EBf7aPKPZOXU/em0QQ1hjvqWuaC3cI8maG9e+7el8r44ePMx1Y4JiTSXNSUw4UQh+xMc/sJUqPCZZDx0WsTxnfuTHL1uF8Ss+jJD7+A/bdTBzsbd5CAsNg6BsAUeE2sIKWsUKOW/vyYzIKabI5iq+S/m76rqqglaB52Lzs2hvmJ3PkiOyTwMZx5VMib4M3aTEs1NvF+vZRawccPVDXuHYUEptXTyBe9AlXoM+t9r5oAvDG4b/IqcMraAPs6VkZFbjPBLlIAkwqom1p70R171Pam+wp5rlVMwCF29hTnFjbe08tMw=","id":"0ce87f7df5c685ce"},{"s":"eGNgk02A3Js+icqT3J4VQQ==","iv":"zgv3Z165xI00L+YR","ct":"uJEpb1Yc0PF41halb0maUj8j3dyNB0lCQkdyrmbNYQMNRHQHOSnN+hSMpZsyXyLB2bhuOkJn3UmyHh/ffb6xItrrA+mk0TMp7pfksAccjONuhnUBYQ5EJ9TmHIr+5EWX1NBdcVquFqHbPubcIHikZh8rnEvIhTv9aAz8HPw460BeVi/DyXRreNQ4Mb6ck8gvXER7AFGAARVIHCRdjMe+P8In9sMurRJ0NYzIGHJGh+3tgcZBCLEYVn71h/Gx7jZndVjh439MHErL9hihQ3VN3ItGQVJZ7wbk/N+NA8Jdi7jdLDv7NQbKDh6utLkwlU0osiiVnIkbA2CzrTRRV418UZO+FYr6T+7HE4w4zQdTtPy6fsVlaIgkNYvdN7ADjLsexxc9ojQkH5ePDOic1S68t2jz3G2RaoEC95+fX5+aicY/P3Avjj5JWyVVLHD/ntdy9WQXORmAzHCefM7/JaiTrMsg3sf8d2IKBXS6WbQHlntnHuTSNRVqDw7RJKcLZyaPGYcpr4yqX7F1orS8BAfBINAoGjpWHDGr6bQDXl4slruph9bg5TirZKWBCzGj1oyRtqdd3ettWxJhntCa9Rqya5V8ZYyDDz1cFpjne4GQafWmTLsLtxCgc2p83pU2qUcH3lD4zeZDYNX1NuoYvNiug5KUg8ARfkiuKpInjqrM85cE2v8FKKL78H67AfYjd+3GiE4mhP9R3a3DNnZg/dRmzxbutlzby72q6StYlqTwRzqfXcVTXN+UrnDUvRU0y+RcRL4z8LCXe8JCmg2ifGu6VxzuhY0h3RRtlcPkjBDyT+CkJibL1e3u1Ptt576A/it8cIwdQ1SNg6xEkbCGTnCf2gciG1xAl/MxAqJzKGXPSjFGS1j0n2xc027uvAUxDWpEAxDV4j+LmX+LPFdkqt2Pw3xGE6OEzb9sm9WzvvsBgnlb64D0Rn0tPyMrN5oVn3Vc4voW3ig3sIaNFiPzdaYRGjfsoxaE7MH8LuPnpg4fU/YTooo7nV6jKG2tkAid7jZNAB1AOmgQWZM+vb+LuhAWO69YUpqnjFT6H1M+o3Uj4ONwmpDQ2Qs+1Ubwc8JhT4LURkORaFhF7mzJ3CfIk9TxfXCdxnPZldFG/PVEWbyE0WHXj6Ngj+eFPLn0DIGiIk5l","id":"b74b61a26312e615"},{"s":"JWcjtCHUvD/b89jXRc1BLQ==","iv":"+ZVcwXbIMUItFqBr","ct":"rM9MvwZN6VH63GtiDqTTsGWKsy0VbmbG+eKitYbD0lA7X63H8V/jE9A03v+IA5lOycRiO3pp9PNMe+oOUBe/VV7TOH0VW68CZrsunxwG7sEQj6N1nV0M19JYdz5HFVMmcyQP9AARaYu9PUP4Pok64wpYBETiJkWp6nv7pqt2gQN6PrnkMKHiiwr1+lJjSyHdIXU/Ldi+ZFgWL7VJbaHRwv+sE8Z9xgC62v1dbM33/O2/69grIc45uSzELA4dg/qebsxIlj3tMUy+DYMeDtt61IZBkzZVNkGRMsDrioeceN51Z3M6iaxpkjiEGkWSDhyHVy11qfdMgvGonpptZZbbCVEjgoE14yxOQFZlMLiTfYFxnoMvxExRNClElwLaP2t4SaBj5vAMpWtnpGE39EKytAAf9ysuR+w1RdCo/3U4TJ4ydjqYT/hR+JIX/asRL+jlIFo7kOKEFn3ptYmrvBkGXV648AqC/QDs6A4kNaI+z/T3qk07RR7n8xgZup2N8Nx4VbapqlDzR9n86YCr3dit+EitGX/jWbigJl4bc9gUYQ9Imv0oNcrZAD5mlSsyAHH4W2CSaXZxyIsnYc3VbFRU4+VcQPlpq4taP+w8pLO3kvRYbTFXXepm1EQMf1Y+0WBkU7KBOgiE4TNHN3wXieZSLSwPen1bIudpljiFGDh7YhmKc2t59YPwFD1HWFht64v7NpUd6bAKO3BOw1m6TPuVMDj+KqCWe3N2qifCb8ItN4eh14m/MOE29G4gHWrG2ZyC9RjQZO/E6rvwTjaTySYfXIzilzYP6CdnPE6+A/DIek1pPCJUz/bnGS6DI6DHJFl7hwrVaPlLTqSqZEBahGNT1sEw071ZS45G0uQRK1bBsioAN6+e7wgIcewfLYEqn89HDk7xSEtlhwdCDh1shpuxHSLUvbwqlMju2bz3vlBPDIo3B1H206qjnOzluw+tum2gCSHWucqaNBcR6Va+Bc3OiAqmQPfwM18sgbbPOTgpzT3FptU12kQnuZ2/Hx/bobK+YCYA+Hsgi23YgqS8Ova8rxSD8EOT/o7dbLxkhPRcMbvO0KVT1Wtc9ueTZnGutu/owFzlh28oz19MCoVyU/VTpBV4G7bcquBHm2agQARUOZshKVHjfwHr/E2OmLiEPifb","id":"4437c8a90afb8aee"}],"blobs":{"hw_pila":{"iv":"jJhfUv4XTjo0t35c","ct":"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"},"disco":{"iv":"9ZSYxhE1imnqV1YM","ct":"FQDg25xbVmQKgwyh98PqZY6VX0vN91vPRCg2aGNaolxS138xELfA8M2YrJ7JKJn+XnRkKeCR33IF/XOSjqoRVQ2rQfiqSSFEi6quKo5hJCNE8aAU4yFXK3lG3aGNQscJAcFbh9tIv5KwQub5zWLsLMP91T0kcWlLNM1vmi1+OQCuE1lvb2akzMUW+NpWq6ADhYkDtUICupZU+G967mLtyeWvvMbncnzy5TGfSACNkDjzQ84nglqSXXT8ctPd936mDqAo+dX4BP1eLGToh0KEtl3Bun/yKDbrctQC2nYGZoPHnSGefxLh/NlvRyKgU0prl8qbjed8zhkYAzhrhBb06mEnLpxSUzkEvRuxmDuRGsxLqwXXv+anoETokKbIMEgb+xEVFNhLA2gEqXJbI0e/alB3oWuVEuDogtgZagVxXkTq1zJnnvDPlNwBeYC5earoGQdfsbaW6qMIkLSUYvy5M5h6+ULnF3t18ISHXfFqEtpf2v7fW8hSyKC+0VUM3DcegKvX2e1e2PDOarrAaK8u4JQm69E6boU0+OWYVNu53pzFPf3eKsHjLyaq2eCAMpJqxTStsMF5r7615cLvF40Ra8Hidk2Z15WACIGBD36Ite+lsj8mH2q/k1ss2uwGDEG2eITobhS0XEGPS8Jz3WX0DacKj6VNI8ABCojpVrMFIt5ppao9YmXJwXKr8Xd6D9t9CYHw/YEYu3utmEdM3nW7z8nMRu8+NlE3w7izBHXElX7UooK5x01h99CmQlaC4iPQMH/z8hxnczyxAFv+SMTH81t0Dr7LxawL3E0bE1WIL5h70cBz4N6wiuShgL27zwBPliFqYP1A3ETe6olbJSsxgFuELut+OxwZl2rjUjNKxromWRjul2PST37xCXOh9d6LINoObaT4iLIfTHZKBYP+flShjUDAS13SoS/8t9i90ChPbwl/qKosi6FX6/Ln6Jqjt5yytrpgEzpr0zNQBsIQ4uWHb1MFrO69dZN5dPSnjpe3TVoLTxNIxLSz0R9c7dU66l99GJXffXa+889dPp3UiOnI6dU0BwDw/+RJPu8ZbZVHmjSCPqSv7C2tG1sZPvxbQoxlKwjymlmHxvaRX8RozeJvYyW039yq8yfU1GTYSLy5nxdXKRB7KOa+5rM5UKfapBDztGHoek2wbeXS8DlOLe59+2ZZlGXYFGfC/TJdBCIwZeDneVN/Rdf4U0eowp8kr38yr7jX0XjaByN5QF0u4N59MONXPZUEZcbiWGFKLKOBJN2UQmswg8P5xSWajGfmjaJk/uy80RDKVdffhkI11OR0ee73GqcYeGWGtyOzYI/ZOUXIvOVTK4OEDQe58aRDD8ZUI7FI2vXKNmnhmd22l8alXJmixURO+6fBDxOQ7yIJ1ACj7873ncdv9fz96nA3xW9RStWB4/GffwHXKgZOEcUmJMQEtqagITn3VSVz6KPzauNk53OG7ce69+KC7QBua83Y1LW1k5L+ZdYgOP7PbsF72WP0aB2UsSLXMq1O/CUXCmW+X0G9BZP1ptQL+phM4dKHBA3dOjmmOZkmqVdkhcu5AGxpPxq5W7HrPtr2XzYZXYOCkl2UId0w5d6ZQ/hI2eJOQ0W+Lz5L2q6umsnGjSumzElzOMqlKjyaxD/L83hO2/Blk3s4Tldu5pSPm4DJkIKqPyvhV+YKtHYTotUGsp8M8KZWKxZ0F83SlF2GVW1EkcLL9/RI2qhMUKbD0cA7uTEZcWDcJdtMC1IwZyKw8BqyQ21EKuGUhJEtJADAzo2Y7+EMElTRDixHbYcL/NxZndzrl+UMgjSI8Ms00zQM3EyxfzIhhHSBExNTeYvWMFgVr0KQjR2ckG1lNmwuuP5QhztAVjThZzY4hxIUu/7R+uvktZFYmWHqUN3Fi7ERf1WXGFAihfbGHiejYf6s+JvRN7i5I6EFmLp4cmEx9D7oLce5rFuPusoX3bsgy4HSkCEj0gPL0A++SbwM/fqrIw2p0K2rA9TdM5+5HwVJLE5vmGUexCe7aA5XUPUbCFpFwrUN39Y4DOgPlM8NumBMBTDFP4eMU2sXUZ+TxMEylWeYBuKsX9wWmEo2UzmH0sbN23xqypFoCIJr9fsegUttFRkW20DMaWT9mBknQMnAE0jIqvxJ1Ds3aMn+VRkTfKKjKgcMj1IZ3tQxxMfXph3+M9f14oZdRUBRNGU/tWpAsf0emrIhrpCBUmQNs1V28acYef0ucGS55jHiaw5V8kQccVybl+SGJ36zd31au409cetqyrYIoY0XJU9TzQS/ZaZfUTfLWW2mJ5Z9wr5HZ77egOIwu+AzbRcdQrQl1Q4KCOFBkh4bnFKkm8PZ6iBoQhnc8gOQ/VfjsdVrKg/bPgaKBtgErkMgG1vjEcw0MicRdtw/3KFdVEAbS/olMyeS30U53E1f72h16oDltJhpBe6s4dsTdhyUj0agfddiHonWyvzDfTEdGtyheIAs/klbdBK1l7WNRNjDwKZAqhEwUP1ewd20nxGNMr8xXT/K5H2h+rlUIZMNns7YGBAlZ3fOZmpT0F6YDcHwB+U/ZBulqrrla6zV/MnaTyAkpF6sAr2D+L8HVyMw+gQyIflAPIqLUfZOZUkjIvBZuPYn/gknB5i/QGJVCEluQ+CRiPnb6YLLMy842m6NNuMQVuDYf2y+Uqc0FQs+RQ84ZL7Vv9EiMDS9sbxgDYUd8MEBnQ2JNpTh6j1DeTD+JghOztnl0e/BrN/EE0gF9S7t8yDmgirzqfOZH06JCFHDqBmpJFzbIbCqrTlsytUQull50/zLJ8IjLBhz8uKWrForZhwHVoE5Jqc35xU9UVnf4pzmxiE01DAyPD5+6Qy23+Bbuu7hhq5eC8ASaNTHLR125oUxppzSvEpSkcT6ddSv0cLmYFqw/T9AnnqUfvW0kMnGiCYiCXvPmNTLLT+/qP2B/8c07Sos5vybDd69f9u5/H6L1lU5kuNmFrJWt+k3zrhIH+Ohvqv2Hv7ivpIIN9d3IbP5Y0dkh20bRqRG8xAstleD3eJwuCFk9x8k2o9ximrT/+6BVlG0Zfr1Go8oK9sWZYUbsLjC/EwlhyGrh0P+1mSzgQ2+MsXbAi08mygaR58G6/Ud+bhXbnMMiKq/OBF4pnPFcB88L66drQQN7IX/3QKIceLUIAau8JrHyXbixy9nkSQXNQoOyNMh1LIXnB5s7HJoMMWaVXopu9xiIiSsYeRcDYwHkBpRJevIvaxd6AI4LF/IRhuCstUXlOXSf5iYhOiSH3sxF8ijqsHJzj3l9Xh+62vMe75pc3o/LwmGROlRIcbozY2fbsD28XL2hphLc21BJmo4QZxVKZLRZfI6yLzrqp4nu+53m7ylUKGdcv6YDRwl1CyR1gvlEyEURk636ReozYg1z2STZR+zlP4VLj6hb8xypSd1xylwvC+Dm4Ppn04Y14wrdEfhouRZmPMHDBA0E86UU7Ut7iLB8MoRlHLsOCUa/nzOWXXDSjYUtHAEud9b8/F09dQaObg6Pg6CqaZUQOUt/DPakDAaxcS3HvF90lY3FObozoVe4x/QzmEKmkcbKfycxUA7Azem3Pc8Coix7jB6H/kUpC5YOj+HasRifHBBiIlsInvQrBz/HGPhCnZEjOkL3Z0sjaI0PbNuswJQYZ8QywLPZQ4WTXovieGqhvCtPnFzDTEn2N3xJw1S42e2qdrpsaPCCrlamDBcsv0Jk2fbLa+XK1RenlP6ejgy/0/WP3BchFnqAHe2CcL4J3PTK6xbA6nOqitSrWNQHPpkeRC5YT7VJ787PuNnJgGSQzrIE1tXXIj4GHLV36zo5nH4laDa05uAYz08eZYuIipcmCmYLaGSWwGhoWPyYaNGFPksH9f+cOdGaNl1jQRSNz4VMjEA9cEAJhfagVLxbZKJSISiPQPWG+UCGH5zl5ooVWBl6x4H/seJxM2FN4ufXZz5gl/pHa6sw9QGgJ8EbpyU4CCFKWQ3dDRA4khhXw1bD29hZzTXyJXrIFnksoolwR/CeZBDlWmB2prss4t7ziPEo/E3ulEPfJNy1dAqJK+ctcQmzSzkg1ntrcD6MJUvZ+uF2eWxGRPTEbjzkGe9OEGYvrKLeSUEUVvAl7OXzxqfnOWs5RSHxDmei5imm/X+rDJ5b06kjwqaxjj25vLCBykPl5s5BQKBLFgVsdaul/jmGcXPrv8fotdMVqDbPjH0Zw9+fbph+IA9pSTKylFPF7AwATocX6helTEimD4kEPjPli6ZoFLBnI2+pLWhrWtNWBIBhOf3fbJbdYA76lb0rss/FDc+M0cMnSZxP2Uk6gfp1bYCu/dXvVpdTwCr3cFihAbiy41CHH1MJXoilQ3azvoDgbfNAiM7Mt75w77yDVR/Ccwa6NakgdtpNZLK6EU3Syz87zqwJwCNAESAc1AzfME5F3Fad6kbNN028RFWlKR3nQGWe8TG/GwJQl4B9N3C2DvjGOGvAo/8redbydgNOkhwTFdwc+8/QxVgG/56ViPA4SGFGQs6OcZOuvliON/LULJdmzc0uSJFhYO1xrFiYKwwj6PGcVVL8Tw/bu0IMNoGm6AcX5WtFU1skKVjt0VnVKV7234+zJDQuibIGdDP23unMrK3zNeAR2mGDOlyOD1pYcxXlSnQTGrKTRqQh2qLJQB4WgsURqvi1VBfQHE743SIYPhKT0Nq2S7quYJm76Xq5SYCyo5zTiLXYJaY7zbR8OFB/bwG1ILexWcVQT7JHbC/Hpn3Ttb19b4rNqpZa57BDT5aYQ37LfmXrBkRHSpGBUa4eQJBPpqHkOedFqUqOLU830FsYp5eK1wFkXmWW51ASms63/IfxzHyaCLZrBOJ6N9LFn8qC4ygjzNXE5zGJ2iNJeS0zVZNCL8ooWO1VYlyjYdD2YGEFBKEYPLfhHADJCbhBwTXtjIM2Dm2SMJUIAyI+pxH+jm50fEK2i7Gc7jS7piW/YCTMVdKA/03cRTnua4lI5/JSAYec7CRfy2g+q0/jptdDUCxdc3/PPuNJ4ydvJm9wjPoj63R3UjH0ERUQuGaCs2xhKNvIx+VFjVHW9MF5YYV2vrwaEZjtHJHf2Cyht60fdGiseczDRABCEi7fQUse6cKYIsFC4f+lwnnkLF/WNZR7g/bb4yABSAtwq62myVyKcbeqAWtu71mk/u5TZyWyqomBWR2L4ugdjAwcHUCcYK9ugUaLNWT0dUu8wKone7b7t4ULPikeC1ghDGLV1G/FXxHihQF1DLD+nakn9qK7K2znadQyHRH6QsmT67SwGCyrMDSMauK7lsUBWD8y4wOfwoTlWn47bUfPWsgxKxQlZtbtf9SSbkUnp9L6rA6o3Z1fqiQ5w1mcA87V1iwRUvIbq5QtvKQ5+/QP8LvK6DBdP7PQ5q+6bBQNVyjwULC5zzeLQYDxQcoRP6DOebslAfMD3kMBN/fZhwIs6G2Gv4rfW7uQX0iXkU+3w59sYL6JxLNqc7mPfbZxmRsFQf0bpdLrIOnzdObC2mZ+YmTZp51aZ8gUBjsyOOjvTjQly8YZEUJoMyWSgUikbpXIXixyaU8htRZjJpasyZUoF7mUgvWLmpCL63kt0DFPVC/O8zjWLSjNRsAc0LaADoli4jWk4n9zr3YRPvEVp3IvnK8ST82p9nw7SnPzGrawusi1x8OmSjvxJP9/1ggpuX7zmpq75c3jBvmPAIkxDl8InjRiDHyPgkDU8sr76FAG+UwjK6WzJJg711PpjPYVm9kcs6t9T4lt3T3e1XSgVpUgdjz2KGUXS4dsupkF/qHWCDZSrSBnuJK2TWtJ5hgaeggnBPxHcqKt8RrTLoJtSqvYDa7V16/G6PI5E2aWYzpVVPwqLa6K8jGbdYqqkKVTIg6MmqRcQXyhvAO2C0GC61g9ulGpuqw+1Xhe1ra6iTMD5HzatxdZDPgKH6y5kGg1Ep67oo17fUTk4moFHURv5uADDE0jfAnYZIC1ask/GfUEyPVagASbB5vYkq4j/94mYaoESkIeCzg02F0ED57USIYNpfr2kQdNS/GOrGovadyc0++xU1+qlVs2OPpJM4trVVkG4E/c2SFgS7YpQ3YQceI0xd2Ofs4IJyqgJ2sviLdwr5QXOgDIB7i5DNg2gwICfvm0YyJgkQ6g3GAaDpEnd5Y/W6hdu/30s0qCy4UvUbqlvfpfL4my4Pse2CBlgp7ldKC6tG6HV7AJRFQtGSFe45oqNynIlkWPSdw3jqmpiPML0NHYIFOPozjfYSVB5t+23gUK6nyFjg/4mbS7HSAjYjC0OV3nPtrVAwpOwIdR+cj/zY6I/K2yhmGUJKUDDZRN7xACcOWg2o2T1nf28Qi2ymzuWTqA0CwOyLkPpNoJUawPdBYkQ39bxoMbDP13OJHU/8OKlXz/aEGkT8oPArPbCKDvA3l2TbPGO9hl0ztxpylxujcK+JmeoU2Gm03xai/Vjv2mwmDdv5+N0f3XdXpSBkLFayEKrm+qFpYXppjK6bg6z0cE41Gi4GxOJaJydf8nfL77gHGf6oWKp3uPS9Y1E2QTa0vS9IKPvMAl8noefq+1JedJc6DkWTJT4cDejvf4jjFRj857K3En4oZxyukOVwgesYok9lDKVG8p+wtVugUmC8oNEtBQ8zrwJfZ1V+NUd0C81mCm3Vjq/RBNL3yaX1gs7ZtB7H+p0WFMfszno18v4Lcfdgh8rkOB45tSwtL5AG9RLiBzXWgbgeyYuR//6jLwI0Pgi9DgVRh626wLwusWYaUx697TyY5aPDHOXof3MXbQSQQeZkrxGRhs5bwQ1/QcsUPURVTcLKeAYD8zIvluHjOJkMUqyHQ6MiFPfMOqSugrvuXmAtZlkngJ7WHVD+EzZBJ9a2saoauhvK7gsixT1FEs1jThLWzLdlNIXtSOPb9GPnMMqUHhDb99EShvAI5/EArmvWzyTPSjSoZpw1UclMH7aMXLYACZpEYij3tRuYDiemwMR4MnmV/UY8h+UN3Lg/Da1OsQQGj2BBpu74igwTLIo+7C5WqjnX68IOl8EmCpR2FkckJueceiZihYhti5Xc6qGgoNuR3kWEQG27QILjxiYNdfHUWGmD8W0hTBd7YvFsYb+3UdXKSIR8zc56wGJyWzmS0JDC+IwcJmTThtxU88jREoj0dnx+NReX9dY8CAI/58XpoUkBBUWpCqVjpcN/a9zbhtweaIpx8HL+5vU9O5d9bwVVFqXU5Aa2E4pxidQomFG5euEytv/LGQLina8p03KCJozUNDvdSpolEAJL7vke5tBLnSyH3UoUZJffwlk4aUrG5/grEii1MYH+rFr+ZVK4l88cJ8ZlHZRwSYYg4tkDJDKn5lqNcvZKthocoQZ2n2lM8F3Wd0hsvXnuYQ9zvKHKAIMPcH5T3N3IG6vLwaMtptT+CscixdUyvfMECAZGuHcqz6c+UCL3XWLrj3bqUisqfLBMv2Nx5qW7ayhN4LIvvuS8iIc9Oq7+v/MRR15/1Ujd/LXZ+mzFQTJg40/PYo6g7/3uA0tySZbiBf+Rpmh7nrhs3H/NED9dbfTCkAa2hXGrcmczy/hm3FuZZQWCZIp0GyoSZEyf06uDv1Z+KjupOXxRp1+8myk3fWhgajdlE8FV9oaZFxQx9MTlz6PHo5svSPS3aPEuUxPV3OcpuYdy7AvtG8KlDqCLOAEbFe6wuO6LUPD9pm2vw1Xn+1flPoCEAMkFFX02uJSd4EhJQJAxXitMxuxVyyJY6P73VWXYYK3VThwOw2hLHb0P5+4ncsRKyjpPdqrtN+6KMmgZjJpbI57De8hmbADw8LQ40nlCo92R7/fxsNGdH6O7BHtIIB8Fte1F256R1JQeBHrX+f16DbVw+eMSjW0sHxxnVoi1+nZvyrHlpYHZB2jIkgSnwDkqePUogHK9l2jgLrLwjJHmd7QcpjP6VMUgn0kfxrQtq06sRM2+3juDIfecROKWvi2uG+XgVmGRA2DzqNuodf6R/l14ErT6MCPWAoOHY8V+wgdGrl1AO4LbS/ErRoUFYWQQNqXXHv9+S8O11l7h6CVxreBb7EoldFfVHnPNl2BfXVKeuwHh9jJct+ltPeltGQMH7cYXh7KaggodvH41hSD6sb4jo2+HqUHUNv3gtt24C3KVTE2sDd4Ktw5rbLmhaZhEyqBSnp+pwUbq8lajVIRe18jr/Saqs3CWYHXkbICe0dZXlEc2wuw7Gu43eUW3a78DGQZZY1R+d2o+2nesrG7/nS/81dStS8pg/AYzLfO6j7+G02B/ccE3Wa4UCD8xTQv/ArjwbBFLNzZiD5KxX82XzxTu0ATH8s9pJYr4xQ10WKwcMTk3ac1V5Fkl6Dken8xngqHS38dRQ7i1fBNjFkjItXwDLdpCPQrNWMlFd328SJq+XI+erzVk7TbbbexzzHL3fNnyCO6icFbMFwsJqd2CUis7qIOmJ6Lwk2Hxi1EJrWIZQkhQ/dnjOszqBSdd1J7BWK7/r7miUp3kQH74XUKGxh78IORuZGv70oGezi7YDQvpf+pxmwi8rhaEzMvH7xlL9dBqSg3Fnq6eWiy5oNRW3X1oigCsHO1h3Ir/7FK4pQWx5t+g05xpTtWEzf8lndCqCkp4wVAVmoBarywFLyXkoaPT+ee3TYgUcXHb3jpRbv1WtYG482fU6Z6LDR89tBUS4uy2XOa23vi4NmqnMwaL1tWfJYnQkU51pZ8cia9a4fdRmjQ1SNd2oHXwl2ZpoIkcrNJuYORtFOchTJ/XbdESgdgj5xjjIZwy2tLwTg4uN4bTlsZCGwDzvGDBwhUWq5EJIZwnJQL2peW+2v7GhRJ5TImm/n+vdt31PW3C04BOXtot4F1TSeDxgkMuQAEBhilz+RIFBT49i1SLpokSj9AmmviN2ggQwCSMQW8M7IgAS2yqkbKuGTijUyueUb2jB0RDfRPPzd+0I0vvVvRcySeMciRqD7WPCaTTdKWMda48EQh6K87xcb/NGtGa14RAg3RT/pfe97K7ew3f87TkvQf13+j3sJ06MX/BMbirYmIxR5+MoE/0QOslHF5B2q5nSWELbCf8wX3AutHs2DGfkfheNQRASNUER9JZQnVCRuW8GQNuI/Cfwkea8MVdQlEpCDXIE9STQiht/8ctGOe4DXmy1grnd+r0k9rQ2H8oB5TrD8DLKa/YAmMmDBzyRiUe9jMBA1XfIzglUEZNSOtUeQRymi1z/fRIs0WZ+vXkPQX8US23pgWHzURN5GM2BajazPmGgA+jE5LrtTfpO5EN5Q4chTW6VHvOeK6dIZIAHputpikETTKBUS5uXu2Ct2Zi4EjzZpi1yaVrRajPJYvcEfaJw2cll63dQQDdXz8WXhnFHgoVAazN9y+EBgehzMmMzJ1Jgfciyl7JDJLH8MCheZsLYN8ZrJhJO5yxwn4RHMX0kExwtvfUxIQN+gY1fahLNgTJ7qD6TQpMSvYeJpVOAUwN+vUBwE+f4A6OkmE/HM79guPwsh60dlp46BMeaCvRgvk9wcol7S/K+xQ4iRrYCeCtn3MqzDj3oyIhrpax0NYCzl7EgatcTNRuGtwvUy0hmJeXgXSXkXLwzjKvDMuV4a27iBGsJSCKwkL3wO1gZ1YIMSrEdSLnQOBXSpEhsD80ry8Wcp0ykOuBc9xXopQeU2IcY54AdHA/VPN/r2ML1FRzfPjunsKYJ8+DsfYA58nBCpoCD1M2AaBJA2nzhQofDTlR8lsRzTVI+pvxGBdmcAa/KfrMG5e/tOYP2RYDHBkrIpMjfaswEp4bvL6ABQn0r8dKbmRZG5zrbN4ngWF0/+8T4AvAAPbnhbHwb8ZxSy1GqX130gZDhVEuMrEPPHXHzNeYrYCag7iNq3WVLlpUE9Luzcl25QvxaD7Twi3/iXwIbgDxXFVySjr/69JktEPdz1qbfOINrjzJ/P4attdXJTYTjg2Q4q8U4SiljBaY9thBhNw3RoLLCKsTVfk/2Z4YNYPiMnbNyrrjpcUy6wG3uc9n5lBYcsG4HpvTJyGlc54TwKkXGyltxmo0g2zZnHq6sz3eKYwyb7ozcgFShFRAoHSTek2O59jLOWzSYVzH9U1JpdQhK+kpRwxVm45vRugCGJEiA8p5WtldSMpVwRvckBHdKePRWAfv2tPDvUwItajV6idTqN5G0fprIDchH7HvhckMCtT/5zMyUkicuee9tZTtU+lJ+j71yfL74E5UJaiR0IT1tTv2YhN4g2Xe3gzLwgOSPFyPxxrf+Ixp9osxZB38qgP2Eg6iWiz0dlHihK8fZovuP0eggS0vXxWmYVIqHApefdoqepIBK2luIycQUwEfZfkXqg0rYdt/zkRNLgJAyJtZ9MeNoKxyYkrA2C7JxrOGxRUivgEgSiezEW6/OCPwy17kRunpANe3IVqt5A48eoPhXhe2CLPS0ofX2snukJNq0hAeS6Ogc3FH/xSVfXrd7JrVwrYEop13oLLwW4LvglC0iXjDcgvxqfp2XhmqDkFxjbKQKdrHorWLpJVFbgEHkXTWPc99wGAcRccTLfcsd1SlOXTOSexYQ8mPsOavoT+zXQKtUBsfCiCm66NaR+EfoyOt+xWZPfrBxjyBfbDcP2GoE4NHaEKCyl+YZAKEyjaVa6t3lR9FxnLmmrly1OaWEOHMYXeyt9N1o76mAYNl5wVOmd/CLAU4u9XxpyxsXgkOnSf1PZryEUOd3db2F3FJa0Q6Wd6DBk9ckv8EbjFZNhbDPjSR3wB256igOre0PXxXPwkt0ZKoOC1eVHDD3yASTcomDDSc3Rits7akBZzTzIdAjPo9H0fBcamX3nejY9f3xZifeuHc6s5BFj1vMcq2UFztkp6mxg2zpuoU9dl/e7M9M8kO3NAkXMSgp2T3UUT7gEu5MkONLyI7v86HCIo297h41j78n0X1ePJ19Mafxqg9yHnS2Apf5HzNmpb9UcHrODd44Zyx/AV+QpDJGvpJXCbaqvc1LC+UhwOmgk3/i9wf1sCMJgT/SUMI0DEkgIypOfCyYG+Sg2AEg4QgxxK/wvyOglvR18yrl15I7ZCMfWiTKprR2LdFCVjNk2BwdvsC4leexZ4fin4BtSOlAQ58jz4PmoenNTLiucePV0LQKZStBDh8Cg94+jfsvZSCDQLFLRPB92289+xqosxS87yVDX9uKxqjaaoZyS9pVUCwdmAv/8prz+vwVOeIXoACWOaKvtVRFSDa82LIL2Ja/AwLKa4+l02qleCpY+9pim5pr2Nkfc+AlvEueOYWtKVTVvKeqx50x1hUPZq0EovEUu7Dir+F9KumWNQShQ9cvi6G91YZBAm5K11bb97HyQzJ1T0lDsSqBtF1bu6cKGspJBKa6kmoOJjp2k7PMh+k2aNvTZ4Uyr1EnP7nmsgEJi7eQ5kAy66PfGcRBH/n+TJKS7PuXVLKXobpqWN8e9OcFc/LcVGwLL9LJSaYMYA=="}}};
+</script>
+<style>
+.modcard{border:var(--bw) solid var(--ink);background:#fff;box-shadow:var(--shadow-sm);padding:14px;display:flex;flex-direction:column;gap:8px}
+.modcard.done{background:var(--lime)}.modcard.cur{background:var(--yellow)}.modcard.lock{background:#eee}
+.diag{font-family:var(--mono);font-size:.85rem;background:var(--term-bg);color:var(--term-ink);padding:10px;border:var(--bw) solid var(--ink);white-space:pre;overflow-x:auto}
+.reg{width:100%;border-collapse:collapse;font-size:.92rem}
+.reg th{background:var(--yellow);text-align:left}.reg th,.reg td{border:var(--bw-thin) solid var(--ink);padding:6px 8px}
+.reg tr:nth-child(even) td{background:var(--zebra)}
+.reg td.m{font-family:var(--mono)}
+</style>
+<script>
+"use strict";
+/* ============ utilidades ============ */
+const $ = s => document.querySelector(s);
+const enc = new TextEncoder();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const normUser = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const normAns = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function sha(txt){const h=await crypto.subtle.digest('SHA-256',enc.encode(txt));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function check(ans, hash){return (await sha(DATA.salt+':'+normAns(ans)))===hash;}
+async function decryptPw(entry, pw){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(entry.s),iterations:DATA.iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(entry.iv)},key,b64(entry.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function decryptKey(blob, keyB64){
+  const key=await crypto.subtle.importKey('raw',b64(keyB64),'AES-GCM',false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(blob.iv)},key,b64(blob.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),3200);}
+
+/* ============ estado ============ */
+let CFG=null, M={}, S=null, pendingLoad=null, MOD=null;
+const ROLE_NAME={operador:'Operador/a',experto:'Experto/a',investigador:'Investigador/a'};
+const MODS=[['hw','HARDWARE','🗄️'],['diario','DIARIO','📓'],['red','RED','🌐'],['disco','DISCO','💾']];
+function freshState(){return {tool:'archivo-rafa',version:2,user:CFG.user,uid:CFG.uid,team:CFG.team,
+  started:new Date().toISOString(),log:[],hints:{},attempts:{},unlocked:{},frags:{},mod:null,
+  llave:{done:false},hw:{pila:false,biosDate:null,boot:['USB','Red (PXE)','Disco duro'],booted:false,fragment:false},
+  disco:{fragment:false},fs:null};}
+function log(type,data){S.log.push({t:new Date().toISOString(),mod:MOD,type,data:data||null});save();}
+function attempt(k){S.attempts[k]=(S.attempts[k]||0)+1;}
+function save(){try{localStorage.setItem('archivo_rafa_v2_'+CFG.uid,JSON.stringify(S));}catch(e){}}
+function load(){try{const s=localStorage.getItem('archivo_rafa_v2_'+CFG.uid);return s?JSON.parse(s):null;}catch(e){return null;}}
+
+/* ============ login ============ */
+$('#loadFile').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{try{const j=JSON.parse(r.result);if(j.tool!=='archivo-rafa')throw 0;pendingLoad=j;
+    $('#loginMsg').innerHTML='<div class="note">📂 Partida de <b>'+esc(j.user)+'</b> cargada. Ahora entra con tu usuario y contraseña.</div>';}
+    catch(_){$('#loginMsg').innerHTML='<div class="note error">⚠️ Ese archivo no es una partida del servidor de Rafa.</div>';}};
+  r.readAsText(f);
+});
+$('#lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+$('#btnLogin').addEventListener('click',doLogin);
+async function doLogin(){
+  const u=normUser($('#lu').value), p=normAns($('#lp').value), msg=$('#loginMsg');
+  if(!u||!p){msg.innerHTML='<div class="note warn">⚠️ Escribe usuario y contraseña.</div>';return;}
+  const uid=(await sha('rafa|'+u)).slice(0,16);
+  const entry=DATA.users.find(x=>x.id===uid);
+  if(!entry){msg.innerHTML='<div class="note error">❌ Ese usuario no existe en el servidor.</div>';return;}
+  try{CFG=await decryptPw(entry,u+':'+p);}catch(e){msg.innerHTML='<div class="note error">❌ Contraseña incorrecta.</div>';return;}
+  CFG.uid=uid;
+  for(const [k,o] of Object.entries(CFG.k)) M[k]=await decryptKey(DATA.blobs[o.b],o.k);
+  S=load();
+  if(pendingLoad&&pendingLoad.uid===uid){S=pendingLoad;}
+  else if(pendingLoad){msg.innerHTML='<div class="note error">⚠️ La partida cargada es de otro usuario.</div>';return;}
+  if(!S||S.version!==2){S=freshState();log('login');} else log('login-again');
+  start();
+}
+
+/* ============ app ============ */
+function role(m){return CFG.roles[m||MOD];}
+function start(){
+  $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
+  $('#subtitle').textContent='Conectado como '+CFG.display;
+  $('#whoPills').innerHTML='<span class="pill">👤 '+esc(CFG.display)+'</span><span class="pill cyan">👥 Equipo '+esc(CFG.teamName)+(CFG.trio?' (trío)':' (dúo)')+'</span>';
+  MOD=S.mod; if(!S.fs){S.fs=initFS();save();}
+  buildTabs(); go(S.llave.done?'modulos':'terminal');
+}
+function tabsFor(){
+  const t=[['terminal','💻 Terminal'],['modulos','🧩 Módulos']];
+  const r=role();
+  if(MOD==='hw'){
+    if(r==='operador') t.push(['servidor','🗄️ Servidor']);
+    if(r==='experto') t.push(['manual','📘 Manual de Rafa']);
+    if(r==='investigador'||(r==='experto'&&!CFG.trio)) t.push(['tiendas','🛒 Compras']);
+  }
+  if(MOD==='disco'){
+    if(r==='operador') t.push(['copia','💾 La copia']);
+    if(r==='experto') t.push(['recup','📘 Manual de recuperación']);
+    if(r==='investigador'||(r==='experto'&&!CFG.trio)) t.push(['registro','🗒️ Registro de borrados']);
+  }
+  t.push(['llaves','🔑 Llaves y entrega']);
+  return t;
+}
+function buildTabs(){
+  $('#tabs').innerHTML=tabsFor().map(([k,n])=>`<button class="tab" data-go="${k}" ${(!S.llave.done&&k!=='terminal'&&k!=='llaves')?'disabled title="Primero consigue tu llave personal"':''}>${n}</button>`).join('');
+  $('#tabs').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+const VIEWS={terminal:renderTerminal,modulos:renderModulos,servidor:renderServidor,manual:renderManual,tiendas:renderTiendas,
+  copia:renderCopia,recup:renderRecup,registro:renderRegistro,llaves:renderLlaves};
+function go(v){
+  const box=$('#views');
+  box.innerHTML='<div data-view="'+v+'"></div>';
+  document.querySelectorAll('#tabs .tab').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
+  VIEWS[v]();
+}
+const VIEW=()=>$('#views>div');
+function roleBanner(){
+  const r=role(), name=MODS.find(m=>m[0]===MOD)[1];
+  const what={
+    hw:{operador:'Tienes el servidor delante: la pantalla de arranque, la BIOS y la torre física. No tienes el manual: pide ayuda a tu equipo.',
+      experto:CFG.trio?'Tienes el manual y las notas de Rafa. No ves el servidor: tu operador/a te dirá lo que aparece. Las compras las hace tu investigador/a.':'Tienes el manual, las notas de Rafa y las tiendas. No ves el servidor: tu operador/a te dirá lo que aparece.',
+      investigador:'Tienes las tiendas y los encargos de Rafa. No ves el servidor ni el manual: tu equipo te dirá qué hace falta.'},
+    disco:{operador:'Tienes la copia del disco de Rafa en tu 💻 Terminal. No sabes qué buscar ni cómo recuperarlo: pregunta a tu equipo.',
+      experto:CFG.trio?'Tienes el manual de recuperación de Rafa. No ves el disco: tu operador/a te dirá lo que aparece. El registro de borrados lo tiene tu investigador/a.':'Tienes el manual de recuperación y el registro de borrados. No ves el disco: tu operador/a te dirá lo que aparece.',
+      investigador:'Tienes el registro de borrados y el encargo de Rafa. No ves el disco ni el manual: guía a tu equipo hacia el archivo correcto.'}}[MOD][r];
+  return `<div class="note warn" style="margin-bottom:14px">🧩 Módulo ${name} · Tu papel: <b>${ROLE_NAME[r].toUpperCase()}</b>. ${what}<br>Equipo: ${CFG.members.map(esc).join(' · ')}</div>`;
+}
+
+/* ============ módulos ============ */
+function modDone(m){return !!S.frags[m];}
+function renderModulos(){
+  const v=VIEW();
+  v.innerHTML=`<h2>🧩 Módulos del servidor</h2><p>El servidor tiene cuatro partes rotas. Para abrir una, pedidle a Albert su sobre: dentro hay un <b>código</b>. Cada uno escribe el código en su ordenador. En cada módulo tendrás un papel distinto.</p>
+  <div class="grid g2">${MODS.map(([k,n,ic])=>{
+    const avail=!!M[k], un=S.unlocked[k], cur=MOD===k, done=modDone(k);
+    const cls=done?'done':(cur?'cur':(avail?'':'lock'));
+    let body='';
+    if(!avail) body='<span class="pill">🔒 Todavía no disponible</span>';
+    else if(!un) body=`<label for="code-${k}">Código del sobre</label><div class="row"><input id="code-${k}" type="text" style="width:10em" autocomplete="off"><button class="btn sm primary" data-unlock="${k}">ABRIR</button></div><div id="umsg-${k}"></div>`;
+    else body=`<div>Tu papel: <b>${ROLE_NAME[role(k)]}</b></div>${done?'<div>✅ Fragmento conseguido</div>':''}<div class="row">${cur?'<span class="pill orange">◀ Estás aquí</span>':`<button class="btn sm secondary" data-enter="${k}">IR A ESTE MÓDULO ➔</button>`}</div>`;
+    return `<div class="modcard ${cls}"><h3>${ic} ${n}</h3>${body}</div>`;}).join('')}</div>`;
+  v.querySelectorAll('[data-unlock]').forEach(b=>b.onclick=async()=>{
+    const k=b.dataset.unlock, val=$('#code-'+k).value; attempt('unlock-'+k);
+    const ok=await check(val,M[k].unlock); log('unlock',{mod:k,ok,val:normAns(val)});
+    if(!ok){$('#umsg-'+k).innerHTML='<div class="note error" style="margin-top:8px">❌ Ese no es el código de este sobre.</div>';return;}
+    S.unlocked[k]=new Date().toISOString(); enterMod(k); toast('🔓 Módulo abierto');});
+  v.querySelectorAll('[data-enter]').forEach(b=>b.onclick=()=>enterMod(b.dataset.enter));
+}
+function enterMod(k){
+  MOD=k;S.mod=k;
+  if(k==='disco'&&role('disco')==='operador') addDiskCopy();
+  log('enter',{mod:k});save();buildTabs();
+  const r=role(k);
+  const first={hw:{operador:'servidor',experto:'manual',investigador:'tiendas'},disco:{operador:'copia',experto:'recup',investigador:'registro'}}[k][r];
+  go(first);
+}
+
+/* ============ pistas ============ */
+function hintBox(id,list){
+  const used=S.hints[id]||0;
+  let h=`<div class="card" style="margin-top:14px;box-shadow:var(--shadow-xs)"><div class="row"><b>💡 Pistas</b><span class="pill">${used}/${list.length} usadas</span><div class="spacer"></div>`;
+  h+= used<list.length?`<button class="btn sm yellow" data-hint="${id}">PEDIR PISTA ${used+1}</button>`:'';
+  h+='</div><p style="margin:6px 0 0;font-size:.85rem">Cada pista resta un poco de nota. Úsalas si lleváis un rato atascados.</p>';
+  if(used) h+='<ol class="hintlist" style="margin:10px 0 0">'+list.slice(0,used).map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  return h+'</div>';
+}
+function mountHints(el,id,list,doneFn){
+  const draw=()=>{el.innerHTML=doneFn()?'':hintBox(id,list);
+    el.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>{S.hints[id]=(S.hints[id]||0)+1;log('hint',{id,n:S.hints[id]});draw();});};
+  draw();
+}
+
+/* ============ sistema de archivos ============ */
+const DECOD=['','Cómo leer los permisos (lo que sale a la izquierda en ls -l):','',
+  '      -    r w x    r w x    r w x','      │    └─┬─┘    └─┬─┘    └─┬─┘','    tipo   DUEÑO    GRUPO    OTROS',
+  '                (tú)','',
+  '  tipo:  -  es un archivo      d  es una carpeta',
+  '  r = leer    w = escribir    x = ejecutar (en una carpeta: entrar)',
+  '  un guion ( - ) en una casilla = ese permiso NO está','',
+  '  Ejemplo:  -r--r--r--   archivo que todos pueden leer pero nadie modificar','',
+  'Para cambiarlos:  chmod u+r fichero   ->  da al dueño (u) el permiso de leer (r)',
+  '                  chmod u-w fichero   ->  quita al dueño el permiso de escribir'].join('\n');
+function initFS(){
+  const L=CFG.llave;
+  const leeme=['Hola. Soy Rafa.','','Te he creado esta cuenta, pero la he dejado "rota" a propósito:',
+    'quiero saber si sabes moverte por un sistema de verdad.','',
+    'Comandos que te harán falta:','  ls        lista lo que hay en la carpeta','  ls -l     lo mismo, con los permisos, el tamaño y la fecha',
+    '  cat X     muestra el contenido del archivo X','  cd X      entra en la carpeta X (cd .. para volver atrás)',
+    '  chmod     cambia los permisos',DECOD,'',
+    'Dentro de esta carpeta hay una palabra. Es tu llave personal.','','— R.'].join('\n');
+  const home={type:'d',perm:'rwx',items:{'LEEME.txt':{type:'f',perm:'rw-',content:leeme}}};
+  if(L.tipo==='archivo') home.items[L.archivo]={type:'f',perm:'-w-',content:'LLAVE PERSONAL: '+L.palabra};
+  else home.items[L.carpeta]={type:'d',perm:'rw-',items:{[L.archivo]:{type:'f',perm:'rw-',content:'LLAVE PERSONAL: '+L.palabra}}};
+  home.items['.historial_de_rafa']={type:'f',perm:'r--',content:'# cosas que no debería olvidar\n- el servidor siempre arranca desde DISCO DURO\n- comprar pilas de repuesto (la de la placa está ya muy vieja)\n- no borrar NUNCA de verdad: todo a la papelera'};
+  return {cwd:[],root:home};
+}
+function addDiskCopy(){
+  if(S.fs.root.items['copia_disco_rafa']) return;
+  S.fs.root.items['copia_disco_rafa']=JSON.parse(JSON.stringify(M.disco.disk));
+}
+function nodeAt(path){let n=S.fs.root;for(const p of path){if(!n||n.type!=='d')return null;n=n.items[p];}return n;}
+function parsePath(str){
+  let parts, base;
+  if(str.startsWith('~')||str.startsWith('/home/'+CFG.uname)){str=str.replace(/^~\/?/,'').replace(new RegExp('^/home/'+CFG.uname+'/?'),'');base=[];}
+  else if(str.startsWith('/')) return null;
+  else base=S.fs.cwd.slice();
+  parts=str.split('/').filter(x=>x&&x!=='.');
+  for(const p of parts){if(p==='..'){if(base.length)base.pop();}else base.push(p);}
+  return base;
+}
+function canTraverse(path){ // x en cada carpeta del camino (sin contar el destino)
+  let n=S.fs.root;
+  for(let i=0;i<path.length-1;i++){n=n.items[path[i]];if(!n)return 'noexist';if(n.type!=='d')return 'notdir';if(!n.perm.includes('x'))return 'denied';}
+  return 'ok';
+}
+function permStr(it){return (it.type==='d'?'d':'-')+it.perm+(it.g||'r--r--');}
+function sizeOf(it){return it.type==='d'?4096:(it.size!=null?it.size:(it.content||'').length);}
+function prettyPath(path){return '/home/'+CFG.uname+(path.length?'/'+path.join('/'):'');}
+
+/* ============ terminal ============ */
+let histCmd=[],histI=0;
+function renderTerminal(){
+  const v=VIEW();
+  const disk=MOD==='disco'&&role()==='operador';
+  v.innerHTML=(MOD?roleBanner():'')+`<h2>💻 Terminal del servidor</h2>
+  <p>${S.llave.done?(disk?'La copia del disco de Rafa está en la carpeta <code>copia_disco_rafa</code>. Tu equipo sabe qué buscar.':'✅ Ya tienes tu llave personal. Ve a la pestaña 🧩 Módulos.'):'Tu cuenta tiene algo roto. Empieza escribiendo <code>ls</code> y pulsa Enter. Si no sabes qué hacer, escribe <code>ayuda</code>.'}</p>
+  <div class="term" id="termOut" aria-live="polite"></div>
+  <div class="termline"><span id="termPrompt"></span><input id="termIn" autocomplete="off" spellcheck="false" aria-label="Escribe un comando"></div>
+  <div id="termHints"></div>`;
+  const out=$('#termOut');
+  if(!S.termLog) S.termLog=[{c:'c',t:'nullbyte-srv · Linux 3.2.0 (2012) · tty1\nÚltimo acceso: hace mucho tiempo.\n'}];
+  const paint=()=>{out.innerHTML=S.termLog.map(l=>`<span class="${l.c}">${esc(l.t)}</span>`).join('\n');out.scrollTop=out.scrollHeight;};
+  paint();
+  const setPrompt=()=>$('#termPrompt').textContent=CFG.uname+'@nullbyte-srv:~'+(S.fs.cwd.length?'/'+S.fs.cwd.join('/'):'')+'$';
+  setPrompt();
+  const inp=$('#termIn'); setTimeout(()=>inp.focus(),30);
+  inp.onkeydown=e=>{
+    if(e.key==='ArrowUp'){if(histI>0){histI--;inp.value=histCmd[histI]||'';}e.preventDefault();return;}
+    if(e.key==='ArrowDown'){if(histI<histCmd.length){histI++;inp.value=histCmd[histI]||'';}e.preventDefault();return;}
+    if(e.key!=='Enter')return;
+    const cmd=inp.value.trim();inp.value='';if(cmd){histCmd.push(cmd);histI=histCmd.length;}
+    const p=$('#termPrompt').textContent;
+    const res=runCmd(cmd);
+    if(res==='CLEAR'){S.termLog=[];}else{S.termLog.push({c:'p',t:p+' '+cmd});if(res)S.termLog.push(res);}
+    if(S.termLog.length>300)S.termLog=S.termLog.slice(-300);
+    if(cmd)log('cmd',cmd); else save();
+    paint();setPrompt();
+  };
+  const hv=$('#termHints');
+  if(!S.llave.done) mountHints(hv,'llave',CFG.llave.pistas,()=>S.llave.done);
+  else if(disk) mountHints(hv,'disco-op',M.disco.operador.pistas,()=>S.disco.fragment);
+}
+function runCmd(cmd){
+  if(!cmd) return null;
+  const a=cmd.split(/\s+/), c=a[0].toLowerCase();
+  const E=t=>({c:'e',t}), O=t=>({c:'',t});
+  const NE=x=>E(c+': '+x+': No existe el archivo o el directorio');
+  switch(c){
+    case 'ayuda': case 'help':
+      return O('Comandos: ls, ls -l, ls -a, cat ARCHIVO, cd CARPETA, cd .., pwd, whoami, chmod, mv ORIGEN DESTINO, clear\nEmpieza por leer el archivo LEEME.txt  ->  cat LEEME.txt');
+    case 'clear': return 'CLEAR';
+    case 'whoami': return O(CFG.uname);
+    case 'pwd': return O(prettyPath(S.fs.cwd));
+    case 'ls': case 'dir':{
+      const flags=a.filter((x,i)=>i>0&&x.startsWith('-')).join('');const longf=flags.includes('l'), all=flags.includes('a');
+      const target=a.find((x,i)=>i>0&&!x.startsWith('-'));
+      const path=target?parsePath(target):S.fs.cwd.slice();
+      if(!path) return NE(target);
+      const tv=canTraverse(path.concat(['_']));
+      if(tv==='denied') return E('ls: no se puede abrir «'+(target||'.')+'»: Permiso denegado');
+      const n=nodeAt(path); if(!n) return E('ls: no se puede acceder a «'+target+'»: No existe el archivo o el directorio');
+      let items;
+      if(n.type==='d'){if(!n.perm.includes('r'))return E('ls: no se puede abrir el directorio «'+(target||'.')+'»: Permiso denegado');items=n.items;}
+      else items={[path[path.length-1]]:n};
+      const names=Object.keys(items).filter(x=>all||!x.startsWith('.')).sort((x,y)=>x.replace(/^\./,'').localeCompare(y.replace(/^\./,'')));
+      if(!names.length) return O('');
+      if(!longf) return O(names.map(x=>items[x].type==='d'?x+'/':x).join('   '));
+      return O(names.map(x=>{const it=items[x];return permStr(it)+'  1 '+CFG.uname+' '+CFG.uname+'  '+String(sizeOf(it)).padStart(5)+'  '+(it.date||'12/01/2012 10:00')+'  '+x+(it.type==='d'?'/':'');}).join('\n'));
+    }
+    case 'cd':{
+      const t=a[1]||'~'; const path=parsePath(t); if(!path) return NE(t);
+      const tv=canTraverse(path.concat(['_'])); if(tv==='denied') return E('cd: '+t+': Permiso denegado');
+      const n=nodeAt(path); if(!n) return NE(t);
+      if(n.type!=='d') return E('cd: '+t+': No es un directorio');
+      S.fs.cwd=path; return null;
+    }
+    case 'cat': case 'type': case 'more': case 'less':{
+      if(!a[1]) return E('cat: falta el nombre del archivo');
+      const path=parsePath(a[1]); if(!path) return NE(a[1]);
+      if(canTraverse(path)==='denied') return E('cat: '+a[1]+': Permiso denegado');
+      const f=nodeAt(path); if(!f) return NE(a[1]);
+      if(f.type==='d') return E('cat: '+a[1]+': Es un directorio');
+      if(!f.perm.includes('r')) return E('cat: '+a[1]+': Permiso denegado');
+      if(f.content.startsWith('LLAVE PERSONAL')&&!S.llave.done) setTimeout(gotLlave,50);
+      if(f.ver) return catVersion(f,path);
+      if(f.bin) return O('cat: '+a[1]+': es un archivo binario (una imagen). No se puede mostrar en la terminal.');
+      return O(f.content);
+    }
+    case 'chmod':{
+      if(a.length<3) return E('chmod: faltan argumentos. Ejemplo: chmod u+r archivo');
+      const mode=a[1], path=parsePath(a[2]);
+      if(!path||!nodeAt(path)) return E('chmod: no se puede acceder a «'+a[2]+'»: No existe el archivo o el directorio');
+      if(canTraverse(path)==='denied') return E('chmod: no se puede acceder a «'+a[2]+'»: Permiso denegado');
+      const it=nodeAt(path); let p=it.perm.split('');
+      if(/^[0-7]{3}$/.test(mode)){const d=+mode[0];p=[d&4?'r':'-',d&2?'w':'-',d&1?'x':'-'];}
+      else{const m=mode.match(/^([ugoa]*)([+\-=])([rwx]+)$/);if(!m)return E('chmod: modo no válido: «'+mode+'»');
+        if(m[1]&&!/[ua]/.test(m[1])){log('chmod',{mode,file:a[2]});return O('(cambiado para el grupo/otros: a ti, como dueño, no te afecta)');}
+        const idx={r:0,w:1,x:2}; if(m[2]==='=')p=['-','-','-'];
+        for(const ch of m[3]) p[idx[ch]]=m[2]==='-'?'-':ch;}
+      it.perm=p.join('');log('chmod',{mode,file:a[2],perm:it.perm});return null;
+    }
+    case 'mv':{
+      if(a.length<3) return E('mv: faltan argumentos. Ejemplo: mv origen destino');
+      const sp=parsePath(a[1]), dp0=parsePath(a[2]);
+      if(!sp||!nodeAt(sp)) return E('mv: no se puede efectuar `stat\' sobre «'+a[1]+'»: No existe el archivo o el directorio');
+      if(!sp.length) return E('mv: no se puede mover la carpeta personal');
+      if(!dp0) return NE(a[2]);
+      let dp=dp0, dn=nodeAt(dp0);
+      if(dn&&dn.type==='d') dp=dp0.concat([sp[sp.length-1]]);
+      const parent=nodeAt(dp.slice(0,-1));
+      if(!parent||parent.type!=='d') return E('mv: no se puede mover «'+a[1]+'» a «'+a[2]+'»: No existe el directorio');
+      if(dp.join('/').startsWith(sp.join('/')+'/')) return E('mv: no se puede mover una carpeta dentro de sí misma');
+      const srcParent=nodeAt(sp.slice(0,-1)), node=srcParent.items[sp[sp.length-1]];
+      delete srcParent.items[sp[sp.length-1]]; parent.items[dp[dp.length-1]]=node;
+      log('mv',{from:sp.join('/'),to:dp.join('/'),ver:node.ver||null});return null;
+    }
+    case 'sudo': return E('sudo: '+CFG.uname+' no está en el archivo sudoers. Este incidente será reportado a nullbyte.');
+    case 'rm': return E('rm: Rafa ha desactivado este comando. Aquí no se borra nada.');
+    case 'ipconfig': case 'ip': case 'ping': case 'nslookup': return E(c+': la red del servidor todavía no funciona.');
+    default: return E(c+': no se encontró la orden');
+  }
+}
+function catVersion(f,path){
+  const D=M.disco, orig=D.original.join('/'), here=path.join('/');
+  const atOrigin=here===orig;
+  log('cat-version',{ver:f.ver,path:here});
+  if(!atOrigin) return {c:'y',t:'cat: este archivo está en la papelera o fuera de su sitio.\nEl sistema de Rafa solo deja leer un archivo restaurado en su carpeta y con su nombre originales.'};
+  if(f.ver!==D.good){attempt('disco-version');return {c:'',t:D.versions[f.ver]};}
+  if(!S.disco.fragment){S.disco.fragment=true;S.frags.disco=true;log('frag-shown',{mod:'disco'});toast('💾 ¡Archivo recuperado!');}
+  return {c:'',t:D.versions[f.ver]};
+}
+function gotLlave(){
+  S.llave.done=true;S.llave.t=new Date().toISOString();log('llave',{});
+  toast('🔑 ¡Llave personal conseguida!');
+  S.termLog.push({c:'y',t:'\n🔑 Llave personal conseguida. Apúntala en tu tarjeta: el equipo la necesitará al final.\n   Ahora ve a la pestaña 🧩 Módulos.'});
+  buildTabs(); go('terminal');
+}
+
+/* ============ HARDWARE: servidor (operador) ============ */
+let biosScreen='off', biosTab='main';
+function renderServidor(){
+  const v=VIEW(); const H=M.hw;
+  v.innerHTML=roleBanner()+`<div class="grid g2" style="grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr)">
+    <div><div class="bios" id="bios"></div></div>
+    <div class="grid" style="align-content:start">
+      <div class="card"><h3>🔧 Cambiar una pieza</h3>
+        <p>Si decidís cambiar una pieza, Rafa exige anotar su número de inventario. Está en una <b>etiqueta pegada junto a la pieza en la torre física</b>.</p>
+        ${S.hw.pila?'<div class="note ok">✅ Pieza cambiada.'+(S.hw.fragment?'':' Ahora hay que volver a configurar la BIOS.')+'</div>':`
+        <label for="inEtq">Número de inventario de la pieza que cambias</label><input id="inEtq" type="text" autocomplete="off" placeholder="Mira la etiqueta en la torre">
+        <label for="inRef" style="margin-top:10px">Referencia de la pieza nueva (la de la tienda)</label><input id="inRef" type="text" autocomplete="off" placeholder="Te la dirá tu equipo">
+        <div class="row" style="margin-top:10px"><button class="btn primary" id="btnInstalar">INSTALAR PIEZA ➔</button></div><div id="instMsg" style="margin-top:10px"></div>`}
+      </div>
+      <div id="srvHints"></div>
+    </div></div>`;
+  mountHints($('#srvHints'),'hw-op',H.operador.pistas,()=>S.hw.fragment);
+  if(!S.hw.pila) $('#btnInstalar').onclick=instalar;
+  drawBios();
+}
+async function instalar(){
+  const H=M.hw, m=$('#instMsg'), e=$('#inEtq').value, r=$('#inRef').value;
+  attempt('instalar');
+  const okE=await check(e,H.answers.etiqueta), okR=await check(r,CFG.trio?H.answers.refTrio:H.answers.refDuo);
+  log('instalar',{etiqueta:normAns(e),ref:normAns(r),okE,okR});
+  if(!okE){m.innerHTML='<div class="note error">❌ Ese número de inventario no corresponde a la pieza averiada. ¿Habéis mirado la etiqueta correcta en la torre?</div>';return;}
+  const refAny=await check(r,H.answers.refDuo)||await check(r,H.answers.refTrio);
+  if(!okR){m.innerHTML='<div class="note error">❌ '+(refAny?'Esa pieza vale, pero no cumple las condiciones que os ha puesto Rafa a vosotros. Revisad plazo y presupuesto.':'Esa pieza no sirve o la referencia está mal escrita. Hablad con quien tiene las tiendas.')+'</div>';return;}
+  S.hw.pila=true;log('pieza-instalada',{});toast('🔧 Pieza instalada');
+  biosScreen='off';renderServidor();
+}
+function drawBios(){
+  const b=$('#bios'); if(!b) return;
+  b.classList.toggle('black',biosScreen!=='setup');
+  if(biosScreen==='off'){
+    b.innerHTML=S.hw.fragment?`<span class="gr">nullbyte-srv está encendido y funcionando.</span>\n\nFragmento de la contraseña de administrador (módulo HARDWARE):\n\n   <span class="yl" style="font-size:1.6rem;letter-spacing:4px">${esc(M.hw.fragment)}</span>\n\nDíctaselo a tu equipo. Cada uno debe apuntarlo en su pestaña 🔑 LLAVES.`
+      :`<span class="w">Servidor apagado.</span>\n\nEs una torre vieja del garaje de Rafa.\n\n<button id="pwr">⏻ ENCENDER</button>`;
+    const p=$('#pwr'); if(p) p.onclick=()=>{log('encender');biosScreen='post';drawBios();};
+    return;
+  }
+  if(biosScreen==='post'){
+    const badClock=!S.hw.pila||!S.hw.biosDate;
+    b.innerHTML=`<span class="w">AwardBIOS v6.00PG, An Energy Star Ally</span>\nCopyright (C) 1984-2011, Award Software, Inc.\n\nMain Processor : Intel(R) Core(TM)2 Duo CPU E7500 @ 2.93GHz\nMemory Testing : 2097152K OK\n\nDetecting IDE/SATA drives ...\n  SATA 1 : WDC WD5000AAKX (500 GB)  <span class="gr">OK</span>\n\n`+
+      (badClock?`<span class="rd">CMOS checksum error - Defaults loaded</span>\n<span class="rd">CMOS battery has failed</span>\n\n`:'')+
+      `<span class="yl">Press ENTER to continue, DEL to enter SETUP</span>\n\n<button id="kEnter">[ ENTER ]</button> <button id="kDel">[ SUPR / DEL ]</button>`;
+    $('#kEnter').onclick=()=>{log('post-enter');tryBoot();};
+    $('#kDel').onclick=()=>{log('setup');biosScreen='setup';biosTab='main';drawBios();};
+    return;
+  }
+  if(biosScreen==='boot'){b.innerHTML=window.__bootText;const r=$('#kRe');if(r)r.onclick=window.__bootNext||(()=>{biosScreen='post';drawBios();});window.__bootNext=null;return;}
+  if(biosScreen==='setup'){
+    const d=S.hw.biosDate||{d:1,m:1,y:2000};
+    const tabs=['main','boot','exit'].map(t=>`<button data-bt="${t}" class="${biosTab===t?'on':''}">${{main:'Main',boot:'Boot',exit:'Exit'}[t]}</button>`).join('');
+    let body='';
+    if(biosTab==='main') body=`<span class="w">CMOS Setup Utility</span>\n\nSystem Date (dd/mm/yyyy):  <input id="bd" value="${d.d}" maxlength="2"> / <input id="bm" value="${d.m}" maxlength="2"> / <input id="by" value="${d.y}" maxlength="4">\nSystem Time            :  ${new Date().toTimeString().slice(0,8)}\n\nSATA 1                 :  WDC WD5000AAKX\nInstalled Memory       :  2048 MB\n\n<span class="yl">Escribe la fecha y ve a Exit para guardar.</span>`;
+    if(biosTab==='boot') body=`<span class="w">Boot Device Priority</span>\n\nUsa ▲ ▼ para cambiar el orden. El primero es desde donde arranca.\n<ul class="bootlist">${S.hw.boot.map((x,i)=>`<li>${i+1}. <span class="${i===0?'hl':''}">${esc(x)}</span> <button data-up="${i}">▲</button><button data-dn="${i}">▼</button></li>`).join('')}</ul>`;
+    if(biosTab==='exit') body=`<span class="w">Exit</span>\n\n<button id="saveExit">Save Changes and Exit</button>\n<button id="discExit">Discard Changes and Exit</button>`;
+    b.innerHTML=`<div class="btabs">${tabs}</div>`+body;
+    b.querySelectorAll('[data-bt]').forEach(x=>x.onclick=()=>{readDate();biosTab=x.dataset.bt;drawBios();});
+    b.querySelectorAll('[data-up]').forEach(x=>x.onclick=()=>{const i=+x.dataset.up;if(i>0){[S.hw.boot[i-1],S.hw.boot[i]]=[S.hw.boot[i],S.hw.boot[i-1]];save();drawBios();}});
+    b.querySelectorAll('[data-dn]').forEach(x=>x.onclick=()=>{const i=+x.dataset.dn;if(i<S.hw.boot.length-1){[S.hw.boot[i+1],S.hw.boot[i]]=[S.hw.boot[i],S.hw.boot[i+1]];save();drawBios();}});
+    const se=$('#saveExit'); if(se) se.onclick=()=>{readDate();log('bios-save',{date:S.hw.biosDate,boot:S.hw.boot.slice()});
+      if(!S.hw.pila){
+        S.hw.biosDate=null;S.hw.boot=['USB','Red (PXE)','Disco duro'];save();
+        window.__bootText=`<span class="w">Guardando cambios... reiniciando...</span>\n\n...\n\nAwardBIOS v6.00PG\n<span class="rd">CMOS checksum error - Defaults loaded</span>\n<span class="rd">CMOS battery has failed</span>\n\n<span class="yl">Vaya. La configuración ha desaparecido otra vez.</span>\n\n<button id="kRe">[ CONTINUAR ]</button>`;
+        biosScreen='boot';drawBios();return;}
+      biosScreen='post';drawBios();};
+    const de=$('#discExit'); if(de) de.onclick=()=>{biosScreen='post';drawBios();};
+  }
+}
+function readDate(){const bd=$('#bd'); if(!bd) return;
+  S.hw.biosDate={d:parseInt(bd.value)||1,m:parseInt($('#bm').value)||1,y:parseInt($('#by').value)||2000};save();}
+function tryBoot(){
+  let t=''; const now=new Date(); const d=S.hw.biosDate;
+  const dateOk=d&&Math.abs(new Date(d.y,d.m-1,d.d)-new Date(now.getFullYear(),now.getMonth(),now.getDate()))<=3*864e5;
+  const first=S.hw.boot[0];
+  if(first!=='Disco duro'){
+    t=first==='USB'?`<span class="w">Booting from USB...</span>\n<span class="rd">No bootable USB device found.</span>\n\n<span class="w">Booting from Red (PXE)...</span>\nIntel(R) Boot Agent GE v1.3.21\n<span class="rd">PXE-E61: Media test failure, check cable</span>\n<span class="rd">PXE-M0F: Exiting Intel Boot Agent.</span>\n\n<span class="rd">Reboot and Select proper Boot device</span>`
+      :`<span class="w">Booting from Red (PXE)...</span>\n<span class="rd">PXE-E61: Media test failure, check cable</span>\n\n<span class="rd">Reboot and Select proper Boot device</span>`;
+    attempt('boot');log('boot-fail',{why:'orden',first});
+  } else if(!S.hw.pila||!dateOk){
+    const shown=d?`${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`:'01/01/2000';
+    t=`<span class="w">Booting from Disco duro...</span>\nGRUB loading.\nLinux 3.2.0-nullbyte ...\n[  0.82] rafa-check: comprobando reloj del sistema\n[  0.83] rafa-check: fecha del sistema = ${shown}\n<span class="rd">[  0.83] rafa-check: ERROR: la fecha no es la de hoy. Un servidor con la hora mal</span>\n<span class="rd">         rompe los registros y los certificados. Arranque detenido.</span>\n[  0.84] -- nullbyte`;
+    attempt('boot');log('boot-fail',{why:S.hw.pila?'fecha':'pila',date:shown});
+  } else {
+    S.hw.booted=true;S.hw.fragment=true;S.frags.hw=true;log('boot-ok',{});
+    t=`<span class="w">Booting from Disco duro...</span>\nGRUB loading.\nLinux 3.2.0-nullbyte ...\n[  0.82] rafa-check: reloj correcto\n[  1.20] montando /dev/sda1 ... ok\n[  2.04] iniciando servicios ... ok\n\n<span class="gr">nullbyte-srv login: _</span>\n\n<span class="yl">¡El servidor ha arrancado!</span>`;
+    toast('✅ ¡Servidor arrancado!');
+    window.__bootText=t+`\n\n<button id="kRe">[ VER FRAGMENTO ]</button>`;window.__bootNext=()=>{biosScreen='off';renderServidor();};
+    biosScreen='boot';drawBios();return;
+  }
+  window.__bootText=t+`\n\n<button id="kRe">[ REINICIAR ]</button>`;biosScreen='boot';drawBios();
+}
+
+/* ============ HARDWARE: manual (experto) y compras ============ */
+function renderManual(){
+  const v=VIEW();const H=M.hw.experto;
+  v.innerHTML=roleBanner()+`<div class="grid g2" style="grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr)">
+  <div><h2>📘 Árbol de averías de Rafa</h2><p>Tu operador/a te leerá lo que sale en la pantalla del servidor. Busca el mensaje aquí.</p>
+    <ul class="tree">${H.arbol.map(n=>`<li><b>${esc(n.si)}</b><br>${n.msgs.map(m=>`<span class="msg">${esc(m)}</span>`).join(' ')}<br>➔ ${n.entonces}</li>`).join('')}</ul></div>
+  <div class="grid" style="align-content:start"><h3>📌 Notas de Rafa</h3>${H.notas.map(n=>`<div class="postit">${n}</div>`).join('')}<div id="manHints"></div></div></div>`;
+  mountHints($('#manHints'),'hw-exp',H.pistas,()=>S.frags.hw);
+}
+function renderTiendas(){
+  const v=VIEW();const H=M.hw.compras;
+  const encg=CFG.trio?H.encargoTrio:H.encargoDuo;
+  v.innerHTML=roleBanner()+`<div class="grid g2"><div class="card yellow"><h3>📝 Encargo de Rafa</h3>${encg}</div>
+  <div class="card"><h3>🛒 Tiendas</h3><p>Rafa compraba aquí. Se abren en otra pestaña del navegador:</p><div class="grid" style="gap:10px">${H.tiendas.map(t=>`<a href="${esc(t.url)}" target="_blank" rel="noopener" class="btn secondary">${esc(t.nombre)} ↗</a>`).join('')}</div>
+  <p style="margin-top:12px">Cuando elijáis la pieza, dale la <b>referencia</b> a tu operador/a: es quien la instala.</p></div></div><div id="tiHints"></div>`;
+  mountHints($('#tiHints'),'hw-inv',H.pistas,()=>S.frags.hw);
+}
+
+/* ============ DISCO ============ */
+function renderCopia(){
+  const v=VIEW();
+  v.innerHTML=roleBanner()+`<div class="card yellow"><h3>💾 La copia del disco de Rafa</h3>
+  <p>Rafa hizo una copia de su disco antes de que el servidor se estropeara. Está en tu terminal, en la carpeta <code>copia_disco_rafa</code>.</p>
+  <p>Algo importante se borró. Tu equipo sabe qué archivo es y cómo recuperarlo. Tú eres quien escribe los comandos.</p>
+  <button class="btn primary" id="toTerm">IR A LA TERMINAL ➔</button></div>`;
+  $('#toTerm').onclick=()=>go('terminal');
+}
+function renderRecup(){
+  const v=VIEW();const D=M.disco.experto;
+  v.innerHTML=roleBanner()+`<h2>📘 Manual de recuperación de Rafa</h2><p>Tu operador/a tiene la copia del disco. Tú sabes cómo se recupera un archivo: díctale los pasos.</p>
+  <div class="grid g2">${D.fichas.map(f=>`<div class="card" ${f.w?'style="grid-column:1/-1"':''}><h3>${f.t}</h3>${f.h}</div>`).join('')}</div><div id="recHints"></div>`;
+  mountHints($('#recHints'),'disco-exp',D.pistas,()=>S.frags.disco);
+}
+function renderRegistro(){
+  const v=VIEW();const D=M.disco.investigador;
+  const rows=CFG.trio?D.registroTrio:D.registroDuo;
+  v.innerHTML=roleBanner()+`<div class="grid g2" style="grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr)">
+  <div><h2>🗒️ Registro de borrados</h2><p>Cada vez que Rafa borraba algo, su sistema lo apuntaba aquí.</p>
+  <table class="reg"><thead><tr><th>Fecha y hora</th><th>Archivo (ruta original)</th><th>Tamaño</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td class="m">${esc(r[0])}</td><td class="m">${esc(r[1])}</td><td class="m">${esc(r[2])}</td></tr>`).join('')}</tbody></table></div>
+  <div><div class="card yellow"><h3>📝 Encargo de Rafa</h3>${CFG.trio?D.encargoTrio:D.encargoDuo}</div><div id="regHints"></div></div></div>`;
+  mountHints($('#regHints'),'disco-inv',D.pistas,()=>S.frags.disco);
+}
+
+/* ============ llaves y entrega ============ */
+function renderLlaves(){
+  const v=VIEW();
+  const fragRow=([k,n])=>{
+    if(!M[k]) return `<div class="row"><b>${n}:</b> <span class="pill">🔒</span></div>`;
+    const mine=(k==='hw'&&S.hw.fragment&&role('hw')==='operador')||(k==='disco'&&S.disco.fragment&&role('disco')==='operador');
+    if(S.frags[k]||mine) return `<div class="row"><b>${n}:</b> <span class="keybox">${esc(M[k].fragment)}</span></div>`;
+    return `<div class="row"><b>${n}:</b> <input id="fr-${k}" type="text" style="width:9em" placeholder="Te lo dictará el operador/a"> <button class="btn sm success" data-frag="${k}">COMPROBAR</button></div><div id="fm-${k}"></div>`;
+  };
+  v.innerHTML=`<div class="grid g2">
+    <div class="card"><h3>🔑 Tu llave personal</h3>${S.llave.done?'<div class="note ok">✅ Conseguida. Apúntala en tu tarjeta: el equipo la necesitará al final.</div><p style="margin-top:10px"><span class="keybox">'+esc(CFG.llave.palabra)+'</span></p>':'<div class="note warn">⏳ Todavía no. Está en la 💻 Terminal.</div>'}</div>
+    <div class="card"><h3>🧩 Fragmentos del equipo</h3><p>La contraseña de administrador tiene 4 fragmentos, uno por módulo. Apunta aquí los que consiga tu equipo.</p>
+      <div class="grid" style="gap:10px">${MODS.map(fragRow).join('')}</div></div>
+    <div class="card violet"><h3>📥 Entrega</h3><p>Al terminar la clase descarga tu partida y súbela. Es tu entrega y también tu partida guardada.</p>
+      <button class="btn primary" id="btnExport">📥 DESCARGAR PARTIDA</button>
+      <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:800">🧹 Empezar de cero</summary>
+      <p>Borra tu partida de este ordenador. No se puede deshacer. Escribe <b>BORRAR</b> para confirmar.</p>
+      <div class="row"><input id="rstTxt" type="text" style="width:9em" autocomplete="off"><button class="btn sm danger" id="btnRst">BORRAR PARTIDA</button></div></details></div></div>`;
+  v.querySelectorAll('[data-frag]').forEach(b=>b.onclick=async()=>{const k=b.dataset.frag, val=$('#fr-'+k).value;attempt('frag-'+k);
+    const ok=await check(val,M[k].answers.fragment);log('fragmento',{mod:k,ok,val:normAns(val)});
+    if(ok){S.frags[k]=new Date().toISOString();save();toast('🧩 Fragmento guardado');renderLlaves();}
+    else $('#fm-'+k).innerHTML='<div class="note error">❌ Ese no es el fragmento.</div>';});
+  $('#btnExport').onclick=exportar;
+  $('#btnRst').onclick=()=>{if($('#rstTxt').value.trim().toUpperCase()!=='BORRAR')return;
+    try{localStorage.removeItem('archivo_rafa_v2_'+CFG.uid);}catch(e){} location.reload();};
+}
+function exportar(){
+  S.exported=new Date().toISOString();log('export');
+  const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='archivo_rafa_'+CFG.uname+'_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+</script>
+</body>
+</html>
